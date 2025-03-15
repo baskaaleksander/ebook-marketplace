@@ -8,7 +8,7 @@ declare module 'express' {
     interface Request {
         user: {
             username: string;
-            sub: string;
+            userId: string;
         }
     }
 }
@@ -40,7 +40,7 @@ export class ListingService {
             categoryConnections = { connect: categoryIds };
         }
         
-        if (!req.user.sub) {
+        if (!req.user.userId) {
             throw new NotFoundException('User ID is required');
         }
         
@@ -51,7 +51,7 @@ export class ListingService {
                 price: data.price,
                 fileUrl: data.fileUrl,
                 seller: {
-                    connect: { id: req.user.sub }  
+                    connect: { id: req.user.userId }  
                 },
                 categories: categoryConnections
             },
