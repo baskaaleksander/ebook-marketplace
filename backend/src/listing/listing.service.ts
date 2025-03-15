@@ -2,11 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
+import { CreateListingDto } from './dtos/create-listing.dto';
 
 declare module 'express' {
     interface Request {
-        userId: string;
-        username: string;
+        user: {
+            username: string;
+            sub: string;
+        }
     }
 }
 
@@ -14,7 +17,32 @@ declare module 'express' {
 export class ListingService {
     constructor (private readonly prismaService: PrismaService, private readonly userService: UserService) {}
 
-    createListing(data: any, req: Request) {
+    async createListing(data: CreateListingDto, req: Request) {
+        let categoryConnections;
+        if (data.categories && data.categories.length > 0) {
+            const categoryPromises = data.categories.map(async (category) => {
+                const existingCategory = await this.prismaService.category.findFirst({
+                    where: { name: category.name }
+                });
+                
+                if (existingCategory) {
+                    return { id: existingCategory.id };
+                }
+                    
+                const newCategory = await this.prismaService.category.create({
+                    data: { name: category.name }
+                });
+                    
+                return { id: newCategory.id };
+            });
+                
+            const categoryIds = await Promise.all(categoryPromises);
+            categoryConnections = { connect: categoryIds };
+        }
+        
+        if (!req.user.sub) {
+            throw new NotFoundException('User ID is required');
+        }
         
         return this.prismaService.product.create({
             data: {
@@ -22,18 +50,25 @@ export class ListingService {
                 description: data.description,
                 price: data.price,
                 fileUrl: data.fileUrl,
-                sellerId: req.userId,
-                categories: {
-                    connect: data.categories
-                }
+                seller: {
+                    connect: { id: req.user.sub }  
+                },
+                categories: categoryConnections
+            },
+            include: {
+                categories: true,
+                seller: true  
             }
-        })
+        });
     }
-
+    
     findListingById(id: string) {
         return this.prismaService.product.findUnique({
             where: {
                 id: id
+            },
+            include: {
+                categories: true
             }
         });
     }
@@ -42,19 +77,17 @@ export class ListingService {
         return this.prismaService.product.findMany();
     }
 
-    // async searchListings(category: string, query: any) {
-    //     const categoriesSearch = await this.prismaService.category.findUnique({
-    //         where: { name: category }
-    //     });
+    searchListingsFromCategory(category: string, query: any) {
+        return this.prismaService.product.findMany({
+            where: {
+                categories: {
+                    some: {
+                        name: category
+                    }
+                }
+            },
+            take: query.take || 10,
+        });
+    }
 
-    //     if (!categoriesSearch) {
-    //         throw new NotFoundException('Category not found');
-    //     }
-
-    //     return this.prismaService.product.findMany({
-    //         where: {
-    //             categories: categoriesSearch
-    //         }
-    //     });
-    // }
 }

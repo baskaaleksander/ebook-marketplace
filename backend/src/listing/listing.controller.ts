@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards 
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { ListingService } from './listing.service';
+import { CreateListingDto } from './dtos/create-listing.dto';
 
 
 @Controller('listing')
@@ -9,17 +10,17 @@ export class ListingController {
     constructor(private readonly listingService: ListingService){}
     @Get(':id')
     findListingById(@Param() data: { id: string }) {
-        return data.id;
+        return this.listingService.findListingById(data.id);
     }
 
     @Get()
     findAllListings() {
-        return 'All listings';
+        return this.listingService.findAllListings();
     }
 
     @Get(':category')
     searchListings(@Param() data: { category: string }, @Query() query: any) {
-        return 'Search listings';
+        return this.listingService.searchListingsFromCategory(data.category, query);
     }
 
     @Get(':id/reviews')
@@ -34,8 +35,8 @@ export class ListingController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post()
-    createListing(@Body() body, @Req() req: Request) {
-        this.listingService.createListing(body, req);
+    createListing(@Body() body: CreateListingDto, @Req() req: Request) {
+        return this.listingService.createListing(body, req);
     }
 
     @Post(':id/reviews')
