@@ -9,9 +9,10 @@ import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user/user.service';
+import { ListingModule } from './listing/listing.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true}), UserModule, AuthModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true}), UserModule, AuthModule, ListingModule],
   controllers: [AppController, AuthController],
   providers: [AppService, PrismaService, AuthService, JwtService, UserService],
 })
