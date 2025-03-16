@@ -7,7 +7,7 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     @Get(':email')
-    findUserByEmail(@Param() data: { email: string }) {
-        return this.userService.findUserByEmail(data.email);
+    findUserByEmail(@Param() email: string ) {
+        return this.userService.findUserByEmail(email);
     }
 }

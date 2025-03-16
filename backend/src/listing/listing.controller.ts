@@ -3,14 +3,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { ListingService } from './listing.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
+import { UpdateListingDto } from './dtos/update-listing.dto';
 
 
 @Controller('listing')
 export class ListingController {
     constructor(private readonly listingService: ListingService){}
     @Get(':id')
-    findListingById(@Param() data: { id: string }) {
-        return this.listingService.findListingById(data.id);
+    findListingById(@Param() id: string) {
+        return this.listingService.findListingById(id);
     }
 
     @Get()
@@ -19,13 +20,13 @@ export class ListingController {
     }
 
     @Get(':category')
-    searchListings(@Param() data: { category: string }, @Query() query: any) {
-        return this.listingService.searchListingsFromCategory(data.category, query);
+    searchListings(@Param() category: string , @Query() take: number) {
+        return this.listingService.searchListingsFromCategory(category, take);
     }
 
     @Get(':id/reviews')
-    getReviews(@Param() data: { id: string }) {
-        return 'Reviews for listing ' + data.id;
+    getReviews(@Param() id: string ) {
+        return 'Reviews for listing ' + id;
     }
 
     @Get(':id/reviews/:reviewId')
@@ -40,23 +41,25 @@ export class ListingController {
     }
 
     @Post(':id/reviews')
-    createReview(@Param() data: { id: string }) {
-        return 'Create review for listing ' + data.id;
+    createReview(@Param() id: string ) {
+        return 'Create review for listing ' + id;
     }
 
     @Put(':id')
-    updateListing(@Param() data: { id: string }) {
-        return 'Update listing ' + data.id;
+    @UseGuards(AuthGuard('jwt'))
+    updateListing(@Param() id: string, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
+        return this.listingService.updateListing(id, updateListingDto, req);
     }
 
-    @Put(':id/reviews/:reviewId')
-    updateReview(@Param() data: { id: string, reviewId: string }) {
+    @Put('reviews/:reviewId')
+    updateReview(@Param() data: { id: string, reviewId: string }, @Body() body: any) {
         return 'Update review ' + data.reviewId + ' for listing ' + data.id;
     }
 
     @Delete(':id')
-    deleteListing(@Param() data: { id: string }) {
-        return 'Delete listing ' + data.id;
+    @UseGuards(AuthGuard('jwt'))
+    deleteListing(@Param() id: string, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
+        return this.listingService.deleteListing(id, req);
     }
 
     
