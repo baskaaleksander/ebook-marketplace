@@ -4,14 +4,15 @@ import { Request } from 'express';
 import { ListingService } from './listing.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
+import { ReviewService } from './review.service';
 
 
 @Controller('listing')
 export class ListingController {
-    constructor(private readonly listingService: ListingService){}
+    constructor(private readonly listingService: ListingService, private readonly reviewService: ReviewService){}
     @Get(':id')
-    findListingById(@Param() id: string) {
-        return this.listingService.findListingById(id);
+    findListingById(@Param() param: {id: string}) {
+        return this.listingService.findListingById(param.id);
     }
 
     @Get()
@@ -20,13 +21,13 @@ export class ListingController {
     }
 
     @Get(':category')
-    searchListings(@Param() category: string , @Query() take: number) {
-        return this.listingService.searchListingsFromCategory(category, take);
+    searchListings(@Param() param: {category: string} , @Query() query: {take: number}) {
+        return this.listingService.searchListingsFromCategory(param.category, query.take);
     }
 
     @Get(':id/reviews')
-    getReviews(@Param() id: string ) {
-        return 'Reviews for listing ' + id;
+    getReviews(@Param() param: {id: string} ) {
+        return this.reviewService.getReviews(param.id);
     }
 
     @Get(':id/reviews/:reviewId')
@@ -41,14 +42,14 @@ export class ListingController {
     }
 
     @Post(':id/reviews')
-    createReview(@Param() id: string ) {
-        return 'Create review for listing ' + id;
+    createReview(@Param() param: { id: string }) {
+        return 'Create review for listing ' + param.id;
     }
 
     @Put(':id')
     @UseGuards(AuthGuard('jwt'))
-    updateListing(@Param() id: string, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
-        return this.listingService.updateListing(id, updateListingDto, req);
+    updateListing(@Param() param: { id: string }, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
+        return this.listingService.updateListing(param.id, updateListingDto, req);
     }
 
     @Put('reviews/:reviewId')
@@ -58,8 +59,8 @@ export class ListingController {
 
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'))
-    deleteListing(@Param() id: string, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
-        return this.listingService.deleteListing(id, req);
+    deleteListing(@Param()param: { id: string }, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
+        return this.listingService.deleteListing(param.id, req);
     }
 
     
