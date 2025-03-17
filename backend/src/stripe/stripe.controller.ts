@@ -124,74 +124,81 @@ import { ConfigService } from '@nestjs/config';
       return { url: link };
     }
 
+    @Get('success')
+    async handlePaymentSuccess(@Query() query: { session_id: string, orderId: string }) {
+      const paymentIntentId = query.orderId;
+      const order = await this.stripeService.handleSuccessfulPayment(paymentIntentId);
+      return order;
+    }
+
     @Get('return')
-async handleConnectReturn(@Query('account') accountId: string) {
-  if (accountId) {
-    const user = await this.prismaService.user.findFirst({
-      where: { stripeAccount: accountId },
-    });
+    async handleConnectReturn(@Query('account') accountId: string) {
+    if (accountId) {
+        const user = await this.prismaService.user.findFirst({
+        where: { stripeAccount: accountId },
+        });
 
-    if (!user) {
-      throw new NotFoundException('User not found for this Stripe account');
-    }
+        if (!user) {
+        throw new NotFoundException('User not found for this Stripe account');
+        }
 
-    const account = await this.stripeService.getAccountDetails(accountId);
-    
-    if (account.details_submitted) {
-      return { 
-        success: true, 
-        message: 'Onboarding completed successfully', 
-        redirectUrl: `${this.configService.get<string>('FRONTEND_URL')}/dashboard` 
-      };
+        const account = await this.stripeService.getAccountDetails(accountId);
+        
+        if (account.details_submitted) {
+        return { 
+            success: true, 
+            message: 'Onboarding completed successfully', 
+            redirectUrl: `${this.configService.get<string>('FRONTEND_URL')}/dashboard` 
+        };
+        } else {
+        return { 
+            success: false, 
+            message: 'Onboarding was not completed', 
+            redirectUrl: `${this.configService.get<string>('FRONTEND_URL')}/account` 
+        };
+        }
     } else {
-      return { 
+        return { 
         success: false, 
-        message: 'Onboarding was not completed', 
+        message: 'Onboarding process was abandoned', 
         redirectUrl: `${this.configService.get<string>('FRONTEND_URL')}/account` 
-      };
+        };
     }
-  } else {
-    return { 
-      success: false, 
-      message: 'Onboarding process was abandoned', 
-      redirectUrl: `${this.configService.get<string>('FRONTEND_URL')}/account` 
-    };
-  }
-}
+    }
 
-@Get('refresh')
-async handleConnectRefresh(@Query('account') accountId: string, @Req() req: Request) {
-  
-  let userId;
-  
-  if (accountId) {
-    const user = await this.prismaService.user.findFirst({
-      where: { stripeAccount: accountId },
-    });
+    @Get('refresh')
+    async handleConnectRefresh(@Query('account') accountId: string, @Req() req: Request) {
     
-    if (user) {
-      userId = user.id;
+    let userId;
+    
+    if (accountId) {
+        const user = await this.prismaService.user.findFirst({
+        where: { stripeAccount: accountId },
+        });
+        
+        if (user) {
+        userId = user.id;
+        } else {
+        try {
+            userId = req.user.userId;
+        } catch (e) {
+            throw new NotFoundException('Could not determine user');
+        }
+        }
     } else {
-      try {
+        try {
         userId = req.user.userId;
-      } catch (e) {
+        } catch (e) {
         throw new NotFoundException('Could not determine user');
-      }
+        }
     }
-  } else {
-    try {
-      userId = req.user.userId;
-    } catch (e) {
-      throw new NotFoundException('Could not determine user');
+    
+    const onboardingUrl = await this.stripeService.refreshConnectAccountLink(userId);
+    
+    return { 
+        url: onboardingUrl,
+        redirectUrl: onboardingUrl
+    };
     }
-  }
-  
-  const onboardingUrl = await this.stripeService.refreshConnectAccountLink(userId);
-  
-  return { 
-    url: onboardingUrl,
-    redirectUrl: onboardingUrl
-  };
-}
     
   }

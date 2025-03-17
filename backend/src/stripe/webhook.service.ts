@@ -73,7 +73,7 @@ export class WebhookService {
         line_items: [
           {
             price_data: {
-              currency: 'usd',
+              currency: 'pln',
               product_data: {
                 name: product.title,
                 description: product.description || 'E-book purchase',
@@ -84,8 +84,8 @@ export class WebhookService {
           },
         ],
         mode: 'payment',
-        success_url: `${this.configService.get<string>('FRONTEND_URL')}/purchase/success?session_id={CHECKOUT_SESSION_ID}&orderId=${orderId}`,
-        cancel_url: `${this.configService.get<string>('FRONTEND_URL')}/purchase/cancel?orderId=${orderId}`,
+        success_url: `${this.configService.get<string>('FRONTEND_URL')}/stripe/success?session_id={CHECKOUT_SESSION_ID}&orderId=${orderId}`,
+        cancel_url: `${this.configService.get<string>('FRONTEND_URL')}/stripe/cancel?orderId=${orderId}`,
         client_reference_id: orderId,
         metadata: {
           orderId,

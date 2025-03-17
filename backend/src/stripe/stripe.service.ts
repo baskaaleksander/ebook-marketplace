@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { PrismaService } from 'src/prisma.service';
@@ -99,7 +99,7 @@ export class StripeService {
 
   async handleSuccessfulPayment(paymentIntentId: string) {
     const order = await this.prismaService.order.findFirst({
-      where: { stripePaymentId: paymentIntentId },
+      where: { id: paymentIntentId },
       include: { product: { include: { seller: true } } },
     });
 
@@ -115,7 +115,7 @@ export class StripeService {
     await this.prismaService.user.update({
       where: { id: order.product.sellerId },
       data: { 
-        balance: { increment: order.amount * 0.9 } // 90% to seller
+        balance: { increment: order.amount * 0.9 }
       },
     });
 
@@ -127,28 +127,74 @@ export class StripeService {
       where: { id: productId },
       include: { seller: true },
     });
-
+  
     if (!product) {
-      throw new Error('Product not found');
+      throw new NotFoundException('Product not found');
     }
-
+  
     if (!product.seller.stripeAccount) {
-      throw new Error('Seller is not connected to Stripe');
+      throw new Error('Seller has not set up payments yet');
     }
-
+  
     const order = await this.prismaService.order.create({
       data: {
         buyerId,
         productId,
         amount: product.price,
         status: 'PENDING',
-        stripePaymentId: 'temp_' + Date.now(),
       },
     });
-
-    const clientSecret = await this.processPayment(order.id, productId, buyerId);
-    
-    return { clientSecret, orderId: order.id };
+  
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: product.title,
+              description: product.description || 'E-book purchase',
+            },
+            unit_amount: Math.round(product.price * 100),
+          },
+          quantity: 1,
+        },
+      ],
+      payment_intent_data: {
+        application_fee_amount: Math.round(product.price * 10),
+        transfer_data: {
+          destination: product.seller.stripeAccount,
+        },
+        metadata: {
+          orderId: order.id,
+          productId,
+          buyerId,
+        },
+      },
+      mode: 'payment',
+      success_url: `${this.configService.get<string>('FRONTEND_URL')}/stripe/success?session_id={CHECKOUT_SESSION_ID}&orderId=${order.id}`,
+      cancel_url: `${this.configService.get<string>('FRONTEND_URL')}/stripe/cancel?orderId=${order.id}`,
+      client_reference_id: order.id,
+      metadata: {
+        orderId: order.id,
+        productId,
+        buyerId,
+      },
+    });
+  
+    await this.prismaService.order.update({
+      where: { id: order.id },
+      data: {
+        checkoutSessionId: session.id,
+        paymentUrl: session.url,
+      },
+    });
+  
+    return {
+      paymentUrl: session.url,
+      orderId: order.id,
+      sessionId: session.id
+    };
   }
 
   verifyWebhookSignature(payload: Buffer, signature: string) {
