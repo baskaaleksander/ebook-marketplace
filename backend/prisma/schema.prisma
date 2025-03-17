@@ -59,6 +59,8 @@ model Order {
   amount     Float
   status     OrderStatus @default(PENDING)
   stripePaymentId String @unique
+  checkoutSessionId String?    @unique
+  paymentUrl       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

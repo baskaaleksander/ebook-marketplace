@@ -4,6 +4,7 @@
 /build
 
 TODO
+*.exe
 
 # Logs
 logs
