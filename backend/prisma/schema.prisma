@@ -14,7 +14,7 @@ model User {
   name           String
   role           Role    @default(BUYER)
   stripeAccount  String? @unique
-  balance        Float   @default(0.0)
+  stripeStatus   String @default("unverified")
   products       Product[]
   orders         Order[]
   reviews        Review[]

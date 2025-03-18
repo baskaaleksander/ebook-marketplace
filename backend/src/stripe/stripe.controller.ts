@@ -1,8 +1,14 @@
-import { Controller, Delete, Get, Param, Post} from '@nestjs/common';
+import { Controller, Delete, Get, Header, Headers, NotFoundException, Param, Post, RawBodyRequest, Req} from '@nestjs/common';
+import { Request } from 'express';
+import { WebhookService } from './webhook.service';
+import { StripeService } from './stripe.service';
   
   @Controller('stripe')
   export class StripeController {
-    constructor() {}
+    constructor(
+        private readonly webhookService: WebhookService,
+        private readonly stripeService: StripeService
+    ) {}
   
     @Post('connect')
     connectAccount(){
@@ -26,7 +32,7 @@ import { Controller, Delete, Get, Param, Post} from '@nestjs/common';
 
     @Post('order/checkout')
     checkoutOrder(){
-        return 'Checkout Order';
+        return this.stripeService.checkoutOrder();
     }
 
     @Post('order/refund')
@@ -45,7 +51,20 @@ import { Controller, Delete, Get, Param, Post} from '@nestjs/common';
     }
 
     @Post('webhook')
-    webhook(){
-        return 'Webhook';
+    webhook(
+        @Headers('stripe-signature') signature: string, 
+        @Req() request: RawBodyRequest<Request> 
+    ){
+        const payload = request.rawBody;
+        if(!payload){
+            throw new NotFoundException('Request body is required');
+        }
+
+        return this.webhookService.handleWebhookEvent(payload, signature);
+    }
+
+    @Get('webhook')
+    webhookTest(){
+        return this.webhookService.returnAllWebhooks();
     }
   }

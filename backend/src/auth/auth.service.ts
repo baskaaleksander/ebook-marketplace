@@ -6,11 +6,12 @@ import { UserService } from 'src/user/user.service';
 import { promisify } from 'util';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
+import { PrismaService } from 'src/prisma.service';
 
 const scrypt = promisify(_scrypt);
 @Injectable()
 export class AuthService {
-    constructor(private readonly jwtService: JwtService, private readonly userService: UserService) {}
+    constructor(private readonly jwtService: JwtService, private readonly userService: UserService, private prismaService: PrismaService) {}
 
     async register(user: CreateUserDto){
         const users = await this.userService.findUserByEmail(user.email);
@@ -26,6 +27,19 @@ export class AuthService {
 
         const newUser = await this.userService.createUser({...user, password: result});
 
+        const newWallet = await this.prismaService.wallet.create({
+            data: {
+                balance: 0,
+                user: {
+                    connect: { id: newUser.id }
+                }
+            }
+        });
+
+        await this.prismaService.user.update({
+            where: { id: newUser.id },
+            data: { wallet: { connect: { id: newWallet.id } } }
+        });
         
         return this.login({username: newUser.email, userId: newUser.id});
     }
