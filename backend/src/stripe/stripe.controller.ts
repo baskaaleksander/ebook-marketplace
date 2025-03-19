@@ -1,7 +1,8 @@
-import { Controller, Delete, Get, Header, Headers, NotFoundException, Param, Post, RawBodyRequest, Req} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Headers, NotFoundException, Param, Post, RawBodyRequest, Req, UseGuards} from '@nestjs/common';
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 import { StripeService } from './stripe.service';
+import { AuthGuard } from '@nestjs/passport';
   
   @Controller('stripe')
   export class StripeController {
@@ -30,9 +31,10 @@ import { StripeService } from './stripe.service';
         return 'Disconnect Account';
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('order/checkout')
-    checkoutOrder(){
-        return this.stripeService.checkoutOrder();
+    checkoutOrder(@Body() body : [string], @Req() req: Request){
+        return this.stripeService.checkoutOrder(body, req);
     }
 
     @Post('order/refund')

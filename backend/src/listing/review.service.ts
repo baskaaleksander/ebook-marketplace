@@ -59,7 +59,7 @@ export class ReviewService {
 
         const ordersOfUser = user.orders;
 
-        const order = ordersOfUser.find(order => order.productId === id);
+        const order = ordersOfUser.find(order => order.productId.includes(id));
 
         if(!order){
             throw new NotFoundException('Order not found');

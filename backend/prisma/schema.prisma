@@ -36,7 +36,6 @@ model Product {
   fileUrl     String
   sellerId    String
   seller      User   @relation(fields: [sellerId], references: [id])
-  orders      Order[]
   reviews     Review[]
   categories  Category[]
   createdAt   DateTime @default(now())
@@ -54,8 +53,7 @@ model Order {
   id         String  @id @default(cuid())
   buyerId    String
   buyer      User   @relation(fields: [buyerId], references: [id])
-  productId  String
-  product    Product @relation(fields: [productId], references: [id])
+  productId  String[]
   amount     Float
   status     OrderStatus @default(PENDING)
   stripePaymentId String? @unique
