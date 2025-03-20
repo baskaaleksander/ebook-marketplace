@@ -16,6 +16,8 @@ import { AuthGuard } from '@nestjs/passport';
     connectAccount(@Req() req: Request){
         return this.stripeService.connectAccount(req);
     }
+
+    @UseGuards(AuthGuard('jwt'))
     @Get('connect/:id')
     getAccountDetails(@Param('id') id: string){
         return this.stripeService.checkAccountStatus(id);
@@ -39,9 +41,10 @@ import { AuthGuard } from '@nestjs/passport';
         return this.stripeService.createRefund(body, req);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('order')
-    getAllOrders(){
-        return this.stripeService.getAllOrders();
+    getAllUserOrders(@Req() req: Request){
+        return this.stripeService.getAllUserOrders(req);
     }
 
     @UseGuards(AuthGuard('jwt'))

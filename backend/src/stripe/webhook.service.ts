@@ -55,8 +55,6 @@ export class WebhookService {
         case "account.updated":
             this.handleAccountUpdated(event);
             break;
-        case "account.application.deauthorized":
-            break;
         }
 
         await this.prismaService.webhookEvent.updateMany({

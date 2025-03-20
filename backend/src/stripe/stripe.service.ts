@@ -20,8 +20,9 @@ export class StripeService {
         });
     }
 
-    getAllOrders(){
+    getAllUserOrders(req: Request){
         return this.prismaService.order.findMany({
+            where: { buyerId: req.user.userId },
             include: { product: true }
         });
     }
@@ -55,43 +56,47 @@ export class StripeService {
             throw new NotFoundException('Seller not found or not connected to stripe');
         }
 
-        const session = await this.stripe.checkout.sessions.create({
-            payment_method_types: ['card', 'blik', 'p24', 'klarna'],
-            line_items: [
-                {
-                    price_data: {
-                        currency: 'pln',
-                        product_data: {
-                            name: product.title,
+        try {
+            const session = await this.stripe.checkout.sessions.create({
+                payment_method_types: ['card', 'blik', 'p24', 'klarna'],
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'pln',
+                            product_data: {
+                                name: product.title,
+                            },
+                            unit_amount: product.price * 100,
                         },
-                        unit_amount: product.price * 100,
-                    },
-                    quantity: 1,
+                        quantity: 1,
+                    }
+                ],
+                mode: 'payment',
+                success_url: 'https://example.com/success',
+                cancel_url: 'https://example.com/cancel',
+                payment_intent_data: {
+                    transfer_data: {
+                        destination: seller?.stripeAccount
+                    }
+                },
+                metadata: {
+                orderId: order.id,
                 }
-            ],
-            mode: 'payment',
-            success_url: 'https://example.com/success',
-            cancel_url: 'https://example.com/cancel',
-            payment_intent_data: {
-                transfer_data: {
-                    destination: seller?.stripeAccount
+            });
+
+            await this.prismaService.order.update({
+                where: { id: order.id },
+                data: { 
+                    checkoutSessionId: session.id, 
+                    paymentUrl: session.url
                 }
-            },
-            metadata: {
-            orderId: order.id,
-            }
-        });
+            });
+            
 
-        await this.prismaService.order.update({
-            where: { id: order.id },
-            data: { 
-                checkoutSessionId: session.id, 
-                paymentUrl: session.url
-            }
-        });
-        
-
-        return session;
+            return session;
+        } catch (error) {
+            throw new NotFoundException('Stripe error', error);
+        }
     }
 
     async createRefund(body : { orderId: string}, req: Request) {
@@ -106,76 +111,89 @@ export class StripeService {
             throw new NotFoundException('Order not found');
         }
 
-        const checkoutSession = await this.stripe.checkout.sessions.retrieve(order.checkoutSessionId);
-
-        if(!checkoutSession.payment_intent){
-            throw new NotFoundException('Payment intent not found');
+        if(order.createdAt.getTime() + 1000 * 60 * 60 * 24 * 14 < new Date().getTime()){
+            throw new UnauthorizedException('Refund can be made only within 14 days of purchase');
         }
 
-        const product = await this.prismaService.product.findUnique({
-            where: { id: order.productId }
-        });
+        try {
+            const checkoutSession = await this.stripe.checkout.sessions.retrieve(order.checkoutSessionId);
 
-        if(!product){
-            throw new NotFoundException('Product not found');
+            if(!checkoutSession.payment_intent){
+                throw new NotFoundException('Payment intent not found');
+            }
+
+            const product = await this.prismaService.product.findUnique({
+                where: { id: order.productId }
+            });
+
+            if(!product){
+                throw new NotFoundException('Product not found');
+            }
+
+
+            const refund = await this.stripe.refunds.create({
+                payment_intent: checkoutSession.payment_intent.toString(),
+                amount: order.amount,
+            });
+
+            await this.prismaService.order.update({
+                where: { id: order.id },
+                data: { status: 'REFUNDED' }
+            });
+
+            await this.prismaService.wallet.update({
+                where: { userId:  product.sellerId},
+                data: { balance: { decrement: order.amount } }
+            })
+
+            return refund
+        } catch (error) {
+            throw new NotFoundException('Stripe error', error);
         }
-
-
-        const refund = await this.stripe.refunds.create({
-            payment_intent: checkoutSession.payment_intent.toString(),
-            amount: order.amount,
-        });
-
-        await this.prismaService.order.update({
-            where: { id: order.id },
-            data: { status: 'REFUNDED' }
-        });
-
-        await this.prismaService.wallet.update({
-            where: { userId:  product.sellerId},
-            data: { balance: { decrement: order.amount } }
-        })
-
-        return refund
 
     }
 
     async connectAccount(request: Request) {
-        const account = await this.stripe.accounts.create({
-            type: 'express',
-            country: 'PL',
-            capabilities: {
-                card_payments: { requested: true },
-                transfers: { requested: true },
-            },
-        });
 
-        const user = await this.prismaService.user.findUnique({
-            where: { id: request.user.userId }
-        });
+        try {
+            const account = await this.stripe.accounts.create({
+                type: 'express',
+                country: 'PL',
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true },
+                },
+            });
 
-        if(!user){
-            throw new NotFoundException('User not found');
+            const user = await this.prismaService.user.findUnique({
+                where: { id: request.user.userId }
+            });
+
+            if(!user){
+                throw new NotFoundException('User not found');
+            }
+
+            if(user.stripeAccount){
+                throw new NotFoundException('User already connected to stripe');
+            }
+
+            await this.prismaService.user.update({
+                where: { id: request.user.userId },
+                data: { stripeAccount: account.id }
+            });
+
+            const accountLink = await this.stripe.accountLinks.create({
+                account: account.id,
+                refresh_url: 'https://example.com/reauth',
+                return_url: 'https://example.com/return',
+                type: 'account_onboarding',
+            });
+
+            return accountLink;
+
+        } catch (error) {
+            throw new NotFoundException('Stripe error', error);
         }
-
-        if(user.stripeAccount){
-            throw new NotFoundException('User already connected to stripe');
-        }
-
-        await this.prismaService.user.update({
-            where: { id: request.user.userId },
-            data: { stripeAccount: account.id }
-        });
-
-        const accountLink = await this.stripe.accountLinks.create({
-            account: account.id,
-            refresh_url: 'https://example.com/reauth',
-            return_url: 'https://example.com/return',
-            type: 'account_onboarding',
-        });
-
-        
-        return accountLink;
 
     }
 
@@ -192,9 +210,12 @@ export class StripeService {
             where: { id: req.user.userId },
             data: { stripeAccount: null, stripeStatus: 'unverified' }
         });
-
-        await this.stripe.accounts.del(user.stripeAccount);
-
+        try {
+            await this.stripe.accounts.del(user.stripeAccount);
+        }
+        catch (error) {
+            throw new NotFoundException('Stripe error', error);
+        }
         return 'Account disconnected';
     }
 
@@ -207,44 +228,49 @@ export class StripeService {
         if(!user || !user.stripeAccount){
             throw new NotFoundException('User not found or not connected to stripe');
         }
+        try {
 
-        const account = await this.stripe.accounts.retrieve(user.stripeAccount);
+            const account = await this.stripe.accounts.retrieve(user.stripeAccount);
 
-        if(!account){
-            throw new NotFoundException('Account not found');
-        }
-
-        const balance = await this.stripe.balance.retrieve({
-            stripeAccount: user.stripeAccount
-        });
-
-        if(balance.available[0].amount < amount){
-            throw new NotFoundException('Insufficient funds');
-        }
-
-        const payout = await this.stripe.payouts.create({
-            amount: amount,
-            currency: 'pln',
-            metadata: { 'userId': user.id}
-        },
-        {
-            stripeAccount: user.stripeAccount
-        });
-
-        await this.prismaService.payout.create({
-            data: {
-                amount: amount,
-                userId: user.id,
-                stripePayoutId: payout.id
+            if(!account){
+                throw new NotFoundException('Account not found');
             }
-        })
 
-        await this.prismaService.wallet.update({
-            where: { userId: user.id },
-            data: { balance: { decrement: amount } }
-        });
+            const balance = await this.stripe.balance.retrieve({
+                stripeAccount: user.stripeAccount
+            });
 
-        return { message: 'Payout created', payout };
+            if(balance.available[0].amount < amount){
+                throw new NotFoundException('Insufficient funds');
+            }
+
+            const payout = await this.stripe.payouts.create({
+                amount: amount,
+                currency: 'pln',
+                metadata: { 'userId': user.id}
+            },
+            {
+                stripeAccount: user.stripeAccount
+            });
+
+            await this.prismaService.payout.create({
+                data: {
+                    amount: amount,
+                    userId: user.id,
+                    stripePayoutId: payout.id
+                }
+            })
+
+            await this.prismaService.wallet.update({
+                where: { userId: user.id },
+                data: { balance: { decrement: amount } }
+            });
+
+            return { message: 'Payout created', payout };
+
+        } catch (error) {
+            throw new NotFoundException('Stripe error', error);
+        }
     }
 
     async getPayout(id: string, req: Request){
