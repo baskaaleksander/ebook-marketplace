@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { PrismaService } from 'src/prisma.service';
 import { Request } from 'express';
-import { Product } from '@prisma/client';
 
 @Injectable()
 export class StripeService {
@@ -101,6 +100,8 @@ export class StripeService {
             where: { id: body.orderId }
         });
 
+        
+
         if(!order || order.buyerId !== req.user.userId || !order.checkoutSessionId){
             throw new NotFoundException('Order not found');
         }
@@ -109,6 +110,14 @@ export class StripeService {
 
         if(!checkoutSession.payment_intent){
             throw new NotFoundException('Payment intent not found');
+        }
+
+        const product = await this.prismaService.product.findUnique({
+            where: { id: order.productId }
+        });
+
+        if(!product){
+            throw new NotFoundException('Product not found');
         }
 
 
@@ -121,6 +130,11 @@ export class StripeService {
             where: { id: order.id },
             data: { status: 'REFUNDED' }
         });
+
+        await this.prismaService.wallet.update({
+            where: { userId:  product.sellerId},
+            data: { balance: { decrement: order.amount } }
+        })
 
         return refund
 
@@ -165,6 +179,91 @@ export class StripeService {
 
     }
 
+    async disconnectAccount(req: Request){
+        const user = await this.prismaService.user.findUnique({
+            where: { id: req.user.userId }
+        });
+
+        if(!user || !user.stripeAccount){
+            throw new NotFoundException('User not found or not connected to stripe');
+        }
+
+        await this.prismaService.user.update({
+            where: { id: req.user.userId },
+            data: { stripeAccount: null, stripeStatus: 'unverified' }
+        });
+
+        await this.stripe.accounts.del(user.stripeAccount);
+
+        return 'Account disconnected';
+    }
+
+    async createPayout(amount: number, req: Request) {
+
+        const user = await this.prismaService.user.findUnique({
+            where: { id: req.user.userId }
+        });
+
+        if(!user || !user.stripeAccount){
+            throw new NotFoundException('User not found or not connected to stripe');
+        }
+
+        const account = await this.stripe.accounts.retrieve(user.stripeAccount);
+
+        if(!account){
+            throw new NotFoundException('Account not found');
+        }
+
+        const balance = await this.stripe.balance.retrieve({
+            stripeAccount: user.stripeAccount
+        });
+
+        if(balance.available[0].amount < amount){
+            throw new NotFoundException('Insufficient funds');
+        }
+
+        const payout = await this.stripe.payouts.create({
+            amount: amount,
+            currency: 'pln',
+            metadata: { 'userId': user.id}
+        },
+        {
+            stripeAccount: user.stripeAccount
+        });
+
+        await this.prismaService.payout.create({
+            data: {
+                amount: amount,
+                userId: user.id,
+                stripePayoutId: payout.id
+            }
+        })
+
+        await this.prismaService.wallet.update({
+            where: { userId: user.id },
+            data: { balance: { decrement: amount } }
+        });
+
+        return { message: 'Payout created', payout };
+    }
+
+    async getPayout(id: string, req: Request){
+        const payout = await this.prismaService.payout.findUnique({
+            where: { id: id }
+        });
+
+        if(!payout){
+            throw new NotFoundException('Payout not found');
+        }
+
+        if(payout.userId !== req.user.userId){
+            throw new UnauthorizedException('You are not authorized to view this payout');
+        }
+
+        return payout;
+        
+    }
+    
     async checkAccountStatus(id: string) {
         const account = await this.stripe.accounts.retrieve(id);
 

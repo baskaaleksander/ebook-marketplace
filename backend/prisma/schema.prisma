@@ -18,6 +18,7 @@ model User {
   products       Product[]
   orders         Order[]
   reviews        Review[]
+  payouts        Payout[]
   wallet         Wallet?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -52,6 +53,7 @@ model Category {
 
 model Order {
   id         String  @id @default(cuid())
+  sellerId  String @default("null")
   buyerId    String
   buyer      User   @relation(fields: [buyerId], references: [id])
   productId  String
@@ -96,4 +98,21 @@ model WebhookEvent {
   payload    Json
   processed  Boolean @default(false)
   createdAt  DateTime @default(now())
+}
+
+model Payout {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id])
+  amount     Float
+  stripePayoutId String
+  status     PayoutStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum PayoutStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }

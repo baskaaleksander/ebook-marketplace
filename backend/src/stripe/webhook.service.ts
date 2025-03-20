@@ -22,9 +22,6 @@ export class WebhookService {
 
   async processWebhookEvent(event: Stripe.Event) {
     switch (event.type) {
-        case 'payment_intent.succeeded':
-            console.log('Payment intent succeeded');
-            break;
         case 'checkout.session.completed':
             this.handleCheckoutSessionCompleted(event);
             break;
@@ -33,12 +30,6 @@ export class WebhookService {
             break;
         case 'payment_intent.canceled':
             console.log('Payment intent canceled');
-            break;
-        case "charge.succeeded":
-            console.log('Charge succeeded');
-            break;
-        case "charge.failed":
-            console.log('Charge failed');
             break;
         case "charge.refunded":
             console.log('Charge refunded');
@@ -55,15 +46,11 @@ export class WebhookService {
         case "charge.dispute.closed":
             console.log('Charge dispute closed');
             break;
-        case "payout.created":
-            break;
         case "payout.failed":
             break;
         case "payout.paid":
             break;
         case "payout.canceled":
-            break;
-        case "payout.updated":
             break;
         case "account.updated":
             this.handleAccountUpdated(event);
@@ -113,27 +100,28 @@ export class WebhookService {
         }
     }
 
-    async paymentIntentSucceeded(event: Stripe.Event) {
-
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-
-        const { orderId, productId, userId } = paymentIntent.metadata; 
-
-        await this.prismaService.order.update({
-            where: { id: orderId },
-            data: { status: 'COMPLETED' },
-        });
-    }
 
     async handleCheckoutSessionCompleted(event: Stripe.Event) {
 
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const { orderId } = paymentIntent.metadata;
 
-        
+        const order = await this.prismaService.order.findUnique({
+            where: { id: orderId },
+        });
+
+        if(!order){
+            throw new NotFoundException('Order not found');
+        }
+
         await this.prismaService.order.update({
             where: { id: orderId },
             data: { status: 'COMPLETED' },
+        });
+
+        await this.prismaService.wallet.update({
+            where: { userId: order.sellerId },
+            data: { balance: { increment: order.amount } },
         });
     }
 

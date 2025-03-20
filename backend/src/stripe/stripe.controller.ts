@@ -21,15 +21,10 @@ import { AuthGuard } from '@nestjs/passport';
         return this.stripeService.checkAccountStatus(id);
     }
 
-    @Post('connect/link')
-    getAccountLink()
-    {
-        return 'Account Link';
-    }
-
-    @Delete('connect/:id')
-    disconnectAccount(@Param('id') id: string){
-        return 'Disconnect Account';
+    @UseGuards(AuthGuard('jwt'))
+    @Delete('connect')
+    disconnectAccount(@Req() req: Request){
+        return this.stripeService.disconnectAccount(req);
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -49,14 +44,16 @@ import { AuthGuard } from '@nestjs/passport';
         return this.stripeService.getAllOrders();
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('payout')
-    payout(){
-        return 'Payout';
+    payout(@Body() body: { amount: number }, @Req() req: Request){
+        return this.stripeService.createPayout(body.amount, req);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('payout/:id')
-    getPayout(@Param('id') id: string){
-        return 'Get Payout';
+    getPayout(@Param('id') id: string, @Req() req: Request){
+        return this.stripeService.getPayout(id, req);
     }
 
     @Post('webhook')
