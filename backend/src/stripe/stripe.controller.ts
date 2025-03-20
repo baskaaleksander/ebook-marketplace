@@ -11,13 +11,14 @@ import { AuthGuard } from '@nestjs/passport';
         private readonly stripeService: StripeService
     ) {}
   
+    @UseGuards(AuthGuard('jwt'))
     @Post('connect')
-    connectAccount(){
-        return 'Connect Account';
+    connectAccount(@Req() req: Request){
+        return this.stripeService.connectAccount(req);
     }
     @Get('connect/:id')
     getAccountDetails(@Param('id') id: string){
-        return 'Get Account';
+        return this.stripeService.checkAccountStatus(id);
     }
 
     @Post('connect/link')
@@ -33,13 +34,19 @@ import { AuthGuard } from '@nestjs/passport';
 
     @UseGuards(AuthGuard('jwt'))
     @Post('order/checkout')
-    checkoutOrder(@Body() body : [string], @Req() req: Request){
-        return this.stripeService.checkoutOrder(body, req);
+    checkoutOrder(@Body() body : {productId: string}, @Req() req: Request){
+        return this.stripeService.checkoutOrder(body.productId, req);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('order/refund')
-    cancelOrder(){
-        return 'Cancel Order';
+    cancelOrder(@Body() body: { orderId: string }, @Req() req: Request){
+        return this.stripeService.createRefund(body, req);
+    }
+
+    @Get('order')
+    getAllOrders(){
+        return this.stripeService.getAllOrders();
     }
 
     @Post('payout')

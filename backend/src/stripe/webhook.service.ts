@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'crypto';
 import { PrismaService } from 'src/prisma.service';
@@ -24,6 +24,9 @@ export class WebhookService {
     switch (event.type) {
         case 'payment_intent.succeeded':
             console.log('Payment intent succeeded');
+            break;
+        case 'checkout.session.completed':
+            this.handleCheckoutSessionCompleted(event);
             break;
         case 'payment_intent.payment_failed':
             console.log('Payment intent failed');
@@ -63,6 +66,7 @@ export class WebhookService {
         case "payout.updated":
             break;
         case "account.updated":
+            this.handleAccountUpdated(event);
             break;
         case "account.application.deauthorized":
             break;
@@ -113,13 +117,42 @@ export class WebhookService {
 
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
-        const { orderId, productId, userId } = paymentIntent.metadata;
+        const { orderId, productId, userId } = paymentIntent.metadata; 
 
         await this.prismaService.order.update({
             where: { id: orderId },
             data: { status: 'COMPLETED' },
         });
     }
+
+    async handleCheckoutSessionCompleted(event: Stripe.Event) {
+
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const { orderId } = paymentIntent.metadata;
+
+        
+        await this.prismaService.order.update({
+            where: { id: orderId },
+            data: { status: 'COMPLETED' },
+        });
+    }
+
+    // to be checked if working
+    async handleAccountUpdated(event: Stripe.Event) {
+        const account = event.data.object as Stripe.Account;
+        const accountId = account.id;
+
+        if(account.charges_enabled && account.payouts_enabled){
+            await this.prismaService.user.update({
+                where: { stripeAccount: accountId },
+                data: {
+                    stripeStatus: 'verified',
+                }
+            });
+
+        }
+    }
+
 
     returnAllWebhooks() {
         return this.prismaService.webhookEvent.findMany();

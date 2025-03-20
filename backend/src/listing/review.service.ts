@@ -59,10 +59,15 @@ export class ReviewService {
 
         const ordersOfUser = user.orders;
 
-        const order = ordersOfUser.find(order => order.productId.includes(id));
+        const orderWithProduct = await this.prismaService.order.findFirst({
+            where: {
+                id: { in: ordersOfUser.map(order => order.id) },
+                productId: id
+            }
+        });
 
-        if(!order){
-            throw new NotFoundException('Order not found');
+        if(!orderWithProduct){
+            throw new NotFoundException('Order not found for this product');
         }
 
         const review = await this.prismaService.review.create({

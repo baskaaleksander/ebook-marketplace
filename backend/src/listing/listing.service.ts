@@ -45,6 +45,14 @@ export class ListingService {
             throw new NotFoundException('User ID is required');
         }
         
+        const seller = await this.prismaService.user.findUnique({
+            where: { id: req.user.userId }
+        });
+
+        if (seller?.stripeStatus === "unverified") {
+            throw new UnauthorizedException('Seller is not verified');
+        }
+
         return this.prismaService.product.create({
             data: {
                 title: data.title,
