@@ -111,10 +111,7 @@ export class WebhookService {
             data: { status: 'COMPLETED' },
         });
 
-        await this.prismaService.wallet.update({
-            where: { userId: order.sellerId },
-            data: { balance: { increment: order.amount } },
-        });
+
     }
 
     async handlePaymentIntentFailed(event: Stripe.Event) {
@@ -166,10 +163,6 @@ export class WebhookService {
             data: { status: 'FAILED' },
         });
 
-        await this.prismaService.wallet.update({
-            where: { userId: existingPayout?.userId },
-            data: { balance: { increment: payout.amount } },
-        });
 
     }
 

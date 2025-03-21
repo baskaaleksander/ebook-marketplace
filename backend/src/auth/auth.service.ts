@@ -27,19 +27,6 @@ export class AuthService {
 
         const newUser = await this.userService.createUser({...user, password: result});
 
-        const newWallet = await this.prismaService.wallet.create({
-            data: {
-                balance: 0,
-                user: {
-                    connect: { id: newUser.id }
-                }
-            }
-        });
-
-        await this.prismaService.user.update({
-            where: { id: newUser.id },
-            data: { wallet: { connect: { id: newWallet.id } } }
-        });
         
         return this.login({username: newUser.email, userId: newUser.id});
     }

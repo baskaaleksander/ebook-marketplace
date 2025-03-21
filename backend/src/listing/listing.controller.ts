@@ -20,8 +20,8 @@ export class ListingController {
         return this.listingService.findAllListings();
     }
 
-    @Get(':category')
-    searchListings(@Param() param: {category: string} , @Query() query: {take: number}) {
+    @Get('/category/:category')
+    searchListings(@Param() param: {category: string} , @Query() query: {take: string}) {
         return this.listingService.searchListingsFromCategory(param.category, query.take);
     }
 
@@ -61,6 +61,30 @@ export class ListingController {
     @UseGuards(AuthGuard('jwt'))
     deleteListing(@Param()param: { id: string }, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
         return this.listingService.deleteListing(param.id, req);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Delete('reviews/:reviewId')
+    deleteReview(@Param() data: { id: string, reviewId: string }, @Req() req: Request) {
+        return this.reviewService.deleteReview(data.reviewId, req);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('favorites/:id')
+    addFavorite(@Param() param: { id: string }) {
+        return 'Add listing ' + param.id + ' to favorites';
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Delete('favorites/:id')
+    removeFavorite(@Param() param: { id: string }) {
+        return 'Remove listing ' + param.id + ' from favorites';
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('favorites')
+    getFavorites() {
+        return 'Get all favorite listings';
     }
 
     

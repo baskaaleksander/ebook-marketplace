@@ -3,12 +3,14 @@ import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 import { StripeService } from './stripe.service';
 import { AuthGuard } from '@nestjs/passport';
+import { OrderService } from './order.service';
   
   @Controller('stripe')
   export class StripeController {
     constructor(
         private readonly webhookService: WebhookService,
-        private readonly stripeService: StripeService
+        private readonly stripeService: StripeService,
+        private readonly orderService: OrderService
     ) {}
   
     @UseGuards(AuthGuard('jwt'))
@@ -32,19 +34,19 @@ import { AuthGuard } from '@nestjs/passport';
     @UseGuards(AuthGuard('jwt'))
     @Post('order/checkout')
     checkoutOrder(@Body() body : {productId: string}, @Req() req: Request){
-        return this.stripeService.checkoutOrder(body.productId, req);
+        return this.orderService.checkoutOrder(body.productId, req);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post('order/refund')
     cancelOrder(@Body() body: { orderId: string }, @Req() req: Request){
-        return this.stripeService.createRefund(body, req);
+        return this.orderService.createRefund(body, req);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('order')
     getAllUserOrders(@Req() req: Request){
-        return this.stripeService.getAllUserOrders(req);
+        return this.orderService.getAllUserOrders(req);
     }
 
     @UseGuards(AuthGuard('jwt'))

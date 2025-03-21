@@ -98,7 +98,7 @@ export class ListingService {
         return listings;
     }
 
-    async searchListingsFromCategory(category: string, take: number) {
+    async searchListingsFromCategory(category: string, take: string) {
         const listings = await this.prismaService.product.findMany({
             where: {
                 categories: {
@@ -107,12 +107,14 @@ export class ListingService {
                     }
                 }
             },
-            take: take || 10,
+            take: parseInt(take) || 10,
         });
 
         if(listings.length === 0){
             throw new NotFoundException('No listings found');
         }
+
+        return listings;
     }
 
     async deleteListing(id: string, req: Request) {
