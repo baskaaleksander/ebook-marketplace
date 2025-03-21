@@ -4,3 +4,10 @@ Todo:
   ✔ review endpoints @done(25-03-16 14:17)
   ✔ searchListingByCategory @done(25-03-16 14:16)
   ☐ searchListingByCategory fix @high 
+  ✔ stripe webhooks @high @done(25-03-21 18:24)
+  ☐ user wallet methods @high
+  ☐ user wallet endpoints @high
+  ☐ rich content preview
+  ☐ recently bought
+  ☐ recently viewed
+  ☐ advanced filtering

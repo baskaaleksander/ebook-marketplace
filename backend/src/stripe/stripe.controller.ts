@@ -59,6 +59,18 @@ import { AuthGuard } from '@nestjs/passport';
         return this.stripeService.getPayout(id, req);
     }
 
+    @UseGuards(AuthGuard('jwt'))
+    @Delete('payout/:id')
+    cancelPayout(@Param('id') id: string, @Req() req: Request){
+        return this.stripeService.cancelPayout(id, req);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('balance')
+    getBalance(@Req() req: Request){
+        return this.stripeService.getCurrentBalance(req);
+    }
+
     @Post('webhook')
     webhook(
         @Headers('stripe-signature') signature: string, 

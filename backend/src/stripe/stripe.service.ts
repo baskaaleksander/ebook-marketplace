@@ -39,6 +39,7 @@ export class StripeService {
 
         const order = await this.prismaService.order.create({
             data: {
+                sellerId: product.sellerId,
                 buyerId: req.user.userId,
                 productId: body,
                 amount: product.price * 100,
@@ -134,6 +135,7 @@ export class StripeService {
             const refund = await this.stripe.refunds.create({
                 payment_intent: checkoutSession.payment_intent.toString(),
                 amount: order.amount,
+                metadata: { orderId: order.id }
             });
 
             await this.prismaService.order.update({
@@ -258,18 +260,22 @@ export class StripeService {
                     amount: amount,
                     userId: user.id,
                     stripePayoutId: payout.id
+
                 }
             })
 
             await this.prismaService.wallet.update({
                 where: { userId: user.id },
-                data: { balance: { decrement: amount } }
+                data: { 
+                    balance: { decrement: amount }, 
+                    lastPayout: new Date() 
+                }
             });
 
             return { message: 'Payout created', payout };
 
         } catch (error) {
-            throw new NotFoundException('Stripe error', error);
+            throw new NotFoundException(error);
         }
     }
 
@@ -289,10 +295,47 @@ export class StripeService {
         return payout;
         
     }
+
+    async cancelPayout(id: string, req: Request){
+
+        try {
+
+            const payout = await this.stripe.payouts.retrieve(id);
+
+            if(!payout || !payout.metadata?.userId) {
+                throw new NotFoundException('Payout not found');
+            }
+
+            if(payout.metadata.userId !== req.user.userId || payout.status !== 'pending'){
+                throw new UnauthorizedException('You cannot cancel this payout');
+            }
+
+            await this.stripe.payouts.cancel(id);
+
+        } catch (error) {
+            throw new NotFoundException('Stripe error', error);
+        }
+
+    }
     
     async checkAccountStatus(id: string) {
         const account = await this.stripe.accounts.retrieve(id);
 
         return account;
+    }
+
+    async getCurrentBalance(req: Request) {
+
+        const user = await this.prismaService.user.findUnique({
+            where: { id: req.user.userId }
+        });
+
+        if(!user || !user.stripeAccount){
+            throw new NotFoundException('User not found or not connected to stripe');
+        }
+
+        return this.stripe.balance.retrieve({
+            stripeAccount: user.stripeAccount
+        });
     }
 }

@@ -26,31 +26,25 @@ export class WebhookService {
             this.handleCheckoutSessionCompleted(event);
             break;
         case 'payment_intent.payment_failed':
-            console.log('Payment intent failed');
+            this.handlePaymentIntentFailed(event);
             break;
         case 'payment_intent.canceled':
-            console.log('Payment intent canceled');
+            this.handlePaymentIntentCanceled(event);
             break;
         case "charge.refunded":
-            console.log('Charge refunded');
+            this.handleRefundCompleted(event);
             break;
-        case "charge.refund.updated":
-            console.log('Charge refund updated');
+        case "refund.created":
+            this.handleRefundCreated(event);
             break;
-        case "charge.dispute.created":
-            console.log('Charge dispute created');
-            break;
-        case "charge.dispute.updated":
-            console.log('Charge dispute updated');
-            break;
-        case "charge.dispute.closed":
-            console.log('Charge dispute closed');
+        case "refund.failed":
+            this.handleRefundFailed(event);
             break;
         case "payout.failed":
+            this.handlePayoutFailed(event);
             break;
         case "payout.paid":
-            break;
-        case "payout.canceled":
+            this.handlePayoutPaid(event);
             break;
         case "account.updated":
             this.handleAccountUpdated(event);
@@ -123,6 +117,27 @@ export class WebhookService {
         });
     }
 
+    async handlePaymentIntentFailed(event: Stripe.Event) {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const { orderId } = paymentIntent.metadata;
+
+        await this.prismaService.order.update({
+            where: { id: orderId },
+            data: { status: 'FAILED' },
+        });
+    }
+
+    async handlePaymentIntentCanceled(event: Stripe.Event) {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const { orderId } = paymentIntent.metadata;
+
+        await this.prismaService.order.update({
+            where: { id: orderId },
+            data: { status: 'CANCELLED' },
+        });
+
+    }
+
     // to be checked if working
     async handleAccountUpdated(event: Stripe.Event) {
         const account = event.data.object as Stripe.Account;
@@ -139,6 +154,80 @@ export class WebhookService {
         }
     }
 
+    async handlePayoutFailed(event: Stripe.Event) {
+        const payout = event.data.object as Stripe.Payout;
+
+        const existingPayout = await this.prismaService.payout.findUnique({
+            where: { id: payout.id },
+        });
+        
+        await this.prismaService.payout.update({
+            where: { id: payout.id },
+            data: { status: 'FAILED' },
+        });
+
+        await this.prismaService.wallet.update({
+            where: { userId: existingPayout?.userId },
+            data: { balance: { increment: payout.amount } },
+        });
+
+    }
+
+    async handlePayoutPaid(event: Stripe.Event) {
+        const payout = event.data.object as Stripe.Payout;
+        
+        await this.prismaService.payout.update({
+            where: { id: payout.id },
+            data: { status: 'COMPLETED' },
+        });
+    }
+
+    async handleRefundCreated(event: Stripe.Event) {
+        const refund = event.data.object as Stripe.Refund;
+
+        if(!refund.metadata){
+            throw new NotFoundException('Refund metadata not found');
+        }
+
+        await this.prismaService.refund.update({
+            where: { orderId: refund.metadata.orderId },
+            data: { status: 'CREATED'}
+        })
+
+    }
+
+    async handleRefundCompleted(event: Stripe.Event) {
+        const refund = event.data.object as Stripe.Refund;
+
+        if(!refund.metadata){
+            throw new NotFoundException('Refund metadata not found');
+        }
+
+        await this.prismaService.refund.update({
+            where: { orderId: refund.metadata.orderId },
+            data: { status: 'COMPLETED'}
+        })
+
+        await this.prismaService.order.update({
+            where: { id: refund.metadata.orderId },
+            data: { status: 'REFUNDED'}
+        })
+    }
+
+    async handleRefundFailed(event: Stripe.Event) {
+        const refund = event.data.object as Stripe.Refund;
+
+        if(!refund.metadata){
+            throw new NotFoundException('Refund metadata not found');
+        }
+
+        await this.prismaService.refund.update({
+            where: { orderId: refund.metadata.orderId },
+            data: { status: 'FAILED'}
+        })
+
+    }
+            
 
     returnAllWebhooks() {
         return this.prismaService.webhookEvent.findMany();

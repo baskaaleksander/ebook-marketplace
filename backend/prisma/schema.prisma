@@ -58,6 +58,8 @@ model Order {
   buyer      User   @relation(fields: [buyerId], references: [id])
   productId  String
   product  Product  @relation(fields: [productId], references: [id])
+  refundId   String?
+  refund     Refund?
   amount     Float
   status     OrderStatus @default(PENDING)
   checkoutSessionId String?    @unique
@@ -66,9 +68,11 @@ model Order {
   updatedAt  DateTime @updatedAt
 }
 
+
 enum OrderStatus {
   PENDING
   COMPLETED
+  CANCELLED
   FAILED
   REFUNDED
 }
@@ -109,6 +113,23 @@ model Payout {
   status     PayoutStatus @default(PENDING)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Refund {
+  id         String  @id @default(cuid())
+  orderId    String @unique
+  order      Order   @relation(fields: [orderId], references: [id])
+  amount     Float
+  status  RefundStatus @default(PENDING)
+  reason     String
+  createdAt  DateTime @default(now())
+}
+
+enum RefundStatus {
+  PENDING
+  CREATED
+  FAILED
+  COMPLETED
 }
 
 enum PayoutStatus {

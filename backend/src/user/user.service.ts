@@ -15,6 +15,13 @@ export class UserService {
         
         const user =  this.prismaService.user.findUnique({
             where: { email: email },
+            include: { 
+                wallet: true,
+                products: true,
+                reviews: true,
+                orders: true,
+                payouts: true
+             }
         });
 
         if(!user){
