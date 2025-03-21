@@ -141,10 +141,6 @@ export class OrderService {
                 data: { status: 'REFUNDED' }
             });
 
-            await this.prismaService.wallet.update({
-                where: { userId:  product.sellerId},
-                data: { balance: { decrement: order.amount } }
-            })
 
             return refund
         } catch (error) {

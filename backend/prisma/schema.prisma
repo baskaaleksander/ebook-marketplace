@@ -19,6 +19,7 @@ model User {
   orders         Order[]
   reviews        Review[]
   payouts        Payout[]
+  favourites     Favourite[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -65,6 +66,14 @@ model Order {
   paymentUrl       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Favourite {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id])
+  productId  String
+  createdAt  DateTime @default(now())
 }
 
 

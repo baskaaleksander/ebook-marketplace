@@ -5,6 +5,8 @@ import { StripeService } from './stripe.service';
 import { AuthGuard } from '@nestjs/passport';
 import { OrderService } from './order.service';
   
+
+@UseGuards(AuthGuard('jwt'))
   @Controller('stripe')
   export class StripeController {
     constructor(
@@ -13,55 +15,46 @@ import { OrderService } from './order.service';
         private readonly orderService: OrderService
     ) {}
   
-    @UseGuards(AuthGuard('jwt'))
     @Post('connect')
     connectAccount(@Req() req: Request){
         return this.stripeService.connectAccount(req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Get('connect/:id')
     getAccountDetails(@Param('id') id: string){
         return this.stripeService.checkAccountStatus(id);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Delete('connect')
     disconnectAccount(@Req() req: Request){
         return this.stripeService.disconnectAccount(req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Post('order/checkout')
     checkoutOrder(@Body() body : {productId: string}, @Req() req: Request){
         return this.orderService.checkoutOrder(body.productId, req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Post('order/refund')
     cancelOrder(@Body() body: { orderId: string }, @Req() req: Request){
         return this.orderService.createRefund(body, req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Get('order')
     getAllUserOrders(@Req() req: Request){
         return this.orderService.getAllUserOrders(req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Post('payout')
     payout(@Body() body: { amount: number }, @Req() req: Request){
         return this.stripeService.createPayout(body.amount, req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Get('payout/:id')
     getPayout(@Param('id') id: string, @Req() req: Request){
         return this.stripeService.getPayout(id, req);
     }
 
-    @UseGuards(AuthGuard('jwt'))
     @Delete('payout/:id')
     cancelPayout(@Param('id') id: string, @Req() req: Request){
         return this.stripeService.cancelPayout(id, req);
