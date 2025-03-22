@@ -6,7 +6,6 @@ import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
 import { ReviewService } from './review.service';
 import { ReviewOrderDto } from './dtos/review-order.dto';
-import { FilterQueryDto } from './dtos/filter-query.dto';
 import { FavouritesService } from './favourites.service';
 import { ViewedListingsService } from './viewedListing.service';
 
@@ -20,8 +19,8 @@ export class ListingController {
         private viewedListingsService: ViewedListingsService
     ){}
     @Get(':id')
-    findListingById(@Param() param: {id: string}) {
-        return this.listingService.findListingById(param.id);
+    findListingById(@Param() param: string) {
+        return this.listingService.findListingById(param);
     }
 
     @Get()
@@ -34,20 +33,21 @@ export class ListingController {
         return this.listingService.getRecentListings();
     }
 
+    //TODO: Implement search functionality
     @Get('search')
-    searchListings(@Query() filterQuery: FilterQueryDto) {
-        return '.';
+    searchListings() {
+        return 'this.listingService.findListings(filterQuery)';
     }
 
 
     @Get(':id/reviews')
-    getReviews(@Param() param: {id: string} ) {
-        return this.reviewService.getReviews(param.id);
+    getReviews(@Param() param: string ) {
+        return this.reviewService.getReviews(param);
     }
 
     @Get('reviews/:reviewId')
-    getReview(@Param() data: { reviewId: string }) {
-        return this.reviewService.getReview(data.reviewId);
+    getReview(@Param() param: string) {
+        return this.reviewService.getReview(param);
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -57,43 +57,43 @@ export class ListingController {
     }
 
     @Post(':id/reviews')
-    createReview(@Param() param: { id: string }, @Req() req: Request, @Body() data: ReviewOrderDto) {
-        return this.reviewService.createReview(param.id, req.user.userId, data);
+    createReview(@Param() param: string, @Req() req: Request, @Body() data: ReviewOrderDto) {
+        return this.reviewService.createReview(param, req.user.userId, data);
     }
 
     @Put(':id')
     @UseGuards(AuthGuard('jwt'))
-    updateListing(@Param() param: { id: string }, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
-        return this.listingService.updateListing(param.id, updateListingDto, req.user.userId);
+    updateListing(@Param() param: string, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
+        return this.listingService.updateListing(param, updateListingDto, req.user.userId);
     }
 
     @Put('reviews/:reviewId')
-    updateReview(@Param() data: { reviewId: string }, @Body() body: ReviewOrderDto, @Req() req: Request) {
-        return this.reviewService.updateReview(data.reviewId, body, req.user.userId);
+    updateReview(@Param() param: string, @Body() body: ReviewOrderDto, @Req() req: Request) {
+        return this.reviewService.updateReview(param, body, req.user.userId);
     }
 
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'))
-    deleteListing(@Param()param: { id: string }, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
-        return this.listingService.deleteListing(param.id, req.user.userId);
+    deleteListing(@Param() param: string, @Body() updateListingDto: UpdateListingDto, @Req() req: Request) {
+        return this.listingService.deleteListing(param, req.user.userId);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Delete('reviews/:reviewId')
-    deleteReview(@Param() data: { id: string, reviewId: string }, @Req() req: Request) {
-        return this.reviewService.deleteReview(data.reviewId, req.user.userId);
+    deleteReview(@Param() param: string, @Req() req: Request) {
+        return this.reviewService.deleteReview(param, req.user.userId);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post('favorites/:id')
-    addFavorite(@Param() param: { id: string }, @Req() req: Request) {
-        return this.favouritesService.addFavorite(req.user.userId, param.id);
+    addFavorite(@Param() param: string, @Req() req: Request) {
+        return this.favouritesService.addFavorite(req.user.userId, param);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Delete('favorites/:id')
-    removeFavorite(@Param() param: { id: string }, @Req() req: Request) {
-        return this.favouritesService.removeFavorite(req.user.userId, param.id);
+    removeFavorite(@Param() param: string, @Req() req: Request) {
+        return this.favouritesService.removeFavorite(req.user.userId, param);
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -104,8 +104,8 @@ export class ListingController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post(':id/view')
-    trackListingView(@Param() param: { id: string }, @Req() req: Request) {
-        return this.viewedListingsService.trackListingView(req.user.userId, param.id);
+    trackListingView(@Param() param: string, @Req() req: Request) {
+        return this.viewedListingsService.trackListingView(req.user.userId, param);
     }
 
     @UseGuards(AuthGuard('jwt'))

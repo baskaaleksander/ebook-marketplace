@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
+import { FilterQueryDto } from './dtos/filter-query.dto';
 
 declare module 'express' {
     interface Request {
@@ -93,6 +94,7 @@ export class ListingService {
         if(listings.length === 0){
             throw new NotFoundException('No listings found');
         }
+
 
         return listings;
     }
@@ -217,4 +219,6 @@ export class ListingService {
             }
         });
     }
+
+
 }

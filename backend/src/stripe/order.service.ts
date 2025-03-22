@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Request } from "express";
+import { IdDto } from "src/dtos/id.dto";
 import { PrismaService } from "src/prisma.service";
 import Stripe from "stripe";
 
@@ -98,10 +99,10 @@ export class OrderService {
         }
     }
 
-    async createRefund(body : { orderId: string}, req: Request) {
+    async createRefund(body : string, req: Request) {
 
         const order = await this.prismaService.order.findUnique({
-            where: { id: body.orderId }
+            where: { id: body }
         });
 
         

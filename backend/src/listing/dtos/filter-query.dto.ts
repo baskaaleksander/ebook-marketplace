@@ -1,45 +1,43 @@
-import { IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString, Min } from "class-validator";
 
 export class FilterQueryDto {
-
+    @IsOptional()
     @IsString()
-    @IsOptional()
-    category: string;
+    category?: string;
 
-    @IsNumber()
     @IsOptional()
+    @IsNumber()
     @Min(0)
-    minPrice: number;
+    minPrice?: number;
 
-    @IsNumber()
     @IsOptional()
-    maxPrice: number;
+    @IsNumber()
+    @Min(0)
+    maxPrice?: number;
 
-    @IsNumber()
     @IsOptional()
+    @IsNumber()
     @Min(1)
-    limit: number;
+    limit?: number;
 
-    @IsString()
     @IsOptional()
-    search: string;
-
     @IsString()
+    search?: string;
+
     @IsOptional()
-    authorId: string;
-
-
     @IsString()
-    @IsOptional()
-    sortBy: 'price' | 'date' | 'popularity';
+    authorId?: string;
 
-    @IsString()
     @IsOptional()
-    sortDirection: 'asc' | 'desc';
+    @IsEnum(['price', 'createdAt', 'popularity'])
+    sortBy?: 'price' | 'createdAt' | 'popularity';
 
+    @IsOptional()
+    @IsEnum(['asc', 'desc'])
+    sortDirection?: 'asc' | 'desc';
+
+    @IsOptional()
     @IsNumber()
-    @IsOptional()
     @Min(1)
-    page: number;
-
+    page?: number;
 }

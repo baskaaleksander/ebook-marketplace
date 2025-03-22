@@ -4,6 +4,8 @@ import { WebhookService } from './webhook.service';
 import { StripeService } from './stripe.service';
 import { AuthGuard } from '@nestjs/passport';
 import { OrderService } from './order.service';
+import { IdDto } from 'src/dtos/id.dto';
+import { AmountDto } from './dtos/amount.dto';
   
 
 @UseGuards(AuthGuard('jwt'))
@@ -31,13 +33,13 @@ import { OrderService } from './order.service';
     }
 
     @Post('order/checkout')
-    checkoutOrder(@Body() body : {productId: string}, @Req() req: Request){
-        return this.orderService.checkoutOrder(body.productId, req);
+    checkoutOrder(@Body() body : IdDto, @Req() req: Request){
+        return this.orderService.checkoutOrder(body.id, req);
     }
 
     @Post('order/refund')
-    cancelOrder(@Body() body: { orderId: string }, @Req() req: Request){
-        return this.orderService.createRefund(body, req);
+    cancelOrder(@Body() body: IdDto, @Req() req: Request){
+        return this.orderService.createRefund(body.id, req);
     }
 
     @Get('order')
@@ -46,7 +48,7 @@ import { OrderService } from './order.service';
     }
 
     @Post('payout')
-    payout(@Body() body: { amount: number }, @Req() req: Request){
+    payout(@Body() body: AmountDto, @Req() req: Request){
         return this.stripeService.createPayout(body.amount, req);
     }
 

@@ -19,6 +19,6 @@ import { ScheduleModule } from './schedule/schedule.module';
       isGlobal: true
     }), UserModule, AuthModule, ListingModule, StripeModule, ScheduleModule],
   controllers: [AppController, AuthController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}
