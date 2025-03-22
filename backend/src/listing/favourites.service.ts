@@ -1,34 +1,33 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Request } from "express";
 import { PrismaService } from "src/prisma.service";
 
 @Injectable() 
 export class FavouritesService {
     constructor(private prismaService: PrismaService) {}
 
-    async getFavorites(req: Request) {
+    async getFavorites(userId: string) {
         const favorites = await this.prismaService.favourite.findMany({
-            where: { userId: req.user.userId },
+            where: { userId: userId },
         });
 
         return favorites;
     }
 
-    async addFavorite(req: Request, productId: string) {
+    async addFavorite(userId: string, productId: string) {
         const favorite = await this.prismaService.favourite.create({
             data: {
                 productId,
-                userId: req.user.userId,
+                userId: userId,
             },
         });
 
         return favorite;
     }
 
-    async removeFavorite(req: Request, productId: string) {
+    async removeFavorite(userId: string, productId: string) {
         const favorite = await this.prismaService.favourite.findFirst({
             where: {
-                userId: req.user.userId,
+                userId,
                 productId,
             }
         });

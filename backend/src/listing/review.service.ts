@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { Request } from "express";
 import { PrismaService } from "src/prisma.service";
 import { ReviewOrderDto } from "./dtos/review-order.dto";
 
@@ -35,6 +34,8 @@ export class ReviewService {
         return reviews;
     }
 
+    
+
     async getReview(reviewId: string) {
         const review = await this.prismaService.review.findUnique({
             where: { id: reviewId }
@@ -47,9 +48,9 @@ export class ReviewService {
         return review;
     }
 
-    async createReview(id: string, req: Request, data: ReviewOrderDto) {
+    async createReview(id: string, userId: string, data: ReviewOrderDto) {
         const user = await this.prismaService.user.findUnique({
-            where: { id: req.user.userId },
+            where: { id: userId },
             include: { orders: true }
         });
 
@@ -72,7 +73,7 @@ export class ReviewService {
 
         const review = await this.prismaService.review.create({
             data: {
-                buyerId: req.user.userId,
+                buyerId: userId,
                 productId: id,
                 rating: data.rating,
                 comment: data.comment
@@ -80,7 +81,7 @@ export class ReviewService {
         });
 
     }
-    async updateReview(reviewId: string, body: ReviewOrderDto, req: Request) {
+    async updateReview(reviewId: string, body: ReviewOrderDto, userId: string) {
         const review = await this.prismaService.review.findUnique({
             where: { id: reviewId }
         });
@@ -90,7 +91,7 @@ export class ReviewService {
         }
 
         const user = await this.prismaService.user.findUnique({
-            where: { id: req.user.userId },
+            where: { id: userId },
             include: { orders: true }
         });
 
@@ -114,7 +115,7 @@ export class ReviewService {
         });
     }
 
-    async deleteReview(reviewId: string, req: Request) {
+    async deleteReview(reviewId: string, userId: string) {
         const review = await this.prismaService.review.findUnique({
             where: { id: reviewId }
         });
@@ -123,9 +124,8 @@ export class ReviewService {
             throw new NotFoundException('Review not found');
         }
 
-        const user = req.user;
 
-        if(review.buyerId !== user.userId){
+        if(review.buyerId !== userId){
             throw new UnauthorizedException('You are not the owner of this review');
         }
 

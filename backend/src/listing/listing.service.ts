@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { Request } from 'express';
 import { PrismaService } from 'src/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
@@ -18,7 +17,7 @@ declare module 'express' {
 export class ListingService {
     constructor (private readonly prismaService: PrismaService, private readonly userService: UserService) {}
 
-    async createListing(data: CreateListingDto, req: Request) {
+    async createListing(data: CreateListingDto, userId: string) {
         let categoryConnections;
         if (data.categories && data.categories.length > 0) {
             const categoryPromises = data.categories.map(async (category) => {
@@ -41,12 +40,12 @@ export class ListingService {
             categoryConnections = { connect: categoryIds };
         }
         
-        if (!req.user.userId) {
+        if (!userId) {
             throw new NotFoundException('User ID is required');
         }
         
         const seller = await this.prismaService.user.findUnique({
-            where: { id: req.user.userId }
+            where: { id: userId }
         });
 
         if (seller?.stripeStatus === "unverified") {
@@ -60,7 +59,7 @@ export class ListingService {
                 price: data.price,
                 fileUrl: data.fileUrl,
                 seller: {
-                    connect: { id: req.user.userId }  
+                    connect: { id: userId }  
                 },
                 categories: categoryConnections
             },
@@ -117,7 +116,7 @@ export class ListingService {
         return listings;
     }
 
-    async deleteListing(id: string, req: Request) {
+    async deleteListing(id: string, userId: string) {
 
         const listing = await this.prismaService.product.findUnique({
             where: {
@@ -129,7 +128,7 @@ export class ListingService {
             throw new NotFoundException('Listing not found');
         }
 
-        if(listing.sellerId !== req.user.userId){
+        if(listing.sellerId !== userId){
             throw new UnauthorizedException('You are not the owner of this listing');
         }
 
@@ -140,7 +139,7 @@ export class ListingService {
         });
     }
 
-    async updateListing(id: string, body: UpdateListingDto, req: Request){ {
+    async updateListing(id: string, body: UpdateListingDto, userId: string){ {
 
         const listing = await this.prismaService.product.findUnique({
             where: {
@@ -153,7 +152,7 @@ export class ListingService {
             throw new NotFoundException('Listing not found');
         }
 
-        if (listing.sellerId !== req.user.userId) {
+        if (listing.sellerId !== userId) {
             throw new UnauthorizedException('You are not the owner of this listing');
         }
 
@@ -209,4 +208,13 @@ export class ListingService {
         });
     }
 }
+
+    getRecentListings() {
+        return this.prismaService.product.findMany({
+            take: 10,
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+    }
 }

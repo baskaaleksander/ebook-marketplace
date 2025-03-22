@@ -11,12 +11,13 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user/user.service';
 import { ListingModule } from './listing/listing.module';
 import { StripeModule } from './stripe/stripe.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [ConfigModule.forRoot(
     { 
       isGlobal: true
-    }), UserModule, AuthModule, ListingModule, StripeModule],
+    }), UserModule, AuthModule, ListingModule, StripeModule, ScheduleModule],
   controllers: [AppController, AuthController],
   providers: [AppService],
 })
