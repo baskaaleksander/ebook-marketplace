@@ -10,6 +10,6 @@ import { OrderService } from './order.service';
   imports: [ConfigModule],
   controllers: [StripeController],
   providers: [StripeService, WebhookService, PrismaService, OrderService],
-  exports: [StripeService]
+  exports: [StripeService, WebhookService, OrderService]
 })
 export class StripeModule {}

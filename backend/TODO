@@ -3,8 +3,9 @@ Todo:
   ✔ review service @done(25-03-16 16:20)
   ✔ review endpoints @done(25-03-16 14:17)
   ✔ stripe webhooks @high @done(25-03-21 18:24)
-  ☐ fix class exports @critical 
+  ✔ fix class exports @critical @done(25-03-22 11:33)
   ☐ rich content preview
   ☐ recently bought
   ☐ recently viewed
   ☐ advanced filtering
+  ✔ favourites service @done(25-03-21 22:57)

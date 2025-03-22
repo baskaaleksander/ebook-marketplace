@@ -8,6 +8,7 @@ import { FavouritesService } from './favourites.service';
 
 @Module({
   providers: [ListingService, PrismaService, UserService, ReviewService, FavouritesService],
-  controllers: [ListingController]
+  controllers: [ListingController],
+  exports: [ListingService, ReviewService, FavouritesService]
 })
 export class ListingModule {}

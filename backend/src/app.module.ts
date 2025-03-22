@@ -18,6 +18,6 @@ import { StripeModule } from './stripe/stripe.module';
       isGlobal: true
     }), UserModule, AuthModule, ListingModule, StripeModule],
   controllers: [AppController, AuthController],
-  providers: [AppService, PrismaService, AuthService, JwtService, UserService],
+  providers: [AppService],
 })
 export class AppModule {}
