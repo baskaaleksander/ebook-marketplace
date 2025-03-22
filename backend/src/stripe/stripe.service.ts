@@ -21,7 +21,7 @@ export class StripeService {
     }
 
 
-    async connectAccount(request: Request) {
+    async connectAccount(userId: string) {
 
         try {
             const account = await this.stripe.accounts.create({
@@ -34,7 +34,7 @@ export class StripeService {
             });
 
             const user = await this.prismaService.user.findUnique({
-                where: { id: request.user.userId }
+                where: { id: userId }
             });
 
             if(!user){
@@ -46,7 +46,7 @@ export class StripeService {
             }
 
             await this.prismaService.user.update({
-                where: { id: request.user.userId },
+                where: { id: userId },
                 data: { stripeAccount: account.id }
             });
 
@@ -65,9 +65,9 @@ export class StripeService {
 
     }
 
-    async disconnectAccount(req: Request){
+    async disconnectAccount(userId: string) {
         const user = await this.prismaService.user.findUnique({
-            where: { id: req.user.userId }
+            where: { id: userId }
         });
 
         if(!user || !user.stripeAccount){
@@ -75,7 +75,7 @@ export class StripeService {
         }
 
         await this.prismaService.user.update({
-            where: { id: req.user.userId },
+            where: { id: userId },
             data: { stripeAccount: null, stripeStatus: 'unverified' }
         });
         try {
@@ -87,10 +87,10 @@ export class StripeService {
         return 'Account disconnected';
     }
 
-    async createPayout(amount: number, req: Request) {
+    async createPayout(amount: number, userId: string) {
 
         const user = await this.prismaService.user.findUnique({
-            where: { id: req.user.userId }
+            where: { id: userId }
         });
 
         if(!user || !user.stripeAccount){
@@ -138,7 +138,7 @@ export class StripeService {
         }
     }
 
-    async getPayout(id: string, req: Request){
+    async getPayout(id: string, userId: string){
         const payout = await this.prismaService.payout.findUnique({
             where: { id: id }
         });
@@ -147,7 +147,7 @@ export class StripeService {
             throw new NotFoundException('Payout not found');
         }
 
-        if(payout.userId !== req.user.userId){
+        if(payout.userId !== userId){
             throw new UnauthorizedException('You are not authorized to view this payout');
         }
 
@@ -155,7 +155,7 @@ export class StripeService {
         
     }
 
-    async cancelPayout(id: string, req: Request){
+    async cancelPayout(id: string, userId: string){
 
         try {
 
@@ -165,7 +165,7 @@ export class StripeService {
                 throw new NotFoundException('Payout not found');
             }
 
-            if(payout.metadata.userId !== req.user.userId || payout.status !== 'pending'){
+            if(payout.metadata.userId !== userId || payout.status !== 'pending'){
                 throw new UnauthorizedException('You cannot cancel this payout');
             }
 
@@ -183,10 +183,10 @@ export class StripeService {
         return account;
     }
 
-    async getCurrentBalance(req: Request) {
+    async getCurrentBalance(userId: string) {
 
         const user = await this.prismaService.user.findUnique({
-            where: { id: req.user.userId }
+            where: { id: userId }
         });
 
         if(!user || !user.stripeAccount){

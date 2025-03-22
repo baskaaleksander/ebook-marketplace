@@ -6,6 +6,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { OrderService } from './order.service';
 import { IdDto } from 'src/dtos/id.dto';
 import { AmountDto } from './dtos/amount.dto';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
   
 
 @UseGuards(AuthGuard('jwt'))
@@ -18,8 +19,8 @@ import { AmountDto } from './dtos/amount.dto';
     ) {}
   
     @Post('connect')
-    connectAccount(@Req() req: Request){
-        return this.stripeService.connectAccount(req);
+    connectAccount(@CurrentUser('userId') userId: string){
+        return this.stripeService.connectAccount(userId);
     }
 
     @Get('connect/:id')
@@ -28,44 +29,44 @@ import { AmountDto } from './dtos/amount.dto';
     }
 
     @Delete('connect')
-    disconnectAccount(@Req() req: Request){
-        return this.stripeService.disconnectAccount(req);
+    disconnectAccount(@CurrentUser('userId') userId: string){
+        return this.stripeService.disconnectAccount(userId);
     }
 
     @Post('order/checkout')
-    checkoutOrder(@Body() body : IdDto, @Req() req: Request){
-        return this.orderService.checkoutOrder(body.id, req);
+    checkoutOrder(@Body() body : IdDto, @CurrentUser('userId') userId: string){
+        return this.orderService.checkoutOrder(body.id, userId);
     }
 
     @Post('order/refund')
-    cancelOrder(@Body() body: IdDto, @Req() req: Request){
-        return this.orderService.createRefund(body.id, req);
+    cancelOrder(@Body() body: IdDto, @CurrentUser('userId') userId: string){
+        return this.orderService.createRefund(body.id, userId);
     }
 
     @Get('order')
-    getAllUserOrders(@Req() req: Request){
-        return this.orderService.getAllUserOrders(req);
+    getAllUserOrders(@CurrentUser('userId') userId: string){
+        return this.orderService.getAllUserOrders(userId);
     }
 
     @Post('payout')
-    payout(@Body() body: AmountDto, @Req() req: Request){
-        return this.stripeService.createPayout(body.amount, req);
+    payout(@Body() body: AmountDto, @CurrentUser('userId') userId: string){
+        return this.stripeService.createPayout(body.amount, userId);
     }
 
     @Get('payout/:id')
-    getPayout(@Param('id') id: string, @Req() req: Request){
-        return this.stripeService.getPayout(id, req);
+    getPayout(@Param('id') id: string, @CurrentUser('userId') userId: string){
+        return this.stripeService.getPayout(id, userId);
     }
 
     @Delete('payout/:id')
-    cancelPayout(@Param('id') id: string, @Req() req: Request){
-        return this.stripeService.cancelPayout(id, req);
+    cancelPayout(@Param('id') id: string, @CurrentUser('userId') userId: string){
+        return this.stripeService.cancelPayout(id, userId);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('balance')
-    getBalance(@Req() req: Request){
-        return this.stripeService.getCurrentBalance(req);
+    getBalance(@CurrentUser('userId') userId: string){
+        return this.stripeService.getCurrentBalance(userId);
     }
 
     @Post('webhook')

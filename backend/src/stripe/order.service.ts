@@ -19,14 +19,14 @@ export class OrderService {
         });
 
     }
-    getAllUserOrders(req: Request){
+    getAllUserOrders(userId: string){
         return this.prismaService.order.findMany({
-            where: { buyerId: req.user.userId },
+            where: { buyerId: userId },
             include: { product: true }
         });
     }
 
-    async checkoutOrder(body: string, req: Request) {
+    async checkoutOrder(body: string, userId: string) {
 
         const product = await this.prismaService.product.findUnique({
             where: { id: body }
@@ -39,7 +39,7 @@ export class OrderService {
         const order = await this.prismaService.order.create({
             data: {
                 sellerId: product.sellerId,
-                buyerId: req.user.userId,
+                buyerId: userId,
                 productId: body,
                 amount: product.price * 100,
             }
@@ -99,7 +99,7 @@ export class OrderService {
         }
     }
 
-    async createRefund(body : string, req: Request) {
+    async createRefund(body : string, userId: string) {
 
         const order = await this.prismaService.order.findUnique({
             where: { id: body }
@@ -107,7 +107,7 @@ export class OrderService {
 
         
 
-        if(!order || order.buyerId !== req.user.userId || !order.checkoutSessionId){
+        if(!order || order.buyerId !== userId || !order.checkoutSessionId){
             throw new NotFoundException('Order not found');
         }
 
