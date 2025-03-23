@@ -11,4 +11,12 @@ Todo:
   ✔ favourites service @done(25-03-21 22:57)
   ✔ dto's review @done(25-03-22 23:48)
   ✔ currentuser dto @done(25-03-23 00:09)
+  ☐ stripe e2e tests @high
+  ☐ stripe service tests @high
+  ☐ stripe controller tests @high
+  ☐ stripe webhook test @high
+  ☐ user controller tests @high
+  ☐ listing controller tests @high
+  ☐ auth controller tests @high
+  ☐ fix existing e2e tests @high
   ☐ TESTS @critical   
