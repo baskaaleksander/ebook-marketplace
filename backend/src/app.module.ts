@@ -16,7 +16,8 @@ import { ScheduleModule } from './schedule/schedule.module';
 @Module({
   imports: [ConfigModule.forRoot(
     { 
-      isGlobal: true
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.dev' : '.env'
     }), UserModule, AuthModule, ListingModule, StripeModule, ScheduleModule],
   controllers: [AppController, AuthController],
   providers: [AppService, PrismaService],

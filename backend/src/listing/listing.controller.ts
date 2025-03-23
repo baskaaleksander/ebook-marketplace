@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
 import { ListingService } from './listing.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
@@ -8,7 +7,7 @@ import { ReviewService } from './review.service';
 import { ReviewOrderDto } from './dtos/review-order.dto';
 import { FavouritesService } from './favourites.service';
 import { ViewedListingsService } from './viewedListing.service';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 
 @Controller('listing')
@@ -57,6 +56,7 @@ export class ListingController {
         return this.listingService.createListing(body, userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post(':id/reviews')
     createReview(@Param('id') param: string, @CurrentUser('userId') userId: string, @Body() data: ReviewOrderDto) {
         return this.reviewService.createReview(param, userId, data);
@@ -86,19 +86,19 @@ export class ListingController {
     }
 
     @UseGuards(AuthGuard('jwt'))
-    @Post('favorites/:id')
+    @Post('favourites/:id')
     addFavorite(@Param('id') param: string, @CurrentUser('userId') userId: string) {
         return this.favouritesService.addFavorite(userId, param);
     }
 
     @UseGuards(AuthGuard('jwt'))
-    @Delete('favorites/:id')
+    @Delete('favourites/:id')
     removeFavorite(@Param('id') param: string, @CurrentUser('userId') userId: string) {
         return this.favouritesService.removeFavorite(userId, param);
     }
 
     @UseGuards(AuthGuard('jwt'))
-    @Get('favorites')
+    @Get('favourites') 
     getFavorites(@CurrentUser('userId') userId: string) {
         return this.favouritesService.getFavorites(userId);
     }

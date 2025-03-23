@@ -4,9 +4,9 @@ import { WebhookService } from './webhook.service';
 import { StripeService } from './stripe.service';
 import { AuthGuard } from '@nestjs/passport';
 import { OrderService } from './order.service';
-import { IdDto } from 'src/dtos/id.dto';
+import { IdDto } from '../dtos/id.dto';
 import { AmountDto } from './dtos/amount.dto';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
   
 
 @UseGuards(AuthGuard('jwt'))

@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { PrismaService } from 'src/prisma.service';
-import { Request } from 'express';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class StripeService {

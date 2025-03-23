@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { ViewedListingsService } from 'src/listing/viewedListing.service';
-import { PrismaService } from 'src/prisma.service';
+import { ViewedListingsService } from '../listing/viewedListing.service';
+import { PrismaService } from '../prisma.service';
 
 @Module({
     imports: [],

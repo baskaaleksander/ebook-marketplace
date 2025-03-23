@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma.service";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
 
 @Injectable()
 export class ViewedListingsService {
@@ -8,6 +8,13 @@ export class ViewedListingsService {
     ) {}
 
     async trackListingView(userId: string, productId: string) {
+        const product = await this.prismaService.product.findUnique({
+            where: { id: productId }
+        });
+
+        if (!product) {
+            throw new NotFoundException(`Product with ID ${productId} not found`);
+        }
 
         await this.prismaService.viewedListing.upsert({
             where: {
@@ -23,9 +30,8 @@ export class ViewedListingsService {
                 userId,
                 productId,
             }
-        })
+        });
     }
-
     async getViewedProducts(userId: string) {
         return this.prismaService.viewedListing.findMany({
             where: {

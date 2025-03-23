@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import { UserService } from 'src/user/user.service';
+import { PrismaService } from '../prisma.service';
+import { UserService } from '../user/user.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
-import { FilterQueryDto } from './dtos/filter-query.dto';
 
 declare module 'express' {
     interface Request {

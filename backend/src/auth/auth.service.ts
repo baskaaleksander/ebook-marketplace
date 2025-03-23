@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
-import { CreateUserDto } from 'src/user/dtos/create-user.dto';
-import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from '../user/dtos/create-user.dto';
+import { UserService } from '../user/user.service';
 import { promisify } from 'util';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 
 const scrypt = promisify(_scrypt);
 @Injectable()

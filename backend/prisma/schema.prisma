@@ -12,7 +12,6 @@ model User {
   email          String  @unique
   password       String
   name           String
-  role           Role    @default(BUYER)
   stripeAccount  String? @unique
   stripeStatus   String @default("unverified")
   products       Product[]
@@ -25,10 +24,7 @@ model User {
   updatedAt      DateTime @updatedAt
 }
 
-enum Role {
-  BUYER
-  SELLER
-}
+
 
 model Product {
   id          String  @id @default(cuid())
