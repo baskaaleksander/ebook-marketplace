@@ -45,10 +45,9 @@ export class OrderService {
 
         const buyer = await this.prismaService.user.findUnique({
             where: { id: userId },
-            include: { address: true }
         });
 
-        if(!buyer || !buyer.address){
+        if(!buyer){
             throw new NotFoundException('Buyer not found or address not set');
         }
 
