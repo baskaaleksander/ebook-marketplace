@@ -16,7 +16,7 @@ export class ViewedListingsService {
             throw new NotFoundException(`Product with ID ${productId} not found`);
         }
 
-        await this.prismaService.viewedListing.upsert({
+        return await this.prismaService.viewedListing.upsert({
             where: {
                 userId_productId: {
                     userId,

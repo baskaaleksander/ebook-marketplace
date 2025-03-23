@@ -6,20 +6,13 @@ import { promisify } from 'util';
 
 const scrypt = promisify(_scrypt);
 
-/**
- * Helper function to create a hashed password in the same format as your AuthService
- */
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(8).toString('hex');
   const hash = await scrypt(password, salt, 32) as Buffer;
   return salt + '.' + hash.toString('hex');
 }
 
-/**
- * Helper function to create a test user and get authentication token
- */
 export async function createUserAndLogin(app, prisma: PrismaService) {
-  // Create a test user with properly hashed password
   const plainPassword = 'password123';
   const hashedPassword = await hashPassword(plainPassword);
   
@@ -40,7 +33,6 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
       password: plainPassword
     });
   
-  // Extract token from response - your AuthService sets it in cookies
   let token;
   if (loginResponse.headers['set-cookie']) {
     const cookies = loginResponse.headers['set-cookie'];
@@ -53,7 +45,6 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
     }
   }
   
-  // If we couldn't get the token from cookies, generate a test token directly
   if (!token) {
     console.log('Could not extract token from cookies, creating a test token');
     const jwtService = new JwtService({ 

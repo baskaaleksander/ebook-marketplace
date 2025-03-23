@@ -79,7 +79,8 @@ export class ReviewService {
                 comment: data.comment
             }
         });
-
+        
+        return review;
     }
     async updateReview(reviewId: string, body: ReviewOrderDto, userId: string) {
         const review = await this.prismaService.review.findUnique({

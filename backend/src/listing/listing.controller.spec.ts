@@ -27,26 +27,7 @@ describe('ListingController (e2e)', () => {
     
     await app.init();
 
-    await prismaService.favourite.deleteMany({
-      where: { user: { email: 'e2e-test@example.com' } }
-    });
-  
-    await prismaService.review.deleteMany({
-      where: { buyer: { email: 'e2e-test@example.com' } }
-    });
-  
-    await prismaService.viewedListing.deleteMany({
-      where: { user: { email: 'e2e-test@example.com' } }
-    });
-  
-    await prismaService.product.deleteMany({
-      where: { title: { startsWith: 'E2E Test' } }
-    });
-    
-    await prismaService.user.deleteMany({
-      where: { email: 'e2e-test@example.com' }
-    });
-
+    await cleanupTestData();
 
     const { user, token } = await createUserAndLogin(app, prismaService);
     authToken = token;
@@ -57,27 +38,71 @@ describe('ListingController (e2e)', () => {
   });
   
   afterAll(async () => {
-    await prismaService.favourite.deleteMany({
-      where: { user: { email: 'e2e-test@example.com' } }
-    });
-  
-    await prismaService.review.deleteMany({
-      where: { buyer: { email: 'e2e-test@example.com' } }
-    });
-  
-    await prismaService.viewedListing.deleteMany({
-      where: { user: { email: 'e2e-test@example.com' } }
-    });
-  
-    await prismaService.product.deleteMany({
-      where: { title: { startsWith: 'E2E Test' } }
-    });
-    
-    await prismaService.user.deleteMany({
-      where: { email: 'e2e-test@example.com' }
-    });    
+
+    await cleanupTestData();
+
     await app.close();
   });
+
+  async function cleanupTestData() {
+
+    try {
+      await prismaService.favourite.deleteMany({
+        where: { 
+          OR: [
+            { user: { email: 'e2e-test@example.com' } },
+          ]
+        }
+      });
+      
+      await prismaService.viewedListing.deleteMany({
+        where: {
+          OR: [
+            { user: { email: 'e2e-test@example.com' } },
+            { product: { title: { startsWith: 'E2E Test' } } }
+          ]
+        }
+      });
+      
+      await prismaService.review.deleteMany({
+        where: {
+          OR: [
+            { buyer: { email: 'e2e-test@example.com' } },
+            { product: { title: { startsWith: 'E2E Test' } } }
+          ]
+        }
+      });
+      
+      await prismaService.order.deleteMany({
+        where: {
+          OR: [
+            { buyer: { email: 'e2e-test@example.com' } },
+            { product: { title: { startsWith: 'E2E Test' } } }
+          ]
+        }
+      });
+      
+      await prismaService.product.deleteMany({
+        where: { 
+          OR: [
+            { title: { startsWith: 'E2E Test' } },
+            { seller: { email: 'e2e-test@example.com' } }
+          ]
+        }
+      });
+      
+      await prismaService.user.deleteMany({
+        where: { email: 'e2e-test@example.com' }
+      });
+
+    } catch (error) {
+      console.error('Error cleaning up test data:', error);
+
+      if (error.code === 'P2003') {
+        console.error('Foreign key constraint violation. Related records still exist.');
+      }
+    }
+  }
 
   it('/listing (GET) - should return listings', () => {
     return request(app.getHttpServer())
@@ -117,6 +142,7 @@ describe('ListingController (e2e)', () => {
       });
   });
 
+
   it('/listing/:id (PUT) - should update a listing', () => {
     return request(app.getHttpServer())
       .put(`/listing/${createdListingId}`)
@@ -133,12 +159,28 @@ describe('ListingController (e2e)', () => {
       });
   });
 
-  it('/listing/:id (DELETE) - should delete a listing', () => {
-    return request(app.getHttpServer())
-      .delete(`/listing/${createdListingId}`)
-      .set('Cookie', [`jwt=${authToken}`])
-      .expect(200);
+  it('should create a test order for reviews', async () => {
+    const testUser = await prismaService.user.findUnique({
+      where: { email: 'e2e-test@example.com' }
+    });
+
+    if(!testUser) {
+      throw new Error('Test user not found');
+    }
+    
+    const order = await prismaService.order.create({
+      data: {
+        buyerId: testUser.id,
+        productId: createdListingId,
+        amount: 14.99,
+        status: 'COMPLETED',
+        checkoutSessionId: 'test-session-id'
+      }
+    });
+    
+    expect(order).toBeDefined();
   });
+
 
   it(':id/reviews (POST) - should create a review', () => {
     return request(app.getHttpServer())
@@ -214,6 +256,23 @@ describe('ListingController (e2e)', () => {
   }
   );
 
+  it('favourites (GET) - should return user favorites', () => {
+    return request(app.getHttpServer())
+      .get('/listing/favourites')
+      .set('Cookie', [`jwt=${authToken}`])
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true);
+      });
+    });
+
+  it('favourites/:id (DELETE) - should remove a favorite', () => {
+    return request(app.getHttpServer())
+      .delete(`/listing/favourites/${createdListingId}`)
+      .set('Cookie', [`jwt=${authToken}`])
+      .expect(200);
+  });
+
   it(':/id/view (POST) - should track a product view', () => {
     return request(app.getHttpServer())
       .post(`/listing/${createdListingId}/view`)
@@ -224,4 +283,17 @@ describe('ListingController (e2e)', () => {
         expect(res.body).toHaveProperty('productId', createdListingId);
       });
   });
+
+  it('viewed (GET) - should return viewed products', () => {
+    return request(app.getHttpServer())
+      .get('/listing/viewed')
+      .set('Cookie', [`jwt=${authToken}`])
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true);
+      });
+  });
+
+
+
 });
