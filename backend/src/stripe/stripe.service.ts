@@ -51,8 +51,8 @@ export class StripeService {
 
             const accountLink = await this.stripe.accountLinks.create({
                 account: account.id,
-                refresh_url: 'https://example.com/reauth',
-                return_url: 'https://example.com/return',
+                refresh_url: `${this.configService.get('FRONTEND_URL')}/reauth`,
+                return_url: `${this.configService.get('FRONTEND_URL')}/return`,
                 type: 'account_onboarding',
             });
 

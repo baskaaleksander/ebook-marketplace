@@ -43,6 +43,15 @@ export class OrderService {
             }
         });
 
+        const buyer = await this.prismaService.user.findUnique({
+            where: { id: userId },
+            include: { address: true }
+        });
+
+        if(!buyer || !buyer.address){
+            throw new NotFoundException('Buyer not found or address not set');
+        }
+
         if(!order){
             throw new NotFoundException('Order not created');
         }
@@ -70,13 +79,16 @@ export class OrderService {
                     }
                 ],
                 mode: 'payment',
-                success_url: 'https://example.com/success',
-                cancel_url: 'https://example.com/cancel',
+                success_url: `${this.configService.get('FRONTEND_URL')}/success`,
+                cancel_url: `${this.configService.get('FRONTEND_URL')}/cancel`,
                 payment_intent_data: {
+                    application_fee_amount: product.price * 5,
                     transfer_data: {
                         destination: seller?.stripeAccount
                     }
                 },
+                customer_email: buyer.email,
+                billing_address_collection: 'auto',
                 metadata: {
                 orderId: order.id,
                 }

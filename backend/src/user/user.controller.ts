@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
-import { CreateUserDto } from './dtos/create-user.dto';
+import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Request } from 'express';
+
 
 @Controller('user')
 export class UserController {
@@ -13,8 +12,4 @@ export class UserController {
         return this.userService.findUserByEmail(emailObj.email);
     }
 
-    @Get('/v1/whoami')
-    whoAmI(@Req() req: Request) {
-        return req.user.username;
-    }
 }

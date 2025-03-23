@@ -4,7 +4,6 @@ import * as request from 'supertest';
 import { AppModule } from '../app.module';
 import { PrismaService } from '../prisma.service';
 import * as cookieParser from 'cookie-parser';
-import { Role } from '@prisma/client';
 import { createUserAndLogin } from '../../test/auth.helper';
 
 describe('ListingController (e2e)', () => {
