@@ -164,8 +164,12 @@ export class StripeService {
                 throw new NotFoundException('Payout not found');
             }
 
-            if(payout.metadata.userId !== userId || payout.status !== 'pending'){
+            if(payout.metadata.userId !== userId){
                 throw new UnauthorizedException('You cannot cancel this payout');
+            }
+
+            if(payout.status !== 'pending'){
+                throw new UnauthorizedException('Payout is not pending');
             }
 
             await this.stripe.payouts.cancel(id);

@@ -15,7 +15,7 @@ Todo:
   ☐ stripe service tests @high
   ☐ stripe controller tests @high
   ☐ stripe webhook test @high
-  ☐ user controller tests @high
+  ✔ user controller tests @high @done(25-03-24 17:10)
   ☐ listing controller tests @high
   ☐ auth controller tests @high
   ☐ fix existing e2e tests @high
