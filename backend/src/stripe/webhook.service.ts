@@ -22,31 +22,31 @@ export class WebhookService {
   async processWebhookEvent(event: Stripe.Event) {
     switch (event.type) {
         case 'checkout.session.completed':
-            this.handleCheckoutSessionCompleted(event);
+            await this.handleCheckoutSessionCompleted(event);
             break;
         case 'payment_intent.payment_failed':
-            this.handlePaymentIntentFailed(event);
+            await this.handlePaymentIntentFailed(event);
             break;
         case 'payment_intent.canceled':
-            this.handlePaymentIntentCanceled(event);
+            await this.handlePaymentIntentCanceled(event);
             break;
         case "charge.refunded":
-            this.handleRefundCompleted(event);
+            await this.handleRefundCompleted(event);
             break;
         case "refund.created":
-            this.handleRefundCreated(event);
+            await this.handleRefundCreated(event);
             break;
         case "refund.failed":
-            this.handleRefundFailed(event);
+            await this.handleRefundFailed(event);
             break;
         case "payout.failed":
-            this.handlePayoutFailed(event);
+            await this.handlePayoutFailed(event);
             break;
         case "payout.paid":
-            this.handlePayoutPaid(event);
+            await this.handlePayoutPaid(event);
             break;
         case "account.updated":
-            this.handleAccountUpdated(event);
+            await this.handleAccountUpdated(event);
             break;
         }
 
@@ -87,7 +87,7 @@ export class WebhookService {
             );
             return event;
         } catch (error) {
-            throw new Error('Webhook signature verification failed');
+            throw new Error(`Webhook signature verification failed: ${error.message}`);
         }
     }
 
@@ -95,6 +95,11 @@ export class WebhookService {
     async handleCheckoutSessionCompleted(event: Stripe.Event) {
 
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+        if (!paymentIntent.metadata || !paymentIntent.metadata.orderId) {
+            throw new NotFoundException('Order ID not found in metadata');
+        }
+
         const { orderId } = paymentIntent.metadata;
 
         const order = await this.prismaService.order.findUnique({
