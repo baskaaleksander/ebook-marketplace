@@ -116,13 +116,22 @@ export class WebhookService {
     async handlePaymentIntentFailed(event: Stripe.Event) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const { orderId } = paymentIntent.metadata;
-
+        
+        // First find the order - this was missing
+        const order = await this.prismaService.order.findUnique({
+            where: { id: orderId },
+        });
+        
+        if (!order) {
+            throw new Error('Order not found');
+        }
+    
+        // Then update it
         await this.prismaService.order.update({
             where: { id: orderId },
             data: { status: 'FAILED' },
         });
     }
-
     async handlePaymentIntentCanceled(event: Stripe.Event) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const { orderId } = paymentIntent.metadata;
