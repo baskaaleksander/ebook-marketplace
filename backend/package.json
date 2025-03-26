@@ -20,7 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:listing": "jest --testPathPattern=src/listing",
     "test:watch:listing": "jest --watch --testPathPattern=src/listing",
-    "test:e2e:listing": "jest --config ./test/jest-e2e.json --testPathPattern=listing.e2e-spec"
+    "test:e2e:listing": "jest --config ./test/jest-e2e.json --testPathPattern=listing-controller.e2e-spec",
+    "test:e2e:user": "jest --config ./test/jest-e2e.json --testPathPattern=user-controller.e2e-spec",
+    "test:e2e:auth": "jest --config ./test/jest-e2e.json --testPathPattern=auth-controller.e2e-spec",
+    "test:e2e:string": "jest --config ./test/jest-e2e.json --testPathPattern=stripe.e2e-spec"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -52,6 +55,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "dotenv": "^16.4.7",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",

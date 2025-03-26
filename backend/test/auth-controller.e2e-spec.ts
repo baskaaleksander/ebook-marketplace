@@ -4,46 +4,45 @@ import * as request from 'supertest';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
+import { setupTestDatabase, cleanupTestDatabase } from './test-setup';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
 
   beforeAll(async () => {
+    prismaService = await setupTestDatabase();
+    
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue(prismaService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
+    
     app.use(cookieParser());
-    app.useGlobalPipes(new ValidationPipe());
-    await app.init();
-
-    prismaService = app.get<PrismaService>(PrismaService);
-  });
-
-  beforeEach(async () => {
-
-    await prismaService.user.deleteMany({
-      where: { email: { contains: 'test' } }
+    app.useGlobalPipes(new ValidationPipe({ 
+      whitelist: true,
+      transform: true
+    }));
+    app.enableCors({
+      origin: true,
+      credentials: true,
     });
-  
+    
+    await app.init();
   });
 
   afterAll(async () => {
-    await prismaService.user.deleteMany({
-      where: { email: { contains: 'test' } }
-    });
-
-    await prismaService.$disconnect();
+    await cleanupTestDatabase(prismaService);
     await app.close();
   });
 
-  
-
   describe('/auth/register (POST)', () => {
     it('should register a new user and return a success message with JWT cookie', async () => {
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/auth/register')
         .send({
           email: 'test-register@example.com',
@@ -55,19 +54,18 @@ describe('AuthController (e2e)', () => {
           expect(response.body).toEqual({ message: 'User created successfully' });
           expect(response.headers['set-cookie']).toBeDefined();
           expect(response.headers['set-cookie'][0]).toContain('jwt=');   
-
         });
 
-        const user = await prismaService.user.findUnique({
-          where: { email: 'test-register@example.com' }
-        });
-        
-        if(!user) {
-          fail('User not found in database');
-        }
-        expect(user).toBeDefined();
-        expect(user.name).toBe('Test User'); 
+      const user = await prismaService.user.findUnique({
+        where: { email: 'test-register@example.com' }
+      });
 
+      if(!user) {
+        throw new Error('User not found');
+      }
+      
+      expect(user).toBeDefined();
+      expect(user.name).toBe('Test User'); 
     });
 
     it('should return 400 if validation fails', async () => {
@@ -80,7 +78,6 @@ describe('AuthController (e2e)', () => {
         .expect(response => {
           expect(response.body.message).toStrictEqual(["password must be a string", "name must be a string"]);
         });
-      
     });
 
     it('should return 401 if user already exists', async () => {
@@ -104,7 +101,6 @@ describe('AuthController (e2e)', () => {
         .expect(response => {
           expect(response.body.message).toContain('User already exists');
         });
-      
     });
   });
 
@@ -133,9 +129,7 @@ describe('AuthController (e2e)', () => {
           const cookieString = response.headers['set-cookie'][0];
           const jwtMatch = cookieString.match(/jwt=([^;]+)/);
           expect(jwtMatch).toBeTruthy();
-          
         });
-
     });
 
     it('should return 404 if user does not exist', async () => {
@@ -149,7 +143,6 @@ describe('AuthController (e2e)', () => {
         .expect(response => {
           expect(response.body.message).toContain('User not found');
         });
-      
     });
 
     it('should return 401 if password is incorrect', async () => {
@@ -171,7 +164,6 @@ describe('AuthController (e2e)', () => {
         .expect(response => {
           expect(response.body.message).toContain('Invalid credentials');
         });
-      
     });
   });
 });

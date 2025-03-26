@@ -25,7 +25,6 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
     }
   });
   
-  // Attempt to login
   const loginResponse = await request(app.getHttpServer())
     .post('/auth/login')
     .send({
@@ -36,7 +35,7 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
   let token;
   if (loginResponse.headers['set-cookie']) {
     const cookies = loginResponse.headers['set-cookie'];
-    // Parse the JWT from cookie
+
     for (const cookie of cookies) {
       if (cookie.startsWith('jwt=')) {
         token = cookie.split(';')[0].split('=')[1];

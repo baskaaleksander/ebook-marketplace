@@ -5,6 +5,8 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
 import * as cookieParser from 'cookie-parser';
 import { createUserAndLogin } from './auth.helper';
+import { setupTestDatabase, cleanupTestDatabase } from './test-setup';
+
 
 describe('ListingController (e2e)', () => {
   let app: INestApplication;
@@ -14,19 +16,23 @@ describe('ListingController (e2e)', () => {
   let createdReviewId: string;
 
   beforeAll(async () => {
+    
+    prismaService = await setupTestDatabase();
+    
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+    .overrideProvider(PrismaService)
+    .useValue(prismaService)
+    .compile();
 
     app = moduleFixture.createNestApplication();
-    prismaService = app.get<PrismaService>(PrismaService);
     
     app.use(cookieParser());
     app.useGlobalPipes(new ValidationPipe());
     
     await app.init();
 
-    await cleanupTestData();
 
     const { user, token } = await createUserAndLogin(app, prismaService);
     authToken = token;
@@ -38,81 +44,12 @@ describe('ListingController (e2e)', () => {
   
   afterAll(async () => {
 
-    await cleanupTestData();
-
+    await cleanupTestDatabase(prismaService);
     await app.close();
+
   });
 
-  async function cleanupTestData() {
-    try {
-      await prismaService.favourite.deleteMany({
-        where: { 
-          OR: [
-            { user: { email: 'e2e-test@example.com' } },
-          ]
-        }
-      });
-      
-      await prismaService.viewedListing.deleteMany({
-        where: {
-          OR: [
-            { user: { email: 'e2e-test@example.com' } },
-            { product: { title: { startsWith: 'E2E Test' } } }
-          ]
-        }
-      });
-      
-      await prismaService.review.deleteMany({
-        where: {
-          OR: [
-            { buyer: { email: 'e2e-test@example.com' } },
-            { product: { title: { startsWith: 'E2E Test' } } }
-          ]
-        }
-      });
-      
-      await prismaService.order.deleteMany({
-        where: {
-          OR: [
-            { buyer: { email: 'e2e-test@example.com' } },
-            { product: { title: { startsWith: 'E2E Test' } } }
-          ]
-        }
-      });
-      
-      await prismaService.product.deleteMany({
-        where: { 
-          OR: [
-            { title: { startsWith: 'E2E Test' } },
-            { seller: { email: 'e2e-test@example.com' } }
-          ]
-        }
-      });
-      
-      await prismaService.user.deleteMany({
-        where: { email: 'e2e-test@example.com' }
-      });
-  
-    } catch (error) {
-      console.error('Error cleaning up test data:', error);
-  
-      if (error.code === 'P2003') {
-        console.error('Foreign key constraint violation. Related records still exist.');
-        
-        console.error(`Field name: ${error.meta?.field_name}`);
-        console.error(`Model name: ${error.meta?.modelName}`);
-      }
-    }
-  }
 
-  it('/listing (GET) - should return listings', () => {
-    return request(app.getHttpServer())
-      .get('/listing')
-      .expect(200)
-      .expect((res) => {
-        expect(Array.isArray(res.body)).toBe(true);
-      });
-  });
 
   it('/listing (POST) - should create a new listing', () => {
     return request(app.getHttpServer())
@@ -132,6 +69,16 @@ describe('ListingController (e2e)', () => {
         createdListingId = res.body.id;
       });
   });
+
+  it('/listing (GET) - should return listings', () => {
+    return request(app.getHttpServer())
+      .get('/listing')
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true);
+      });
+  });
+
 
   it('/listing/:id (GET) - should return a specific listing', () => {
     return request(app.getHttpServer())

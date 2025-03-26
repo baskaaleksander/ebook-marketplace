@@ -23,7 +23,12 @@ describe('AuthService', () => {
     sign: jest.fn(),
   };
   
-  const mockPrismaService = {};
+  const mockPrismaService = {
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,13 +44,11 @@ describe('AuthService', () => {
     userService = module.get<UserService>(UserService);
     jwtService = module.get<JwtService>(JwtService);
     
-    // Reset all mocks between tests
     jest.clearAllMocks();
   });
 
   describe('register', () => {
     it('should register a new user and return a token', async () => {
-      // Setup
       const createUserDto = { 
         email: 'test@example.com', 
         password: 'password123', 
@@ -59,15 +62,14 @@ describe('AuthService', () => {
         password: 'salt.hash' 
       };
       
-      mockUserService.findUserByEmail.mockResolvedValue(null); // No existing user
+      mockUserService.findUserByEmail.mockResolvedValue(null);
       mockUserService.createUser.mockResolvedValue(newUser);
       mockJwtService.sign.mockReturnValue('mock-jwt-token');
       
-      // Execute
       const result = await authService.register(createUserDto);
       
-      // Verify
-      expect(mockUserService.findUserByEmail).toHaveBeenCalledWith(createUserDto.email);
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: createUserDto.email}});
       expect(mockUserService.createUser).toHaveBeenCalled();
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         { username: newUser.email, userId: newUser.id },
@@ -77,19 +79,17 @@ describe('AuthService', () => {
     });
 
     it('should throw an exception if user already exists', async () => {
-      // Setup
       const createUserDto = { 
         email: 'existing@example.com', 
         password: 'password123', 
         name: 'Existing User'
       };
       
-      mockUserService.findUserByEmail.mockResolvedValue({ 
+      mockPrismaService.user.findUnique.mockResolvedValue({ 
         id: '1', 
         email: 'existing@example.com' 
-      });
+      });      
       
-      // Execute & Verify
       await expect(authService.register(createUserDto))
         .rejects
         .toThrow(UnauthorizedException);
@@ -100,12 +100,10 @@ describe('AuthService', () => {
 
   describe('validateCredentials', () => {
     it('should validate credentials and return a token', async () => {
-      // Generate a real password hash for testing
       const salt = randomBytes(8).toString('hex');
       const hash = await scrypt('password123', salt, 32) as Buffer;
       const hashedPassword = salt + '.' + hash.toString('hex');
       
-      // Setup
       const credentials = { 
         email: 'test@example.com', 
         password: 'password123'
@@ -120,10 +118,8 @@ describe('AuthService', () => {
       mockUserService.findUserByEmail.mockResolvedValue(existingUser);
       mockJwtService.sign.mockReturnValue('mock-jwt-token');
       
-      // Execute
       const result = await authService.validateCredentials(credentials);
       
-      // Verify
       expect(mockUserService.findUserByEmail).toHaveBeenCalledWith(credentials.email);
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         { username: existingUser.email, userId: existingUser.id },
@@ -133,7 +129,6 @@ describe('AuthService', () => {
     });
 
     it('should throw exception if user does not exist', async () => {
-      // Setup
       const credentials = { 
         email: 'nonexistent@example.com', 
         password: 'password123'
@@ -141,7 +136,6 @@ describe('AuthService', () => {
       
       mockUserService.findUserByEmail.mockResolvedValue(null);
       
-      // Execute & Verify
       await expect(authService.validateCredentials(credentials))
         .rejects
         .toThrow(NotFoundException);
@@ -150,12 +144,10 @@ describe('AuthService', () => {
     });
 
     it('should throw exception if password is invalid', async () => {
-      // Generate a real password hash for testing
       const salt = randomBytes(8).toString('hex');
       const hash = await scrypt('correct-password', salt, 32) as Buffer;
       const hashedPassword = salt + '.' + hash.toString('hex');
       
-      // Setup
       const credentials = { 
         email: 'test@example.com', 
         password: 'wrong-password'
@@ -169,7 +161,6 @@ describe('AuthService', () => {
       
       mockUserService.findUserByEmail.mockResolvedValue(existingUser);
       
-      // Execute & Verify
       await expect(authService.validateCredentials(credentials))
         .rejects
         .toThrow(UnauthorizedException);
@@ -180,7 +171,6 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should generate and return a JWT token', async () => {
-      // Setup
       const loginDto = { 
         username: 'test@example.com', 
         userId: '1'
@@ -188,10 +178,8 @@ describe('AuthService', () => {
       
       mockJwtService.sign.mockReturnValue('mock-jwt-token');
       
-      // Execute
       const result = await authService.login(loginDto);
       
-      // Verify
       expect(mockJwtService.sign).toHaveBeenCalledWith(
         { username: loginDto.username, userId: loginDto.userId },
         { secret: expect.any(String) }

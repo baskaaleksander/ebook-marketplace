@@ -4,62 +4,33 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma.service';
 import * as cookieParser from 'cookie-parser';
+import { setupTestDatabase, cleanupTestDatabase } from './test-setup';
 
 describe('UserController (e2e)', () => {
-    let app: INestApplication;
-    let prismaService: PrismaService;
+  let app: INestApplication;
+  let prismaService: PrismaService;
   
-    beforeAll(async () => {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
-      }).compile();
+  beforeAll(async () => {
+
+    prismaService = await setupTestDatabase();
+    
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    })
+    .overrideProvider(PrismaService)
+    .useValue(prismaService)
+    .compile();
+
+    app = moduleFixture.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await cleanupTestDatabase(prismaService);
+    await app.close();
+  });
+
   
-      app = moduleFixture.createNestApplication();
-      app.use(cookieParser());
-      app.useGlobalPipes(new ValidationPipe());
-      await app.init();
-  
-      prismaService = app.get<PrismaService>(PrismaService);
-    });
-  
-    beforeEach(async () => {
-      await cleanupTestData();
-    });
-  
-    afterAll(async () => {
-      await cleanupTestData();
-      await app.close();
-    });
-  
-    async function cleanupTestData() {
-      try {
-        await prismaService.viewedListing.deleteMany({
-          where: { user: { email: { contains: 'test' } } }
-        });
-        
-        await prismaService.favourite.deleteMany({
-          where: { user: { email: { contains: 'test' } } }
-        });
-        
-        await prismaService.review.deleteMany({
-          where: { buyer: { email: { contains: 'test' } } }
-        });
-        
-        await prismaService.order.deleteMany({
-          where: { buyer: { email: { contains: 'test' } } }
-        });
-        
-        await prismaService.product.deleteMany({
-          where: { seller: { email: { contains: 'test' } } }
-        });
-        
-        await prismaService.user.deleteMany({
-          where: { email: { contains: 'test' } }
-        });
-      } catch (error) {
-        console.error('Error cleaning up test data:', error);
-      }
-    }
   
     describe('/user/:email (GET)', () => {
       it('should return a user when found by email', async () => {

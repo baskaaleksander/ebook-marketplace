@@ -14,10 +14,16 @@ export class AuthService {
     constructor(private readonly jwtService: JwtService, private readonly userService: UserService, private prismaService: PrismaService) {}
 
     async register(user: CreateUserDto){
-        const users = await this.userService.findUserByEmail(user.email);
-        if(users){
+
+
+        const existingUser = await this.prismaService.user.findUnique({
+            where: { email: user.email }
+          });
+          
+          if (existingUser) {
             throw new UnauthorizedException('User already exists');
-        }
+          }
+          
 
         const salt = randomBytes(8).toString('hex');
 
