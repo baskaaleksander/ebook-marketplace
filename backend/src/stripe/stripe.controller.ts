@@ -17,7 +17,8 @@ import { CurrentUser } from '../decorators/current-user.decorator';
         private readonly stripeService: StripeService,
         private readonly orderService: OrderService
     ) {}
-  
+    
+    @UseGuards(AuthGuard('jwt'))
     @Post('connect')
     connectAccount(@CurrentUser('userId') userId: string){
         return this.stripeService.connectAccount(userId);

@@ -18,7 +18,7 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
   
   const user = await prisma.user.create({
     data: {
-      email: 'e2e-test@example.com',
+      email: 'e2e-test-acc@example.com',
       password: hashedPassword,
       name: 'E2E Test User',
       stripeStatus: 'verified'
@@ -28,7 +28,7 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
   const loginResponse = await request(app.getHttpServer())
     .post('/auth/login')
     .send({
-      email: 'e2e-test@example.com',
+      email: 'e2e-test-acc@example.com',
       password: plainPassword
     });
   

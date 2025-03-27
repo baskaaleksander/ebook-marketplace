@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
+import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserResponseDto } from './dtos/user-response.dto';
 
 

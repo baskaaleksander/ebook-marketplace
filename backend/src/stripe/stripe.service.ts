@@ -59,7 +59,7 @@ export class StripeService {
             return accountLink;
 
         } catch (error) {
-            throw new NotFoundException('Stripe error', error);
+            throw new Error(`Stripe error ${error}`);
         }
 
     }
@@ -133,7 +133,7 @@ export class StripeService {
             return { message: 'Payout created', payout };
 
         } catch (error) {
-            throw new NotFoundException(error);
+            throw new Error(`Stripe error ${error}`);
         }
     }
 
@@ -175,7 +175,7 @@ export class StripeService {
             await this.stripe.payouts.cancel(id);
 
         } catch (error) {
-            throw new NotFoundException('Stripe error', error);
+            throw new Error(`Stripe error ${error}`);
         }
 
     }

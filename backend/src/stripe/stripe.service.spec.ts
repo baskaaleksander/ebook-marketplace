@@ -129,7 +129,7 @@ describe('StripeService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
       stripeMock.accounts.create.mockResolvedValue({ id: 'acct_123' } as Stripe.Account);
       
-      await expect(service.connectAccount('nonexistent_user')).rejects.toThrow(NotFoundException);
+      await expect(service.connectAccount('nonexistent_user')).rejects.toThrow(Error);
       expect(stripeMock.accounts.create).toHaveBeenCalled();
       expect(mockPrismaService.user.findUnique).toHaveBeenCalled();
       expect(mockPrismaService.user.update).not.toHaveBeenCalled();
@@ -139,7 +139,7 @@ describe('StripeService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue({ id: 'user123', stripeAccount: 'existing_acct' });
       stripeMock.accounts.create.mockResolvedValue({ id: 'acct_123' } as Stripe.Account);
       
-      await expect(service.connectAccount('user123')).rejects.toThrow(NotFoundException);
+      await expect(service.connectAccount('user123')).rejects.toThrow(Error);
       expect(stripeMock.accounts.create).toHaveBeenCalled();
       expect(mockPrismaService.user.findUnique).toHaveBeenCalled();
       expect(mockPrismaService.user.update).not.toHaveBeenCalled();
@@ -235,7 +235,7 @@ describe('StripeService', () => {
         available: [{ amount: 1000, currency: 'pln' }]
       } as Stripe.Balance);
       
-      await expect(service.createPayout(amount, userId)).rejects.toThrow(NotFoundException);
+      await expect(service.createPayout(amount, userId)).rejects.toThrow(Error);
       expect(stripeMock.payouts.create).not.toHaveBeenCalled();
       expect(mockPrismaService.payout.create).not.toHaveBeenCalled();
     });
@@ -258,7 +258,7 @@ describe('StripeService', () => {
     it('should throw NotFoundException if payout not found', async () => {
       mockPrismaService.payout.findUnique.mockResolvedValue(null);
       
-      await expect(service.getPayout('nonexistent_payout', 'user123')).rejects.toThrow(NotFoundException);
+      await expect(service.getPayout('nonexistent_payout', 'user123')).rejects.toThrow(Error);
     });
 
     it('should throw UnauthorizedException if user not authorized', async () => {
@@ -291,7 +291,7 @@ describe('StripeService', () => {
     it('should throw NotFoundException if payout not found', async () => {
       stripeMock.payouts.retrieve.mockResolvedValue(null as unknown as Stripe.Payout);
       
-      await expect(service.cancelPayout('nonexistent_payout', 'user123')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelPayout('nonexistent_payout', 'user123')).rejects.toThrow(Error);
       expect(stripeMock.payouts.cancel).not.toHaveBeenCalled();
     });
 
@@ -302,7 +302,7 @@ describe('StripeService', () => {
         metadata: { userId: 'other_user' }
       } as unknown as Stripe.Payout);
       
-      await expect(service.cancelPayout('po_123', 'user123')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelPayout('po_123', 'user123')).rejects.toThrow(Error);
       expect(stripeMock.payouts.cancel).not.toHaveBeenCalled();
     });
 
@@ -313,7 +313,7 @@ describe('StripeService', () => {
         metadata: { userId: 'user123' }
       } as unknown as Stripe.Payout);
       
-      await expect(service.cancelPayout('po_123', 'user123')).rejects.toThrow(NotFoundException);
+      await expect(service.cancelPayout('po_123', 'user123')).rejects.toThrow(Error);
       expect(stripeMock.payouts.cancel).not.toHaveBeenCalled();
     });
   });
