@@ -28,7 +28,6 @@ export async function setupTestDatabase(): Promise<PrismaService> {
 
 export async function cleanupTestDatabase(prismaService: PrismaService) {
   try {
-    console.log('Cleaning up test database...');
     
     await prismaService.viewedListing.deleteMany();
     await prismaService.webhookEvent.deleteMany();

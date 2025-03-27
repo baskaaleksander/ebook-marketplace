@@ -35,6 +35,11 @@ describe('AuthController (e2e)', () => {
     await app.init();
   });
 
+  beforeEach(async () => {
+    await cleanupTestDatabase(prismaService);
+    prismaService = await setupTestDatabase();
+  });
+
   afterAll(async () => {
     await cleanupTestDatabase(prismaService);
     await app.close();

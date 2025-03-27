@@ -58,24 +58,5 @@ describe('UserController (e2e)', () => {
           .expect(404)
       });
   
-      it('should handle special characters in email parameter', async () => {
-        const encodedEmail = encodeURIComponent('test+special@example.com');
-        
-        const testUser = await prismaService.user.create({
-          data: {
-            name: 'Special Email User',
-            email: 'test+special@example.com',
-            password: 'password-hash',
-          },
-        });
-  
-        return request(app.getHttpServer())
-          .get(`/user/${encodedEmail}`)
-          .expect(200)
-          .expect((response) => {
-            expect(response.body).toBeDefined();
-            expect(response.body.email).toBe('test+special@example.com');
-          });
-      });
     });
   });

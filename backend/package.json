@@ -20,10 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:listing": "jest --testPathPattern=src/listing",
     "test:watch:listing": "jest --watch --testPathPattern=src/listing",
-    "test:e2e:listing": "jest --config ./test/jest-e2e.json --testPathPattern=listing-controller.e2e-spec",
-    "test:e2e:user": "jest --config ./test/jest-e2e.json --testPathPattern=user-controller.e2e-spec",
-    "test:e2e:auth": "jest --config ./test/jest-e2e.json --testPathPattern=auth-controller.e2e-spec",
-    "test:e2e:string": "jest --config ./test/jest-e2e.json --testPathPattern=stripe.e2e-spec"
+    "test:e2e:listing": "jest --config ./test/jest-e2e.json --testPathPattern=listing.e2e-spec",
+    "test:e2e:user": "jest --config ./test/jest-e2e.json --testPathPattern=user.e2e-spec",
+    "test:e2e:auth": "jest --config ./test/jest-e2e.json --testPathPattern=auth.e2e-spec",
+    "test:e2e:stripe": "jest --config ./test/jest-e2e.json --testPathPattern=stripe.e2e-spec"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

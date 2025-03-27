@@ -19,4 +19,5 @@ Todo:
   ✔ listing controller tests @high @done(25-03-24 17:47)
   ✔ auth controller tests @high @done(25-03-24 17:47)
   ✔ fix existing e2e tests @high @done(25-03-26 18:27)
+  ☐ add serialization of user @high
   ☐ TESTS @critical   
