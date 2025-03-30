@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { json } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { ApiKeyGuard } from './guards/api-key.guard';
 
 async function bootstrap() {
 
@@ -10,6 +12,11 @@ async function bootstrap() {
       rawBody: true,
     }
   );
+
+
+  const configService = app.get(ConfigService);
+
+
   app.use(cookieParser());
 
   app.use(
@@ -27,6 +34,9 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
+
+  app.useGlobalGuards(new ApiKeyGuard(configService));
+
   await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();
