@@ -125,13 +125,10 @@ export function LoginForm({
               <div className="flex flex-col gap-3">
                 <Button 
                   type="submit" 
-                  className="w-full"
+                  className="w-full cursor-pointer"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Login"}
-                </Button>
-                <Button type="button" variant="outline" className="w-full">
-                  Login with Google
                 </Button>
               </div>
             </div>
