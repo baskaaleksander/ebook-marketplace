@@ -1,13 +1,20 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from '../user/dtos/create-user.dto';
 import { AuthService } from './auth.service';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
 
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/me')
+    async me(@CurrentUser('userId') userId: string){
+        return userId;
+    }
     @Post('/register')
     async register(@Body() data: CreateUserDto, @Res() res: Response){
         const token = await this.authService.register(data);
@@ -33,7 +40,7 @@ export class AuthController {
             maxAge: 24 * 60 * 60 * 1000,
           });
 
-        return res.send({message: 'User created successfully'});
+        return res.send({user: token.user});
 
     }
 

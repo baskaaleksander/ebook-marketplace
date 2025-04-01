@@ -8,6 +8,12 @@ import { UserResponseDto } from './dtos/user-response.dto';
 export class UserController {
     constructor(private userService: UserService) {}
 
+    @Get('/id/:id')
+    @Serialize(UserResponseDto)
+    findUserById(@Param() idObj: {id: string} ) {
+        
+        return this.userService.findUserById(idObj.id);
+    }
     @Get(':email')
     @Serialize(UserResponseDto)
     findUserByEmail(@Param() emailObj: {email: string} ) {

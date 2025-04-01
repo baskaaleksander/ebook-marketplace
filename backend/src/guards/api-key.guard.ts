@@ -9,7 +9,7 @@ export class ApiKeyGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const apiKey = request.headers['x-api-key'];
 
-    const validApiKeys = this.configService.get<string>('API_KEYS')?.split(',');
+    const validApiKeys = this.configService.get<string>('API_KEY');
 
     if (!apiKey || !validApiKeys?.includes(apiKey)) {
       throw new UnauthorizedException('Invalid API Key');
