@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 
 function Navbar() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
     const { user, logout } = useAuth();
     const router = useRouter();
 
@@ -55,7 +56,24 @@ function Navbar() {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 pr-4 py-2 w-full rounded-md"
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => {
+                                setTimeout(() => setIsFocused(false), 200);
+                            }}
                         />
+                        {searchQuery.trim() && isFocused && (
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                                <div 
+                                    className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded-md"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+                                    }}
+                                >
+                                    Search for '{searchQuery}'
+                                </div>
+                            </div>
+                        )}
                         <button 
                             type="submit" 
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -66,7 +84,9 @@ function Navbar() {
                 </form>
                 
                 <div className="flex items-center gap-4">
-                 {user ? (<DropdownMenu>
+                 {user ? (
+                    <>
+                    <DropdownMenu>
                         <DropdownMenuTrigger>
                             <Button variant="outline" className="flex items-center gap-1">
                                 <LiaUser />
@@ -83,7 +103,14 @@ function Navbar() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="font-medium text-red-500" onClick={() => handleLogout()}>Logout</DropdownMenuItem>
                         </DropdownMenuContent>
-                    </DropdownMenu> ) : (
+                    </DropdownMenu> 
+                    {user.stripeStatus === 'verified' && (
+                        <Button className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/create-listing')}>
+                            List product
+                        </Button>
+                    )}
+                    </>
+                    ) : (
                         <>
                         <Button variant="outline" className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/login')}>
                             Sign In
