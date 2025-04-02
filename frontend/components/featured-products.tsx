@@ -18,7 +18,6 @@ function FeaturedProducts() {
                     price={49.99}
                     sellerId="cm8t4soki0000ilb88th6ou1a"
                     createdAt="2025-04-02T17:11:25.540Z"
-                    category="Fiction"
                     imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
                 />
                 <ProductCard
@@ -27,7 +26,6 @@ function FeaturedProducts() {
                     price={29.99}
                     sellerId="cm8t4soki0000ilb88th6ou1a"
                     createdAt="2025-04-02T17:11:25.540Z"
-                    category="Fiction"
                     imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
                 />
                 <ProductCard
@@ -36,7 +34,6 @@ function FeaturedProducts() {
                     price={19.99}
                     sellerId="cm8t4soki0000ilb88th6ou1a"
                     createdAt="2025-04-02T17:11:25.540Z"
-                    category="Non-Fiction"
                     imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
                 />
                 <ProductCard
@@ -45,7 +42,6 @@ function FeaturedProducts() {
                     price={34.99}
                     sellerId="cm8t4soki0000ilb88th6ou1a"
                     createdAt="2025-04-02T17:11:25.540Z"
-                    category="Education & Professional"
                     imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
                 />                
                 </div>
