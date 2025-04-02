@@ -1,6 +1,10 @@
+'use client';
+
 import { 
     LiaAngleDownSolid, 
-    LiaUser 
+    LiaBookOpenSolid, 
+    LiaUser,
+    LiaSearchSolid
 } from "react-icons/lia";
 import { 
     DropdownMenu, 
@@ -11,24 +15,58 @@ import {
     DropdownMenuTrigger 
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { useState } from "react";
+import { useAuth } from "@/providers/authprovider";
+import { useRouter } from "next/navigation";
 
+function Navbar() {
+    const [searchQuery, setSearchQuery] = useState("");
+    const { user, logout } = useAuth();
+    const router = useRouter();
 
-function Navbar(
-    
-) {
+    const handleLogout = () => {
+        logout();
+    }
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+        }
+    }
 
     return (
         <nav className="border-grid sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="w-[80%] px-4 py-2 mx-auto flex items-center justify-between">
-                <div>
-                    <ul>
-                        <li>
-                            HOME
-                        </li>
-                    </ul>
+                <div className="flex items-center gap-8">
+                    <a className="flex items-center gap-2" href="/">
+                        <LiaBookOpenSolid className="text-xl" />
+                        <span className="font-medium">bookify</span>
+                    </a>
                 </div>
-                <div>
-                <DropdownMenu>
+                
+                {/* Search Bar */}
+                <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md px-4">
+                    <div className="relative w-full">
+                        <Input
+                            type="text"
+                            placeholder="Search for ebooks..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 w-full rounded-md"
+                        />
+                        <button 
+                            type="submit" 
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        >
+                            <LiaSearchSolid className="text-lg" />
+                        </button>
+                    </div>
+                </form>
+                
+                <div className="flex items-center gap-4">
+                 {user ? (<DropdownMenu>
                         <DropdownMenuTrigger>
                             <Button variant="outline" className="flex items-center gap-1">
                                 <LiaUser />
@@ -36,15 +74,47 @@ function Navbar(
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Billing</DropdownMenuItem>
-                            <DropdownMenuItem>Team</DropdownMenuItem>
-                            <DropdownMenuItem>Subscription</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/dashboard')}>Dashboard</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/wallet')}>Wallet</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="font-medium text-red-500" onClick={() => handleLogout()}>Logout</DropdownMenuItem>
                         </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> ) : (
+                        <>
+                        <Button variant="outline" className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/login')}>
+                            Sign In
+                        </Button>
+                        <Button className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/signup')}>
+                            Sign Up
+                        </Button>
+                        </>
+                    )}
                 </div>
+            </div>
+            
+            {/* Mobile Search (visible only on small screens) */}
+            <div className="md:hidden px-4 pb-3">
+                <form onSubmit={handleSearch} className="w-full">
+                    <div className="relative w-full">
+                        <Input
+                            type="text"
+                            placeholder="Search for ebooks..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 w-full rounded-md"
+                        />
+                        <button 
+                            type="submit" 
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        >
+                            <LiaSearchSolid className="text-lg" />
+                        </button>
+                    </div>
+                </form>
             </div>
         </nav>
     )
