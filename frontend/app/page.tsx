@@ -7,7 +7,7 @@ export default function Home() {
     title: "sadad",
     description: "asdasdad",
     price: 50,
-    sellerId: "cm8t4soki0000ilb88th6ou1a",
+    sellerId: "cm92nodda00006mwfk9tyt43j",
     createdAt: "2025-04-02T17:11:25.540Z",
   }
   return (

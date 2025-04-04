@@ -33,6 +33,16 @@ export class ListingController {
         return 'this.listingService.findListings(filterQuery)';
     }
     
+    @Get('categories')
+    getCategories() {
+        return this.listingService.getCategories();
+    }
+
+    @Get('categories/products')
+    getProductsByCategory(@Query('category') category: string) {
+        return this.listingService.getProductsByCategory(category);
+    }
+    
     @UseGuards(AuthGuard('jwt'))
     @Get('favourites') 
     getFavorites(@CurrentUser('userId') userId: string) {

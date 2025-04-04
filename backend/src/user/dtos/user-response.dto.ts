@@ -9,6 +9,8 @@ export class UserResponseDto {
     @Expose()
     name: string;
     @Expose()
+    surname: string;
+    @Expose()
     stripeStatus: string;
     @Expose()
     createdAt: Date;

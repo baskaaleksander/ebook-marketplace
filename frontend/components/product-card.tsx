@@ -26,8 +26,9 @@ async function ProductCard({
     isFavorite = false,
     className,
 }: ProductCardProps) {
-    const seller = await api.get(`/user/id/${sellerId}`);
+    let seller = await api.get(`/user/id/${sellerId}`);
 
+    
     return (
         <Card 
             className={cn(

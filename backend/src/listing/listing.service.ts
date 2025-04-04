@@ -98,6 +98,43 @@ export class ListingService {
         return listings;
     }
 
+    async getCategories() {
+        const categories = await this.prismaService.category.findMany({
+            include: {
+                products: {
+                    take: 4,
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    include: {
+                        seller: true
+                    }
+                }
+            }
+        });
+
+        return categories;
+    }
+    async getProductsByCategory(category: string) {
+        const listings = await this.prismaService.product.findMany({
+            where: {
+                categories: {
+                    some: {
+                        name: category
+                    }
+                }
+            },
+            include: {
+                categories: true,
+                seller: true
+            }
+        });
+        if(listings.length === 0){
+            throw new NotFoundException('No listings found');
+        }
+        return listings;
+    }
+
     async searchListingsFromCategory(category: string, take: string) {
         const listings = await this.prismaService.product.findMany({
             where: {
