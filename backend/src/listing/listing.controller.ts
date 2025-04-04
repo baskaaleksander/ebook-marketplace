@@ -27,6 +27,11 @@ export class ListingController {
     findRecentListings() {
         return this.listingService.getRecentListings();
     }
+
+    @Get('featured')
+    findFeaturedListings() {
+        return this.listingService.getFeaturedListings();
+    }
     
     @Get('search')
     searchListings() {
