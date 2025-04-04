@@ -57,7 +57,7 @@ async function CategoriesContent() {
           {category.products.length === 0 ? (
             <p className="text-gray-500 italic">No products available in this category yet.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"> 
               {category.products.map((product) => (
                 <ProductCard 
                   key={product.id}
