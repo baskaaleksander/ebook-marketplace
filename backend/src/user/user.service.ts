@@ -11,6 +11,18 @@ export class UserService {
     }
 
 
+    async findUserListings(id: string) {
+        const user = await this.prismaService.user.findUnique({
+            where: { id },
+            include: { products: true }
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user.products;
+    }
 
     async findUserByEmail(email: string) {
         const user = await this.prismaService.user.findUnique({

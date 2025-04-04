@@ -11,6 +11,10 @@ export class UserResponseDto {
     @Expose()
     surname: string;
     @Expose()
+    avatarUrl?: string;
+    @Expose()
+    description?: string;
+    @Expose()
     stripeStatus: string;
     @Expose()
     createdAt: Date;

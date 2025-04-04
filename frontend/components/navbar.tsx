@@ -96,7 +96,7 @@ function Navbar() {
                         <DropdownMenuContent>
                             <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/user/${user.id}`)}>Profile</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/dashboard')}>Dashboard</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/wallet')}>Wallet</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
