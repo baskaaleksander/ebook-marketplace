@@ -51,15 +51,7 @@ async function CategoriesContent() {
       {categories.map((category) => (
         <div key={category.id} className="mb-12">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold">{category.name}</h2>
-            {category.products.length > 0 && (
-              <Link 
-                href={`/category/${category.id}`}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                View all
-              </Link>
-            )}
+            <Link href={`/products/${encodeURIComponent(category.name)}`}><h2 className="text-2xl font-semibold">{category.name}</h2></Link>
           </div>
           
           {category.products.length === 0 ? (
