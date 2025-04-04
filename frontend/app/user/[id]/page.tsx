@@ -1,13 +1,16 @@
 'use client'
+
 import { useAuth } from "@/providers/authprovider";
+import { use } from "react";
 
-function User({ params }: { params: { id: string } }) {
+function User({ params }: { params: Promise<{ id: string }> }) {
     const { user } = useAuth();
-
-        
+    const resolvedParams = use(params);
+    const userId = resolvedParams.id;
+    
     return (
         <div>
-            {user && user.id === params.id ? (
+            {user && user.id === userId ? (
                 <div className="flex flex-col items-center justify-center h-screen">
                     <h1 className="text-3xl font-bold mb-4">Welcome, {user.name}!</h1>
                     <p className="text-lg">This is your profile page.</p>
@@ -23,7 +26,6 @@ function User({ params }: { params: { id: string } }) {
             )}
         </div>
     );
-
 }
 
 export default User;
