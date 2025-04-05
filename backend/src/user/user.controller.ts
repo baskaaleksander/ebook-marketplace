@@ -27,4 +27,9 @@ export class UserController {
         return this.userService.findUserListings(idObj.id);
     }
 
+    @Get('avgratings/:id')
+    reviewAvgRatings(@Param() idObj: {id: string} ) {
+        return this.userService.reviewAvgRatings(idObj.id);
+    }
+
 }

@@ -1,10 +1,13 @@
+'use client'
+
+import { useState, useEffect } from "react";
 import api from "@/utils/axios";
 import { Card, CardContent, CardTitle } from "./ui/card";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import FavoriteButton from "./favorite-button";
 import { cn } from "@/lib/utils";
-import placeholder  from "@/public/placeholder.jpg"
+import placeholder from "@/public/placeholder.jpg";
 
 interface ProductCardProps {
     id: string;
@@ -15,9 +18,14 @@ interface ProductCardProps {
     createdAt: string;
     isFavorite?: boolean;
     className?: string;
+    sellerData?: {
+        id: string;
+        name: string;
+        surname: string;
+    };
 }
 
-async function ProductCard({
+function ProductCard({
     id,
     title,
     price,
@@ -26,9 +34,28 @@ async function ProductCard({
     createdAt,
     isFavorite = false,
     className,
+    sellerData,
 }: ProductCardProps) {
-    let seller = await api.get(`/user/id/${sellerId}`);
+    const [seller, setSeller] = useState(sellerData);
+    const [loading, setLoading] = useState(!sellerData);
 
+    useEffect(() => {
+        // Only fetch seller data if it wasn't provided as a prop
+        if (!sellerData) {
+            const fetchSeller = async () => {
+                try {
+                    const response = await api.get(`/user/id/${sellerId}`);
+                    setSeller(response.data);
+                } catch (error) {
+                    console.error("Error fetching seller data:", error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            fetchSeller();
+        }
+    }, [sellerId, sellerData]);
     
     return (
         <Card 
@@ -61,12 +88,14 @@ async function ProductCard({
                             <CardTitle className="line-clamp-1 text-base sm:text-lg">{title}</CardTitle>
                         </div>
                         
-                        <Link 
-                            href={`/user/${seller.data.id}`}
-                            className="text-xs sm:text-sm text-gray-400 hover:text-gray-700 hover:underline block mb-4"
-                        >
-                            {seller.data.name} {seller.data.surname}
-                        </Link>
+                        {!loading && seller && (
+                            <Link 
+                                href={`/user/${seller.id}`}
+                                className="text-xs sm:text-sm text-gray-400 hover:text-gray-700 hover:underline block mb-4"
+                            >
+                                {seller.name} {seller.surname}
+                            </Link>
+                        )}
 
                         <Button className="w-full text-sm sm:text-base">
                             <Link href={`/product/${id}`} className="w-full flex justify-center">

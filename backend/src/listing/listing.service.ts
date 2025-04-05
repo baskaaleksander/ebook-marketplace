@@ -135,6 +135,23 @@ export class ListingService {
         return listings;
     }
 
+    async findUserListings(userId: string) {
+        const listings = await this.prismaService.product.findMany({
+            where: {
+                sellerId: userId
+            },
+            include: {
+                categories: true,
+                seller: true
+            }
+        });
+        
+        if(listings.length === 0){
+            throw new NotFoundException('No listings found');
+        }
+        return listings;
+    }
+
     async getFeaturedListings() {
         const listings = await this.prismaService.product.findMany({
             where: {

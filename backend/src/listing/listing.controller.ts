@@ -32,6 +32,11 @@ export class ListingController {
     findFeaturedListings() {
         return this.listingService.getFeaturedListings();
     }
+
+    @Get('user/:userId')
+    findUserListings(@Param('userId') userId: string) {
+        return this.listingService.findUserListings(userId);
+    }
     
     @Get('search')
     searchListings() {
