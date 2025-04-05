@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import Link from "next/link";
 import { useAuth } from "@/providers/authprovider";
 import { Button } from "./ui/button";
-import { UserData } from "@/app/lib/definitions";
+import { UserData } from "@/lib/definitions";
 
 
 function StarRating({ rating }: { rating: number }) {
@@ -29,8 +29,7 @@ function UserHeading(userData : UserData) {
 
     return (
         <div className="flex flex-col">
-            <h1 className="text-3xl font-bold mb-4">User Profile</h1>
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="mb-6">
                 <div className="flex items-center mb-4">
                     <img
                         src={userData.avatarUrl || `https://ui-avatars.com/api/?name=${userData.name}+${userData.surname}&bold=true`}

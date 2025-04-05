@@ -1,4 +1,4 @@
-import { Product, UserData } from "@/app/lib/definitions";
+import { Product, UserData } from "@/lib/definitions";
 import ProductCard from "./product-card";
 
 function UserProducts({ userData, products }: { userData: UserData; products: Product[] }) {

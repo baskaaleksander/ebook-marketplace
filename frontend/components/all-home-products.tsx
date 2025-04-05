@@ -3,7 +3,7 @@ import ProductCard from "./product-card";
 import CategoriesSkeleton from "./categories-skeleton";
 import { Suspense } from "react";
 import api from "@/utils/axios";
-import { Category } from "@/app/lib/definitions";
+import { Category } from "@/lib/definitions";
 
 
 

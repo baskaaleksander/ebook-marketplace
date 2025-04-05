@@ -1,6 +1,6 @@
 'use client'
 
-import { Product, UserData } from "@/app/lib/definitions";
+import { Product, UserData } from "@/lib/definitions";
 import UserHeading from "@/components/user-heading";
 import UserProducts from "@/components/user-products";
 import api from "@/utils/axios";
@@ -54,7 +54,7 @@ function User({ params }: { params: Promise<{ id: string }> }) {
     }
     
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 h-screen">
             {userData ? (
                 <>
                     <UserHeading {...userData} />
