@@ -3,30 +3,9 @@ import ProductCard from "./product-card";
 import CategoriesSkeleton from "./categories-skeleton";
 import { Suspense } from "react";
 import api from "@/utils/axios";
+import { Category } from "@/app/lib/definitions";
 
-interface Seller {
-  id: string;
-  name: string;
-  surname: string;
-}
 
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  fileUrl: string;
-  sellerId: string;
-  isFeatured: boolean;
-  seller: Seller;
-  createdAt: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  products: Product[];
-}
 
 async function CategoriesContent() {
   let categories: Category[] = [];
