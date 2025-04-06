@@ -31,6 +31,11 @@ function User({ params }: { params: Promise<{ id: string }> }) {
                 });
                 
                 const productsResponse = await api.get(`/listing/user/${userId}`);
+
+                if (productsResponse.data.length === 0) {
+                    setProducts([]);
+                }
+
                 setProducts(productsResponse.data);
             }
             catch (error) {
@@ -47,10 +52,6 @@ function User({ params }: { params: Promise<{ id: string }> }) {
     
     if (loading) {
         return <div className="container mx-auto px-4 py-8">Loading user data...</div>;
-    }
-    
-    if (error) {
-        return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
     }
     
     return (

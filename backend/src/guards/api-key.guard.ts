@@ -7,6 +7,11 @@ export class ApiKeyGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
+
+    if (request.url.startsWith('/stripe/webhook')) {
+      return true;
+    }
+    
     const apiKey = request.headers['x-api-key'];
 
     const validApiKeys = this.configService.get<string>('API_KEY');

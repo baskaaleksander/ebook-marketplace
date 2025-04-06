@@ -9,7 +9,6 @@ import { AmountDto } from './dtos/amount.dto';
 import { CurrentUser } from '../decorators/current-user.decorator';
   
 
-@UseGuards(AuthGuard('jwt'))
   @Controller('stripe')
   export class StripeController {
     constructor(
@@ -29,45 +28,55 @@ import { CurrentUser } from '../decorators/current-user.decorator';
         return this.stripeService.checkAccountStatus(id);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Delete('connect')
     disconnectAccount(@CurrentUser('userId') userId: string){
         return this.stripeService.disconnectAccount(userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('order/checkout')
     checkoutOrder(@Body() body : IdDto, @CurrentUser('userId') userId: string){
         return this.orderService.checkoutOrder(body.id, userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('order/refund')
     cancelOrder(@Body() body: IdDto, @CurrentUser('userId') userId: string){
         return this.orderService.createRefund(body.id, userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('order')
     getAllUserOrders(@CurrentUser('userId') userId: string){
         return this.orderService.getAllUserOrders(userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('orders/sold')
     getAllSoldOrders(@CurrentUser('userId') userId: string){
         return this.orderService.getAllSoldOrders(userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('payouts')
     getAllPayouts(@CurrentUser('userId') userId: string){
         return this.stripeService.getAllUserPayouts(userId);
     }
+
+    @UseGuards(AuthGuard('jwt'))
     @Post('payout')
     payout(@Body() body: AmountDto, @CurrentUser('userId') userId: string){
         return this.stripeService.createPayout(body.amount, userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('payout/:id')
     getPayout(@Param('id') id: string, @CurrentUser('userId') userId: string){
         return this.stripeService.getPayout(id, userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Delete('payout/:id')
     cancelPayout(@Param('id') id: string, @CurrentUser('userId') userId: string){
         return this.stripeService.cancelPayout(id, userId);

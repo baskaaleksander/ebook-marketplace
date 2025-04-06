@@ -8,6 +8,7 @@ import { UserResponseDto } from './dtos/user-response.dto';
 export class UserController {
     constructor(private userService: UserService) {}
 
+    
     @Get('/id/:id')
     @Serialize(UserResponseDto)
     findUserById(@Param() idObj: {id: string} ) {
