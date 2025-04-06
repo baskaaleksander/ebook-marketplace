@@ -24,6 +24,19 @@ export class OrderService {
         });
     }
 
+    getAllSoldOrders(userId: string){
+        return this.prismaService.order.findMany({
+            where: { sellerId: userId },
+            include: { product: true }
+        });
+    }
+
+    getAllUserPayouts(userId: string){
+        return this.prismaService.payout.findMany({
+            where: { userId: userId },
+        });
+    }
+
     async checkoutOrder(body: string, userId: string) {
 
         const product = await this.prismaService.product.findUnique({

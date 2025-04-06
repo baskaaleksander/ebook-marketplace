@@ -179,6 +179,12 @@ export class StripeService {
         }
 
     }
+
+    getAllUserPayouts(userId: string){
+        return this.prismaService.payout.findMany({
+            where: { userId: userId },
+        });
+    }
     
     async checkAccountStatus(id: string) {
         const account = await this.stripe.accounts.retrieve(id);

@@ -49,6 +49,15 @@ import { CurrentUser } from '../decorators/current-user.decorator';
         return this.orderService.getAllUserOrders(userId);
     }
 
+    @Get('orders/sold')
+    getAllSoldOrders(@CurrentUser('userId') userId: string){
+        return this.orderService.getAllSoldOrders(userId);
+    }
+
+    @Get('payouts')
+    getAllPayouts(@CurrentUser('userId') userId: string){
+        return this.stripeService.getAllUserPayouts(userId);
+    }
     @Post('payout')
     payout(@Body() body: AmountDto, @CurrentUser('userId') userId: string){
         return this.stripeService.createPayout(body.amount, userId);
@@ -67,7 +76,36 @@ import { CurrentUser } from '../decorators/current-user.decorator';
     @UseGuards(AuthGuard('jwt'))
     @Get('balance')
     getBalance(@CurrentUser('userId') userId: string){
-        return this.stripeService.getCurrentBalance(userId);
+        // return this.stripeService.getCurrentBalance(userId);
+        // mocked value
+        return {
+            "object": "balance",
+            "available": [
+              {
+                "amount": 666670,
+                "currency": "usd",
+                "source_types": {
+                  "card": 666670
+                }
+              }
+            ],
+            "connect_reserved": [
+              {
+                "amount": 0,
+                "currency": "usd"
+              }
+            ],
+            "livemode": false,
+            "pending": [
+              {
+                "amount": 61414,
+                "currency": "usd",
+                "source_types": {
+                  "card": 61414
+                }
+              }
+            ]
+          }
     }
 
     @Post('webhook')

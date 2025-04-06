@@ -33,3 +33,52 @@ export type Seller = {
     name: string;
     surname: string;
 }
+
+enum PayoutStatus {
+    PENDING = "PENDING",
+    COMPLETED = "COMPLETED",
+    FAILED = "FAILED"
+ }
+
+export type Payout = {
+    id: string;
+    userId: string;
+    amount: number;
+    stripePayoutId: string;
+    status: PayoutStatus;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export enum OrderStatus {
+    PENDING = "PENDING",
+    COMPLETED = "COMPLETED",
+    CANCELLED = "CANCELLED",
+    FAILED = "FAILED",
+    REFUNDED = "REFUNDED"
+  }
+  
+export type Order = {
+    id: string;
+    sellerId: string;
+    buyerId: string;
+    productId: string;
+    refundId?: string | null;
+    amount: number;
+    status: OrderStatus;
+    checkoutSessionId?: string | null;
+    paymentUrl?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type Balance = {
+    "available" : {
+        "amount" : number,
+        "currency" : string
+    },
+    "pending" : {
+        "amount" : number,
+        "currency" : string
+    }
+}
