@@ -12,25 +12,39 @@ export class ViewedListingsService {
             where: { id: productId }
         });
 
+        
+
         if (!product) {
             throw new NotFoundException(`Product with ID ${productId} not found`);
         }
 
-        return await this.prismaService.viewedListing.upsert({
-            where: {
-                userId_productId: {
+        if(userId) {
+            await this.prismaService.viewedListing.upsert({
+                where: {
+                    userId_productId: {
+                        userId,
+                        productId
+                    }
+                },
+                update: {
+                    viewedAt: new Date()
+                },
+                create: {
                     userId,
-                    productId
+                    productId,
                 }
-            },
-            update: {
-                viewedAt: new Date()
-            },
-            create: {
-                userId,
-                productId,
+            });
+        }
+
+        return await this.prismaService.product.update({
+            where: { id: productId},
+            data: {
+                views: {
+                    increment: 1
+                }
             }
-        });
+        })
+
     }
     async getViewedProducts(userId: string) {
         return this.prismaService.viewedListing.findMany({
@@ -57,5 +71,17 @@ export class ViewedListingsService {
         })
 
         return result.count;
+    }
+
+    async getProductViews(productId: string) {
+        const product = await this.prismaService.product.findUnique({
+            where: { id: productId }
+        });
+
+        if (!product) {
+            throw new NotFoundException(`Product with ID ${productId} not found`);
+        }
+
+        return product.views;
     }
 }

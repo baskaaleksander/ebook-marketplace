@@ -39,7 +39,7 @@ function ConnectStripeAccount() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Important</AlertTitle>
               <AlertDescription>
-                You won't be able to receive payouts until your Stripe account is verified.
+                You won't be able to create listings until your Stripe account is verified.
               </AlertDescription>
             </Alert>
             

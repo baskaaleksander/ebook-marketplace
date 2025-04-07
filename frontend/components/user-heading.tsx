@@ -37,7 +37,7 @@ function UserHeading(userData : UserData) {
                         className="w-16 h-16 rounded-full mr-4"
                     />
                     <div className="flex flex-col items-start w-full">
-                        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-1">
+                        <h2 className="text-2xl font-semibold flex items-center gap-1">
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger>{userData.name} {userData.surname}</TooltipTrigger>
@@ -61,8 +61,8 @@ function UserHeading(userData : UserData) {
                             </Tooltip>
                         </TooltipProvider>
                     </Link>
-                    <a className='hover:underline' href={`mailto:${userData.email}`}>{userData.email}</a>
                     {userData.description && <p className="text-gray-600 mb-4">{userData.description}</p>}
+                    <a className='hover:underline text-gray-600 mt-4' href={`mailto:${userData.email}`}>{userData.email}</a>
                 </div>
             </div>
             <div className="flex items-start">

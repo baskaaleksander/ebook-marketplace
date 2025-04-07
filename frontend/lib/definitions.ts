@@ -15,6 +15,8 @@ export type Product = {
     title: string;
     description: string;
     price: number;
+    imageUrl: string;
+    views: number;
     fileUrl: string;
     sellerId: string;
     isFeatured: boolean;

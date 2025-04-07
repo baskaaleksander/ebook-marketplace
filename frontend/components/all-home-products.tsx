@@ -25,7 +25,13 @@ async function CategoriesContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">📚 Categories</h1>
+      <div className="flex justify-between items-center mb-8">
+        <Link href="/featured"><h2 className="text-2xl md:text-3xl font-bold">📚 Categories</h2></Link>
+        <a href="/all-products/" className="text-blue-600 hover:underline text-sm">
+          View all &rarr;
+        </a>
+      </div>
+
       
       {categories.map((category) => (
         <div key={category.id} className="mb-12">

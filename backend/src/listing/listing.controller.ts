@@ -76,6 +76,11 @@ export class ListingController {
     getViewedProducts(@CurrentUser('userId') userId: string) {
         return this.viewedListingsService.getViewedProducts(userId);
     }
+
+    @Get(':id/views')
+    getProductViews(@Param('id') param: string) {
+        return this.viewedListingsService.getProductViews(param);
+    }
     
     @Get('reviews/:reviewId')
     getReview(@Param('reviewId') reviewId: string) {
@@ -94,6 +99,7 @@ export class ListingController {
         return this.reviewService.deleteReview(param, userId);
     }
     
+    //serialize the fileurl
     @Get(':id')
     findListingById(@Param('id') param: string) {
         return this.listingService.findListingById(param);

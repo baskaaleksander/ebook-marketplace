@@ -47,11 +47,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: [
         {
           title: "My Products",
-          url: `/user/${user.id}`,
+          url: '/user/dashboard/my-products',
         },
         {
           title: "Create New Listing",
-          url: "/create-listing",
+          url: "/product/create",
         },
       ],
     },
@@ -61,12 +61,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       items: [
         {
-          title: "Purchases",
-          url: "/user/dashboard/purchases",
-        },
-        {
-          title: "Sales",
-          url: "/user/dashboard/sales",
+          title: "Purchased",
+          url: "/user/dashboard/purchased",
         },
       ],
     },
@@ -77,11 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: [
         {
           title: "Wallet",
-          url: "/user/wallet",
-        },
-        {
-          title: "Payment Methods",
-          url: "/user/dashboard/payment-methods",
+          url: "/user/dashboard/wallet",
         },
       ],
     },
@@ -114,7 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       items: [
         {
           title: "Settings",
-          url: `/user/${user.id}/settings`,
+          url: '/user/dashboard/settings',
         },
       ],
     },
