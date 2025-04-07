@@ -98,8 +98,8 @@ function Navbar() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => router.push(`/user/${user.id}`)}>Profile</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/user/dashboard')}>Dashboard</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push('/user/wallet')}>Wallet</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push(`/user/${user.id}/settings`)}>Settings</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/user/dashboard/wallet')}>Wallet</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/user/dashboard/settings')}>Settings</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="font-medium text-red-500" onClick={() => handleLogout()}>Logout</DropdownMenuItem>
                         </DropdownMenuContent>
@@ -115,7 +115,7 @@ function Navbar() {
                         <Button variant="outline" className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/login')}>
                             Sign In
                         </Button>
-                        <Button className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/signup')}>
+                        <Button className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/register')}>
                             Sign Up
                         </Button>
                         </>

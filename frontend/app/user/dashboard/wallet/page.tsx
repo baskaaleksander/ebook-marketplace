@@ -15,7 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 function Wallet() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [balance, setBalance] = useState<Balance>();
     const [soldOrders, setSoldOrders] = useState<Order[]>([]);
     const [payouts, setPayouts] = useState<Payout[]>([]);
@@ -25,14 +25,14 @@ function Wallet() {
     const [activeTab, setActiveTab] = useState("orders");
 
     useEffect(() => {
-      if (!user) {
-        router.push('/');
-      }
-    }, [user, router]);
+        if (!authLoading && !user) {
+          router.push('/login');
 
+        }
+      }, [user, router, authLoading]);
     useEffect(() => {
         const fetchData = async () => {
-            if (!user || user.stripeStatus !== 'verified') return;
+            if (authLoading || !user || user.stripeStatus !== 'verified') return;
             
             try {
                 setLoading(true);
