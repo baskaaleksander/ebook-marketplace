@@ -31,11 +31,6 @@ export class OrderService {
         });
     }
 
-    getAllUserPayouts(userId: string){
-        return this.prismaService.payout.findMany({
-            where: { userId: userId },
-        });
-    }
 
     async checkoutOrder(body: string, userId: string) {
 

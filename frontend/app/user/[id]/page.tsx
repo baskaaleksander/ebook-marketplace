@@ -55,7 +55,7 @@ function User({ params }: { params: Promise<{ id: string }> }) {
     }
     
     return (
-        <div className="container mx-auto px-4 py-8 h-screen">
+        <div className="container mx-auto px-4 py-8 min-h-screen">
             {userData ? (
                 <>
                     <UserHeading {...userData} />
