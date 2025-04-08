@@ -64,6 +64,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "Purchased",
           url: "/user/dashboard/purchased",
         },
+        {
+          title: "Sold",
+          url: "/user/dashboard/sold-orders",
+        },
       ],
     },
     {
