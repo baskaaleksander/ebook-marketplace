@@ -84,3 +84,15 @@ export type Balance = {
         "currency" : string
     }
 }
+
+export const mockUserData: UserData = {
+    id: "1",
+    name: "John",
+    surname: "Doe",
+    email: "",
+    stripeStatus: "ACTIVE",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    avatarUrl: "https://example.com/avatar.jpg",
+    rating: 4.5,
+    createdAt: new Date().toISOString(),
+}
