@@ -40,7 +40,6 @@ function ProductCard({
     const [loading, setLoading] = useState(!sellerData);
 
     useEffect(() => {
-        // Only fetch seller data if it wasn't provided as a prop
         if (!sellerData) {
             const fetchSeller = async () => {
                 try {
@@ -58,25 +57,19 @@ function ProductCard({
     }, [sellerId, sellerData]);
     
     return (
-        <Card 
-            className={cn(
-                "hover:shadow-lg transition-shadow duration-200 ease-in-out h-full relative flex flex-col",
-                className
-            )}
-        >            
-            <CardContent className="flex-1 flex flex-col p-4">
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col p-4">
                     <div className="aspect-[3/4] overflow-hidden rounded-md mb-4 relative">
                         <div className="absolute top-2 right-2 z-10">
                             <FavoriteButton productId={id} initialIsFavorite={isFavorite} />
                         </div>
-                        
+                        <Link href={`/product/${id}`}>
                         <img
                             src={imageUrl || placeholder.src}
                             alt={title}
                             className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
                             loading="lazy"
                         />
+                        </Link>
                     </div>
                     
                     <div className="mt-auto">
@@ -84,9 +77,11 @@ function ProductCard({
                             <p className="text-gray-500 font-medium">${price.toFixed(2)}</p>
                         </div>
                         
+                        <Link href={`/product/${id}`}>
                         <div className="mb-2">
-                            <CardTitle className="line-clamp-1 text-base sm:text-lg">{title}</CardTitle>
+                            <h2 className="line-clamp-1 text-base sm:text-lg font-medium hover:underline">{title}</h2>
                         </div>
+                        </Link>
                         
                         {!loading && seller && (
                             <Link 
@@ -96,16 +91,8 @@ function ProductCard({
                                 {seller.name} {seller.surname}
                             </Link>
                         )}
-
-                        <Button className="w-full text-sm sm:text-base">
-                            <Link href={`/product/${id}`} className="w-full flex justify-center">
-                                Learn more
-                            </Link>
-                        </Button>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
     );
 }
 
