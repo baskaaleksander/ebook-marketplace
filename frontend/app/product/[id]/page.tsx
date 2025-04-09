@@ -73,6 +73,7 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
       )}
+      
       {user?.id === product.sellerId && (
         <Alert className="mb-6">
           <AlertTitle className="flex items-center gap-2">
@@ -97,9 +98,7 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
         ) : (
           seller && <UserProducts userData={seller} products={sellerProducts} />
         )}
-      
-
-    </div>
+      </div>
     </div>
   );
 }
