@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useImage } from "@/providers/image-provider";
 
 type Point = {
   x: number;
@@ -61,6 +62,7 @@ function getCroppedImg(imageSrc: string, crop: Area): Promise<string> {
 }
 
 export default function ImageResizer() {
+  const { setImage } = useImage();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState<number>(1);
@@ -78,12 +80,26 @@ export default function ImageResizer() {
       if (!imageSrc || !croppedAreaPixels) return;
       
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
+      setImage(croppedImage);
       setCroppedImgUrl(croppedImage);
       setDialogOpen(false);
     } catch (e) {
       console.error(e);
     }
   }, [imageSrc, croppedAreaPixels]);
+
+  const handleImageClear = () => {
+    setImageSrc(null);
+    setCroppedImgUrl(null);
+    setImage(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setDialogOpen(false);
+    setDragActive(false);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  }
 
   const handleFile = (file: File) => {
     const reader = new FileReader();
@@ -119,7 +135,7 @@ export default function ImageResizer() {
   const handleDragLeave = () => setDragActive(false);
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
+    <div className="flex flex-col items-center gap-4">
       <Card className="w-full max-w-md p-4">
         <CardContent className="flex flex-col gap-4 items-center">
           <div
@@ -136,15 +152,24 @@ export default function ImageResizer() {
           </div>
 
           {croppedImgUrl && (
+            <>
             <div className="mt-4">
-              <p className="mb-2 text-center font-semibold">Cropped Result:</p>
               <img
                 src={croppedImgUrl}
                 alt="Cropped"
                 className="w-64 h-64 object-cover rounded-xl shadow"
               />
             </div>
+            <Button
+              variant="destructive"
+              className="mt-4"
+              onClick={handleImageClear}
+            >
+              Clear Image
+            </Button>
+            </>
           )}
+          
         </CardContent>
       </Card>
 
