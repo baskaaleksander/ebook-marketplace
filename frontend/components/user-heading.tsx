@@ -69,7 +69,7 @@ function UserHeading(userData : UserData) {
                 <div className="flex w-full justify-between items-center">
                     <p className="text-gray-600">Member since: {new Date(userData.createdAt).toLocaleDateString()}</p>
                     {user?.id === userData.id && (
-                        <Link href={`/user/${userData.id}/settings`}>
+                        <Link href={'/user/dashboard/settings'}>
                             <Button>Edit Profile</Button>
                         </Link>
                     )}

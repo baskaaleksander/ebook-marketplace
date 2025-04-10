@@ -38,7 +38,7 @@ export class AuthService {
         return this.login({username: newUser.email, userId: newUser.id});
     }
 
-    async validateCredentials(user: UserCredentialsDto, onlyValidation: boolean = false){
+    async validateCredentials(user: UserCredentialsDto){
         const users = await this.userService.findUserByEmail(user.email);
 
         if(!users){
@@ -52,15 +52,12 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        if(onlyValidation){
-            return true;
-        }
-
         return this.login({username: users.email, userId: users.id});
     }
 
     async changePassword(userId: string, user: ChangePasswordDto){
-        const validated = await this.validateCredentials(user, true);
+        const validated = await this.validateCredentials(user);
+        
         if(!validated){
             throw new UnauthorizedException('Invalid credentials');
         }
