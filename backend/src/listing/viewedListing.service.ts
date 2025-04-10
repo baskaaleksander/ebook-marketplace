@@ -47,7 +47,7 @@ export class ViewedListingsService {
 
     }
     async getViewedProducts(userId: string) {
-        return this.prismaService.viewedListing.findMany({
+        const viewed = await this.prismaService.viewedListing.findMany({
             where: {
                 userId
             },
@@ -59,6 +59,21 @@ export class ViewedListingsService {
                 product: true
             }
         })
+        const viewedProducts = await Promise.all(
+            viewed.map(async (viewedListing) => {
+                const product = await this.prismaService.product.findUnique({
+                    where: { id: viewedListing.productId },
+                    include: {
+                        seller: true
+                    }
+                }
+            )
+                return product;
+            })
+        );
+        
+        return viewedProducts;
+
     }
 
     async clearViewedProducts() {

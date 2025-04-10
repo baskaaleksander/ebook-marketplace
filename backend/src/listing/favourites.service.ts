@@ -10,7 +10,19 @@ export class FavouritesService {
             where: { userId: userId },
         });
 
-        return favorites;
+        const favouritesProducts = await Promise.all(
+            favorites.map(async (favorite) => {
+                const product = await this.prismaService.product.findUnique({
+                    where: { id: favorite.productId },
+                    include: {
+                        seller: true
+                    }
+                }
+            )
+                return product;
+            })
+        );
+        return favouritesProducts;
     }
 
     async addFavorite(userId: string, productId: string) {

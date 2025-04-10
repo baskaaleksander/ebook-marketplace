@@ -60,7 +60,7 @@ function User({ params }: { params: Promise<{ id: string }> }) {
                 <>
                     <UserHeading {...userData} />
                     
-                    <UserProducts products={products} userData={userData} />
+                    <UserProducts products={products} userData={userData} emptyMessage="No products available from this user yet."/>
                 </>
             ) : (
                 <div className="text-center py-10">
