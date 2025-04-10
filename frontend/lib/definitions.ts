@@ -65,6 +65,7 @@ export type Order = {
     sellerId: string;
     buyerId: string;
     productId: string;
+    product: Product;
     refundId?: string | null;
     amount: number;
     status: OrderStatus;

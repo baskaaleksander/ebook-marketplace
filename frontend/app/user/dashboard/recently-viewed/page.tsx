@@ -25,7 +25,10 @@ function RecentlyViewed() {
     fetchData()
   }, [])
   return (
-    <div className="container px-4 py-8 min-h-screen">
+    <div className="container mx-auto px-4 py-8 min-h-screen">
+      {loading && <div>Loading...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+      {!loading && !error && <h1 className="text-3xl font-bold mb-6">Recently Viewed</h1>}
       <UserProducts products={viewed} emptyMessage="No viewed products found" />
     </div>
   )

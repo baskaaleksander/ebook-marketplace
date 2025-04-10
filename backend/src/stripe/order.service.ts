@@ -96,6 +96,9 @@ export class OrderService {
                 },
                 customer_email: buyer.email,
                 billing_address_collection: 'auto',
+                invoice_creation: {
+                    enabled: true,
+                },
                 metadata: {
                 orderId: order.id,
                 }
@@ -150,6 +153,7 @@ export class OrderService {
 
             const refund = await this.stripe.refunds.create({
                 payment_intent: checkoutSession.payment_intent.toString(),
+                reason: 'requested_by_customer',
                 amount: order.amount,
                 metadata: { orderId: order.id }
             });

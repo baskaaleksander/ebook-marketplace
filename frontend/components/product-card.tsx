@@ -74,7 +74,7 @@ function ProductCard({
                     
                     <div className="mt-auto">
                         <div className="flex justify-between items-baseline mb-3">
-                            <p className="text-gray-500 font-medium">${price.toFixed(2)}</p>
+                            <p className="text-gray-500 font-medium">{price.toFixed(2)}zł</p>
                         </div>
                         
                         <Link href={`/product/${id}`}>

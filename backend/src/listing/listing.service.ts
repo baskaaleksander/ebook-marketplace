@@ -146,9 +146,6 @@ export class ListingService {
             }
         });
         
-        if(listings.length === 0){
-            throw new NotFoundException('No listings found');
-        }
         return listings;
     }
 

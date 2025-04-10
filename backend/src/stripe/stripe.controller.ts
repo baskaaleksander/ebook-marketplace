@@ -47,7 +47,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
     }
 
     @UseGuards(AuthGuard('jwt'))
-    @Get('order')
+    @Get('orders')
     getAllUserOrders(@CurrentUser('userId') userId: string){
         return this.orderService.getAllUserOrders(userId);
     }

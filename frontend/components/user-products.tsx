@@ -1,7 +1,7 @@
 import { Product, UserData } from "@/lib/definitions";
 import ProductCard from "./product-card";
 
-function UserProducts({ userData, products, emptyMessage }: { userData?: UserData; products: Product[], emptyMessage?: string }) {
+function UserProducts({ userData, products, emptyMessage, favourites }: { userData?: UserData; products: Product[], emptyMessage?: string, favourites?: boolean }) {
 
     return products.length === 0 ? (
         <p className="text-gray-500 italic">{emptyMessage}</p>
@@ -14,6 +14,7 @@ function UserProducts({ userData, products, emptyMessage }: { userData?: UserDat
                     title={product.title}
                     price={product.price}
                     sellerId={product.sellerId}
+                    isFavorite={favourites || false}
                     createdAt={product.createdAt || new Date().toISOString()}
                     sellerData={{
                         id: userData?.id || product.seller.id,
