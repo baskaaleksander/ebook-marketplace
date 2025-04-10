@@ -10,6 +10,21 @@ export class UserService {
         return this.prismaService.user.create({ data });
     }
 
+    async updateUser(id: string, data: Partial<CreateUserDto>) {
+        const user = await this.prismaService.user.findUnique({
+            where: { id }
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return this.prismaService.user.update({
+            where: { id },
+            data
+        });
+    }
+
     async reviewAvgRatings(id: string) {
         const user = await this.prismaService.user.findUnique({
             where: { id },

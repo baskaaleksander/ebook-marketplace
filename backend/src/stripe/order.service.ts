@@ -160,7 +160,7 @@ export class OrderService {
 
             await this.prismaService.order.update({
                 where: { id: order.id },
-                data: { status: 'REFUNDED' }
+                data: { status: 'REFUNDED', refundId: refund.id }
             });
 
 

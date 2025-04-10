@@ -18,6 +18,7 @@ function SoldOrdersTable({ orders }: { orders: Order[] }) {
                 <TableCaption>All your sold orders</TableCaption>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Order ID</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Refund ID</TableHead>
@@ -28,6 +29,7 @@ function SoldOrdersTable({ orders }: { orders: Order[] }) {
                 <TableBody>
                     {orders.map((order) => (
                         <TableRow key={order.id}>
+                            <TableCell>{order.id}</TableCell>
                             <TableCell>{(order.amount / 100).toFixed(2)}</TableCell>
                             <TableCell>{order.status}</TableCell>
                             <TableCell>{order.refundId || ""}</TableCell>

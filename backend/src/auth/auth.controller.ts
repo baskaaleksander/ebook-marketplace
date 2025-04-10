@@ -1,14 +1,22 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from '../user/dtos/create-user.dto';
 import { AuthService } from './auth.service';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
 import { Request, Response } from 'express';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
+
+
+    @Post('/change-password')
+    @UseGuards(AuthGuard('jwt'))
+    async changePassword(@Body() data: ChangePasswordDto, @CurrentUser('userId') userId: string){
+        return this.authService.changePassword(userId, data);
+    }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('/me')
@@ -53,5 +61,7 @@ export class AuthController {
           });
         return res.send({message: 'User logged out successfully'});
     }
+
+
 
 }

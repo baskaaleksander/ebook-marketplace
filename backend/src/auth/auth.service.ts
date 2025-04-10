@@ -7,6 +7,7 @@ import { promisify } from 'util';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
 import { PrismaService } from '../prisma.service';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 
 const scrypt = promisify(_scrypt);
 @Injectable()
@@ -37,7 +38,7 @@ export class AuthService {
         return this.login({username: newUser.email, userId: newUser.id});
     }
 
-    async validateCredentials(user: UserCredentialsDto){
+    async validateCredentials(user: UserCredentialsDto, onlyValidation: boolean = false){
         const users = await this.userService.findUserByEmail(user.email);
 
         if(!users){
@@ -51,7 +52,27 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        if(onlyValidation){
+            return true;
+        }
+
         return this.login({username: users.email, userId: users.id});
+    }
+
+    async changePassword(userId: string, user: ChangePasswordDto){
+        const validated = await this.validateCredentials(user, true);
+        if(!validated){
+            throw new UnauthorizedException('Invalid credentials');
+        }
+        const salt = randomBytes(8).toString('hex');
+        const hash = await scrypt(user.newPassword, salt, 32) as Buffer;
+        const result = salt + '.' + hash.toString('hex');
+        const updatedUser = await this.userService.updateUser(userId, {password: result});
+        if(!updatedUser){
+            throw new NotFoundException('User not found');
+        }
+
+        return this.login({username: updatedUser.email, userId: updatedUser.id});
     }
 
     async login(user: LoginUserDto){
