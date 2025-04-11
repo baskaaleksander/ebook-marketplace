@@ -49,7 +49,7 @@ export class ListingController {
         return this.listingService.getCategories();
     }
 
-    @Get('categories/products')
+    @Get('categories/:category/products')
     getProductsByCategory(@Query('category') category: string) {
         return this.listingService.getProductsByCategory(category);
     }
