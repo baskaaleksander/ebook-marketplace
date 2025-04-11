@@ -8,6 +8,7 @@ import { ReviewOrderDto } from './dtos/review-order.dto';
 import { FavouritesService } from './favourites.service';
 import { ViewedListingsService } from './viewedListing.service';
 import { CurrentUser } from '../decorators/current-user.decorator';
+import { Request } from 'express';
 
 
 @Controller('listing')
@@ -116,9 +117,9 @@ export class ListingController {
         return this.reviewService.createReview(param, userId, data);
     }
     
-    @UseGuards(AuthGuard('jwt'))
     @Post(':id/view')
-    trackListingView(@Param('id') param: string, @CurrentUser('userId') userId: string) {
+    trackListingView(@Param('id') param: string, @Req() req: Request) {
+        const userId = req.user?.userId || null;
         return this.viewedListingsService.trackListingView(userId, param);
     }
     

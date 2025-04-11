@@ -27,7 +27,7 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
         <div className="flex flex-col h-full">
           <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
           <div className="text-sm text-gray-600 mb-4">
-              {seller && <Link href={`${seller.id}`} className="mb-1 hover:underline">{seller.name} {seller.surname}</Link> }
+              {seller && <Link href={`/user/${seller.id}`} className="mb-1 hover:underline">{seller.name} {seller.surname}</Link> }
             </div>
           
           <div className="mb-6">

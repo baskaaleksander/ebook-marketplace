@@ -105,7 +105,7 @@ function Navbar() {
                         </DropdownMenuContent>
                     </DropdownMenu> 
                     {user.stripeStatus === 'verified' && (
-                        <Button className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/create-listing')}>
+                        <Button className="flex items-center gap-1 cursor-pointer" onClick={() => router.push('/product/create')}>
                             List product
                         </Button>
                     )}

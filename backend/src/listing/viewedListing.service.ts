@@ -7,7 +7,7 @@ export class ViewedListingsService {
         private prismaService: PrismaService
     ) {}
 
-    async trackListingView(userId: string, productId: string) {
+    async trackListingView(userId: string | null, productId: string) {
         const product = await this.prismaService.product.findUnique({
             where: { id: productId }
         });
