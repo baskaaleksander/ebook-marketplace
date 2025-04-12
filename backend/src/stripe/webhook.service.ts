@@ -205,12 +205,12 @@ export class WebhookService {
     async handleRefundCompleted(event: Stripe.Event) {
         const refund = event.data.object as Stripe.Refund;
 
-        if(!refund.metadata){
+        if(!refund.metadata?.id){
             throw new NotFoundException('Refund metadata not found');
         }
 
         await this.prismaService.refund.update({
-            where: { orderId: refund.metadata.orderId },
+            where: { refundId: refund.id },
             data: { status: 'COMPLETED'}
         })
 
@@ -218,17 +218,15 @@ export class WebhookService {
             where: { id: refund.metadata.orderId },
             data: { status: 'REFUNDED'}
         })
+
     }
 
     async handleRefundFailed(event: Stripe.Event) {
         const refund = event.data.object as Stripe.Refund;
 
-        if(!refund.metadata){
-            throw new NotFoundException('Refund metadata not found');
-        }
 
         await this.prismaService.refund.update({
-            where: { orderId: refund.metadata.orderId },
+            where: { refundId: refund.id },
             data: { status: 'FAILED'}
         })
 

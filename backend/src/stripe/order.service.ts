@@ -17,13 +17,21 @@ export class OrderService {
         });
 
     }
-    getAllUserOrders(userId: string){
+    getAllUserOrders(userId: string) {
         return this.prismaService.order.findMany({
             where: { buyerId: userId },
-            include: { product: true }
-        });
-    }
+            include: { 
+                product: true 
+            }
+        }).then(orders => orders.map(order => {
 
+            if (order.status === 'REFUNDED' || order.status === 'PENDING' && order.product) {
+                const { fileUrl, ...productWithoutFileUrl } = order.product;
+                return { ...order, product: productWithoutFileUrl };
+            }
+            return order;
+        }));
+    }
     getAllSoldOrders(userId: string){
         return this.prismaService.order.findMany({
             where: { sellerId: userId },
@@ -162,6 +170,16 @@ export class OrderService {
                 where: { id: order.id },
                 data: { status: 'REFUNDED', refundId: refund.id }
             });
+
+            await this.prismaService.refund.create({
+                data: {
+                    orderId: order.id,
+                    refundId: refund.id,
+                    amount: order.amount,
+                    status: 'CREATED',
+                    reason: 'requested_by_customer',
+                }
+            })
 
 
             return refund

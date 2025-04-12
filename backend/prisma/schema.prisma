@@ -135,6 +135,7 @@ model Payout {
 model Refund {
   id         String  @id @default(cuid())
   orderId    String @unique
+  refundId   String? @unique
   order      Order   @relation(fields: [orderId], references: [id])
   amount     Float
   status  RefundStatus @default(PENDING)
