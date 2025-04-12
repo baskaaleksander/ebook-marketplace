@@ -73,8 +73,8 @@ model Order {
   sellerId  String @default("null")
   buyerId    String
   buyer      User   @relation(fields: [buyerId], references: [id])
-  productId  String
-  product  Product  @relation(fields: [productId], references: [id])
+  productId  String?
+  product  Product?  @relation(fields: [productId], references: [id])
   refundId   String?
   refund     Refund?
   amount     Float

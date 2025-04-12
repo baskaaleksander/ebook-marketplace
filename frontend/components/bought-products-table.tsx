@@ -38,7 +38,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
         setIsSubmitting(selectedOrderId);
         try {
             await api.post('/stripe/order/refund', { id: selectedOrderId });
-            // Close dialog on success
+
             setIsDialogOpen(false);
         } catch (error) {
             console.log("Error processing refund:", error);

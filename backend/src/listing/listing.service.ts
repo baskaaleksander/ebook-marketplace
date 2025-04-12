@@ -266,6 +266,23 @@ async findListings(filters: SearchFiltersDto) {
             throw new UnauthorizedException('You are not the owner of this listing');
         }
 
+        await this.prismaService.favourite.deleteMany({
+            where: {
+                productId: id
+            }
+        });
+
+        await this.prismaService.viewedListing.deleteMany({
+            where: {
+                productId: id
+            }
+        });
+        await this.prismaService.review.deleteMany({
+            where: {
+                productId: id
+            }
+        });
+
         return this.prismaService.product.delete({
             where: {
                 id: id

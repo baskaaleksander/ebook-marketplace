@@ -132,7 +132,7 @@ export class ListingController {
     
     @Delete(':id')
     @UseGuards(AuthGuard('jwt'))
-    deleteListing(@Param('id') param: string, @Body() updateListingDto: UpdateListingDto, @CurrentUser('userId') userId: string) {
+    deleteListing(@Param('id') param: string, @CurrentUser('userId') userId: string) {
         return this.listingService.deleteListing(param, userId);
     }
     

@@ -12,9 +12,19 @@ import {
   SortingState
 } from '@tanstack/react-table'
 import { ChevronDown, ChevronUp } from "lucide-react"
+import { Button } from "./ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import api from "@/utils/axios"
 
 function UserProductsTable({ products }: { products: Product[] }) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [deletedProductId, setDeletedProductId] = useState<string | null>(null)
+
+  const handleDelete = async (productId: string) => {
+    setIsDialogOpen(true)
+    setDeletedProductId(productId)
+  }
   
   const columnHelper = createColumnHelper<Product>()
   
@@ -44,7 +54,7 @@ function UserProductsTable({ products }: { products: Product[] }) {
     columnHelper.display({
       id: 'delete',
       header: 'Delete',
-      cell: info => <Link href={`/product/${info.row.original.id}/delete`} className="text-red-600 hover:text-red-800">Delete</Link>,
+      cell: info => <Button variant='destructive' onClick={() => handleDelete(info.row.original.id)}>Delete</Button>,
     }),
   ], [columnHelper])
 
@@ -92,7 +102,42 @@ function UserProductsTable({ products }: { products: Product[] }) {
           ))}
         </TableBody>
       </Table>
+      <DeleteDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} productId={deletedProductId!} />
     </>
+  )
+}
+
+function DeleteDialog({ isDialogOpen, setIsDialogOpen, productId }: { 
+  isDialogOpen: boolean, 
+  setIsDialogOpen: (open: boolean) => void, 
+  productId: string 
+}) {
+  const handleDelete = async (productId: string) => {
+    try {
+      await api.delete(`/listing/${productId}`)
+    }
+    catch (err) {
+      console.error("Error deleting product:", err)
+    }
+    finally {
+      setIsDialogOpen(false)
+    }
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this product? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end">
+          <Button variant="destructive" onClick={() => handleDelete(productId)}>Delete</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

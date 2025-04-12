@@ -26,7 +26,7 @@ export class OrderService {
         }).then(orders => orders.map(order => {
 
             if (order.status === 'REFUNDED' || order.status === 'PENDING' && order.product) {
-                const { fileUrl, ...productWithoutFileUrl } = order.product;
+                const { fileUrl, ...productWithoutFileUrl } = order.product || {};
                 return { ...order, product: productWithoutFileUrl };
             }
             return order;
