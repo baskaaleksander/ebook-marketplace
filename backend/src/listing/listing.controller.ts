@@ -50,7 +50,7 @@ export class ListingController {
     }
 
     @Get('categories/:category/products')
-    getProductsByCategory(@Query('category') category: string) {
+    getProductsByCategory(@Param('category') category: string) {
         return this.listingService.getProductsByCategory(category);
     }
     

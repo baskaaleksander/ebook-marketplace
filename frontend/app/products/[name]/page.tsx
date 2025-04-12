@@ -13,7 +13,7 @@ async function CategoryPage({ params }: { params: { name: string } }) {
 
     console.log(`Fetching products for category: ${categoryName}`);
     
-    const response = await api.get(`/listing/categories/${encodeURIComponent(categoryName)}/products`);
+    const response = await api.get(`/listing/categories/${categoryName}/products`);
     products = response.data;
     
 

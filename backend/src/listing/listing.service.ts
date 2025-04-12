@@ -116,11 +116,12 @@ export class ListingService {
         return categories;
     }
     async getProductsByCategory(category: string) {
+        const categoryName = decodeURIComponent(category);
         const listings = await this.prismaService.product.findMany({
             where: {
                 categories: {
                     some: {
-                        name: category
+                        name: categoryName
                     }
                 }
             },
@@ -129,9 +130,7 @@ export class ListingService {
                 seller: true
             }
         });
-        if(listings.length === 0){
-            throw new NotFoundException('No listings found');
-        }
+
         return listings;
     }
 
