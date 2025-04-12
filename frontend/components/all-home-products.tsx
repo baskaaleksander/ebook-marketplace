@@ -27,7 +27,7 @@ async function CategoriesContent() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <Link href="/featured"><h2 className="text-2xl md:text-3xl font-bold">📚 Categories</h2></Link>
-        <a href="/all-products/" className="text-blue-600 hover:underline text-sm">
+        <a href="/products/" className="text-blue-600 hover:underline text-sm">
           View all &rarr;
         </a>
       </div>

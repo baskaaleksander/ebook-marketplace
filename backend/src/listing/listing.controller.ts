@@ -9,6 +9,7 @@ import { FavouritesService } from './favourites.service';
 import { ViewedListingsService } from './viewedListing.service';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Request } from 'express';
+import { SearchFiltersDto } from './dtos/search-filters.dto';
 
 
 @Controller('listing')
@@ -40,8 +41,8 @@ export class ListingController {
     }
     
     @Get('search')
-    searchListings() {
-        return 'this.listingService.findListings(filterQuery)';
+    searchListings(@Query() query: SearchFiltersDto) {
+        return this.listingService.findListings(query);
     }
     
     @Get('categories')

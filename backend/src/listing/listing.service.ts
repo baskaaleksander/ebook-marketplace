@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma.service';
 import { UserService } from '../user/user.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
+import { SearchFiltersDto } from './dtos/search-filters.dto';
 
 declare module 'express' {
     interface Request {
@@ -181,6 +182,73 @@ export class ListingService {
 
         return listings;
     }
+
+async findListings(filters: SearchFiltersDto) {
+    const {
+      query,
+      category,
+      minPrice,
+      maxPrice,
+      sortBy,
+      sortOrder,
+      isFeatured,
+    } = filters;
+  
+    const where: any = {
+    };
+  
+    if (query) {
+      where.OR = [
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+        { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
+        { seller: { name: { contains: query, mode: 'insensitive' } } },
+    ];
+    }
+  
+    if (category) {
+      where.categories = {
+        some: {
+          name: {
+            contains: category,
+            mode: 'insensitive'
+          }
+        }
+      };
+    }
+  
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      
+      if (minPrice !== undefined) {
+        where.price.gte = minPrice;
+      }
+      
+      if (maxPrice !== undefined) {
+        where.price.lte = maxPrice;
+      }
+    }
+  
+    if (isFeatured !== undefined) {
+      where.isFeatured = isFeatured;
+    }
+  
+  
+    const orderBy: any = {};
+    if (sortBy) {
+      orderBy[sortBy] = sortOrder || 'desc';
+    }
+  
+    const products = await this.prismaService.product.findMany({
+        where,
+        orderBy,
+        include: {
+          seller: true,          
+        }
+    });
+  
+    return products
+  }
 
     async deleteListing(id: string, userId: string) {
 
