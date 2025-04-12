@@ -1,18 +1,15 @@
 'use client';
 
 import UserBalance from "@/components/user-balance";
-import SoldOrdersTable from "@/components/sold-orders-table";
-import PayoutsTable from "@/components/payouts-table";
 import { Balance, Order, Payout } from "@/lib/definitions";
 import { useAuth } from "@/providers/authprovider";
 import api from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ConnectStripeAccount from "@/components/connect-stripe-account";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import WalletTabs from "@/components/wallet-tabs";
 
 function Wallet() {
     const { user, loading: authLoading } = useAuth();
@@ -27,9 +24,9 @@ function Wallet() {
     useEffect(() => {
         if (!authLoading && !user) {
           router.push('/login');
-
         }
       }, [user, router, authLoading]);
+      
     useEffect(() => {
         const fetchData = async () => {
             if (authLoading || !user || user.stripeStatus !== 'verified') return;
@@ -65,7 +62,7 @@ function Wallet() {
         };
 
         fetchData();
-    }, [user]);
+    }, [user, authLoading]);
 
     const handlePayoutRequested = async () => {
         if (!user) return;
@@ -103,7 +100,7 @@ function Wallet() {
         <div className="container mx-auto px-4 py-12 h-screen">
             <ConnectStripeAccount />
         </div>
-    );
+      );
     }
 
     if (loading) {
@@ -130,57 +127,12 @@ function Wallet() {
                 />
             )}
             
-            <Tabs 
-                defaultValue="overview" 
-                value={activeTab} 
-                onValueChange={setActiveTab}
-                className="mt-8"
-            >
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="orders">Orders</TabsTrigger>
-                    <TabsTrigger value="payouts">Payouts</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="orders" className="mt-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Sold Orders</CardTitle>
-                            <CardDescription>
-                                Track all your successful sales and their statuses.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {soldOrders.length > 0 ? (
-                                <SoldOrdersTable orders={soldOrders} />
-                            ) : (
-                                <p className="text-center py-6 text-gray-500 italic">
-                                    You haven't sold any orders yet.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                
-                <TabsContent value="payouts" className="mt-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Payout History</CardTitle>
-                            <CardDescription>
-                                View your completed and pending payouts.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {payouts.length > 0 ? (
-                                <PayoutsTable payouts={payouts} />
-                            ) : (
-                                <p className="text-center py-6 text-gray-500 italic">
-                                    You haven't made any payout requests yet.
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+            <WalletTabs 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab} 
+                soldOrders={soldOrders} 
+                payouts={payouts}
+            />
         </div>
     );
 }

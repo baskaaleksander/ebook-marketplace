@@ -22,9 +22,7 @@ function UserBalance({ balance, onPayoutRequested }: {
             setIsLoading(true);
             await api.post('/stripe/payouts/create');
             
-            toast.success("Payout requested", {
-                description: `Your payout for ${currency} ${availableAmount.toFixed(2)} has been requested.`,
-            });
+            toast.success("Payout requested");
 
             if (onPayoutRequested) {
                 onPayoutRequested();
@@ -32,9 +30,7 @@ function UserBalance({ balance, onPayoutRequested }: {
             
         } catch (error) {
             console.error("Error requesting payout:", error);
-            toast.error("Payout failed", {
-                description: "There was an error requesting your payout. Please try again.",
-            });
+            toast.error("Payout failed");
         } finally {
             setIsLoading(false);
         }
@@ -84,5 +80,6 @@ function UserBalance({ balance, onPayoutRequested }: {
         </div>
     );
 }
+
 
 export default UserBalance;
