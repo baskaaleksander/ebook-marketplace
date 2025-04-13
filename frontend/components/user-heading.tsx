@@ -4,24 +4,8 @@ import Link from "next/link";
 import { useAuth } from "@/providers/authprovider";
 import { Button } from "./ui/button";
 import { UserData } from "@/lib/definitions";
+import StarRating from "./star-rating";
 
-
-function StarRating({ rating }: { rating: number }) {
-    const stars = [];
-    const roundedRating = Math.round(rating * 2) / 2;
-    
-    for (let i = 1; i <= 5; i++) {
-        if (i <= roundedRating) {
-            stars.push(<FaStar key={i} className="text-yellow-400" />);
-        } else if (i - 0.5 === roundedRating) {
-            stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
-        } else {
-            stars.push(<FaRegStar key={i} className="text-yellow-400" />);
-        }
-    }
-    
-    return <div className="flex">{stars}</div>;
-}
 
 function UserHeading(userData : UserData) {
     const { user } = useAuth();

@@ -2,6 +2,7 @@
 
 import ProductNotFound from "@/components/product-not-found";
 import ProductPageCard from "@/components/product-page-card";
+import ReviewComponent from "@/components/reviews-component";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import UserProducts from "@/components/user-products";
@@ -16,6 +17,7 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
 
   const { user, loading: authLoading } = useAuth();
   const [product, setProduct] = useState<Product>();
+  const [reviews, setReviews] = useState([]);
   const [seller, setSeller] = useState<UserData>(mockUserData);
   const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,6 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const productId = resolvedParams.id;
   const viewCounted = useRef(false);
-
   useEffect(() => {
     
     async function fetchData() {
@@ -33,13 +34,15 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
       try {
         setLoading(true);
         const productResponse = await api.get(`/listing/${productId}`);
-        const [ sellerResponse, sellerProductsResponse ] = await Promise.all([
+        const [ sellerResponse, sellerProductsResponse, reviewsResponse ] = await Promise.all([
           api.get(`/user/id/${productResponse.data.sellerId}`),
           api.get(`/listing/user/${productResponse.data.sellerId}`),
+          api.get(`/listing/${productId}/reviews`)
         ]);
         setSeller(sellerResponse.data);
         setSellerProducts(sellerProductsResponse.data);
         setProduct(productResponse.data);
+        setReviews(reviewsResponse.data);
         
         viewCounted.current = true;
         await api.post(`/listing/${productId}/view`);
@@ -90,6 +93,7 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
       )}
 
       <ProductPageCard product={product} seller={seller} />
+      <ReviewComponent reviews={reviews} />
 
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">More from this seller</h2>

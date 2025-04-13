@@ -21,6 +21,7 @@ export type Product = {
     sellerId: string;
     isFeatured: boolean;
     seller: UserData;
+    reviews: Review[];
     createdAt: string;
 }
 
@@ -96,4 +97,12 @@ export const mockUserData: UserData = {
     avatarUrl: "https://example.com/avatar.jpg",
     rating: 4.5,
     createdAt: new Date().toISOString(),
+}
+
+export type Review = {
+    id: string, 
+    rating: number, 
+    comment: string, 
+    createdAt: string, 
+    user: UserData 
 }

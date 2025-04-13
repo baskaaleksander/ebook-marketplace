@@ -77,7 +77,8 @@ export class ListingService {
                 id: id
             },
             include: {
-                categories: true
+                categories: true,
+                reviews: true,
             }
         });
 

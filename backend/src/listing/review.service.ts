@@ -16,18 +16,20 @@ export class ReviewService {
     constructor(private readonly prismaService: PrismaService) {}
 
     async getReviews(id: string) {
-        const listing = await this.prismaService.product.findUnique({
-            where: { id: id },
-            include: { reviews: true }
+        const reviews = await this.prismaService.review.findMany({
+            where: { productId: id },
+            include: { buyer: {
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    surname: true,
+                    avatarUrl: true,
+                }
+            } }
         });
 
-        if (!listing) {
-            throw new NotFoundException('Listing not found');
-        }
-
-        const reviews = listing.reviews;
-
-        if(!reviews || reviews.length === 0){
+        if(!reviews){
             throw new NotFoundException('No reviews found');
         }
 
