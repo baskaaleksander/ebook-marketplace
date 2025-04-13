@@ -87,22 +87,17 @@ export type Balance = {
     }
 }
 
-export const mockUserData: UserData = {
-    id: "1",
-    name: "John",
-    surname: "Doe",
-    email: "",
-    stripeStatus: "ACTIVE",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    avatarUrl: "https://example.com/avatar.jpg",
-    rating: 4.5,
-    createdAt: new Date().toISOString(),
-}
-
 export type Review = {
     id: string, 
     rating: number, 
     comment: string, 
     createdAt: string, 
-    user: UserData 
+    user: UserData
+    buyer: {
+        id: string;
+        email: string;
+        name: string;
+        surname: string;
+        avatarUrl?: string;
+      };     
 }

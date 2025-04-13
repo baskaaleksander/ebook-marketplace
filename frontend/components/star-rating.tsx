@@ -1,16 +1,44 @@
 import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 
-function StarRating({ rating }: { rating: number }) {
+interface StarRatingProps {
+  rating: number;
+  editable?: boolean;
+  onChange?: (rating: number) => void;
+}
+
+function StarRating({ rating, editable = false, onChange }: StarRatingProps) {
     const stars = [];
     const roundedRating = Math.round(rating * 2) / 2;
     
+    const handleClick = (newRating: number) => {
+        if (editable && onChange) {
+            onChange(newRating);
+        }
+    };
+    
     for (let i = 1; i <= 5; i++) {
+        let star;
         if (i <= roundedRating) {
-            stars.push(<FaStar key={i} className="text-yellow-400" />);
+            star = <FaStar key={i} className="text-yellow-400" />;
         } else if (i - 0.5 === roundedRating) {
-            stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
+            star = <FaStarHalfAlt key={i} className="text-yellow-400" />;
         } else {
-            stars.push(<FaRegStar key={i} className="text-yellow-400" />);
+            star = <FaRegStar key={i} className="text-yellow-400" />;
+        }
+        
+        if (editable) {
+            stars.push(
+                <span 
+                    key={i} 
+                    onClick={() => handleClick(i)}
+                    className="cursor-pointer"
+                    title={`${i} stars`}
+                >
+                    {star}
+                </span>
+            );
+        } else {
+            stars.push(star);
         }
     }
     
