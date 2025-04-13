@@ -9,7 +9,7 @@ import api from "@/utils/axios";
 import { Textarea } from "./ui/textarea";
 
 
-function ReviewCard({ review }: { review: Review;}) {
+function ReviewCard({ review, withProductLink }: { review: Review, withProductLink: boolean}) {
   const { buyer } = review;
   const { user } = useAuth();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
@@ -44,6 +44,7 @@ function ReviewCard({ review }: { review: Review;}) {
       await api.delete(`/listing/reviews/${review.id}`);
       
       setIsDeleteDialogOpen(false);
+      window.location.reload();
     } catch (error) {
       console.error("Failed to delete review:", error);
     } finally {
@@ -67,8 +68,9 @@ function ReviewCard({ review }: { review: Review;}) {
         </div>
         <StarRating rating={review.rating} />
         <p className="text-gray-700 mt-2">{review.comment}</p>
+        <div className="flex justify-end gap-2"> 
         {user?.id === review.buyer.id &&
-          <div className="flex justify-end gap-2"> 
+        <>
             <Button onClick={() => setIsEditDialogOpen(true)} className="mt-2" variant="outline">Edit</Button>
             <Button 
               onClick={() => setIsDeleteDialogOpen(true)} 
@@ -77,8 +79,18 @@ function ReviewCard({ review }: { review: Review;}) {
             >
               Delete
             </Button>
-          </div>
+        </>
         }
+        {withProductLink && (
+          <Button 
+            variant="outline" 
+            className="mt-2"
+            onClick={() => window.location.href = `/product/${review.productId}`}
+          >
+            View Product
+          </Button>
+        )}
+        </div>
       </div>
       
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

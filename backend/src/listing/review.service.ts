@@ -15,6 +15,7 @@ declare module 'express' {
 export class ReviewService {
     constructor(private readonly prismaService: PrismaService) {}
 
+    
     async getReviews(id: string) {
         const reviews = await this.prismaService.review.findMany({
             where: { productId: id },

@@ -24,6 +24,11 @@ export class UserController {
         return this.userService.findUserByEmail(emailObj.email);
     }
 
+    @Get(':id/reviews')
+    getUserReviews(@Param() idObj: {id: string} ) {
+        return this.userService.getUserReviews(idObj.id);
+    }
+
     @Get(':id/listings')
     @Serialize(UserResponseDto)
     findUserListings(@Param() idObj: {id: string} ) {

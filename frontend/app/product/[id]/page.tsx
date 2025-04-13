@@ -93,7 +93,7 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
       )}
 
       <ProductPageCard product={product} seller={seller} />
-      <ReviewComponent reviews={reviews} />
+      <ReviewComponent reviews={reviews} withProductLink={false}/>
 
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">More from this seller</h2>

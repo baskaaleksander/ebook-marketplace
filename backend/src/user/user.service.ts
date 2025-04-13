@@ -25,6 +25,25 @@ export class UserService {
         });
     }
 
+    async getUserReviews(userId: string) {
+        const reviews = await this.prismaService.review.findMany({
+            where: { product:
+                { sellerId: userId }
+             },
+             include: { buyer: {
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    surname: true,
+                    avatarUrl: true,
+                }
+            } }
+        });
+
+        return reviews;
+        }
+
     async reviewAvgRatings(id: string) {
         const user = await this.prismaService.user.findUnique({
             where: { id },

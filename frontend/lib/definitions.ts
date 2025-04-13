@@ -102,7 +102,8 @@ export const mockUserData: UserData = {
 export type Review = {
     id: string, 
     rating: number, 
-    comment: string, 
+    comment: string,
+    productId: string, 
     createdAt: string, 
     user: UserData
     buyer: {
