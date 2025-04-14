@@ -23,14 +23,6 @@ export class StripeService {
     async connectAccount(userId: string) {
 
         try {
-            const account = await this.stripe.accounts.create({
-                type: 'express',
-                country: 'PL',
-                capabilities: {
-                    card_payments: { requested: true },
-                    transfers: { requested: true },
-                },
-            });
 
             const user = await this.prismaService.user.findUnique({
                 where: { id: userId }
@@ -39,6 +31,17 @@ export class StripeService {
             if(!user){
                 throw new NotFoundException('User not found');
             }
+
+            const account = await this.stripe.accounts.create({
+                type: 'express',
+                country: 'PL',
+                capabilities: {
+                    card_payments: { requested: true },
+                    transfers: { requested: true },
+                },
+                email: user.email,
+            });
+
 
             if(user.stripeAccount){
                 throw new NotFoundException('User already connected to stripe');

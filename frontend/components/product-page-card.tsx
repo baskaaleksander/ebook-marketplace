@@ -1,10 +1,58 @@
 import { Product, UserData } from "@/lib/definitions";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import api from "@/utils/axios";
+import { useAuth } from "@/providers/authprovider";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function ProductPageCard({product, seller}: {product: Product, seller: UserData}) {
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
+  const { user } = useAuth();
+  const router = useRouter();
+  const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const startPurchaseFlow = () => {
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    
+    setIsPurchaseDialogOpen(true);
+  };
+
+  const handlePurchase = async () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      const response = await api.post('/stripe/order/checkout', {
+        id: product.id
+      });
+      
+      if (response?.data?.url) {
+        router.push(response.data.url);
+      }
+    } catch (error) {
+      console.error("Error processing purchase:", error);
+      setIsPurchaseDialogOpen(false);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
         <div className="rounded-lg overflow-hidden shadow-lg">
           <div className="bg-slate-100 p-8 ">
             {product.imageUrl ? (
@@ -20,15 +68,13 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
               </div>
             )}
           </div>
-
-          
         </div>
 
         <div className="flex flex-col h-full">
           <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
           <div className="text-sm text-gray-600 mb-4">
-              {seller && <Link href={`/user/${seller.id}`} className="mb-1 hover:underline">{seller.name} {seller.surname}</Link> }
-            </div>
+            {seller && <Link href={`/user/${seller.id}`} className="mb-1 hover:underline">{seller.name} {seller.surname}</Link>}
+          </div>
           
           <div className="mb-6">
             <p className="text-gray-700 mb-4">{product.description}</p>
@@ -41,7 +87,10 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
           </div>
                     
           <div className="flex flex-col space-y-3 mt-auto">
-            <Button className="font-bold py-3 px-4">
+            <Button 
+              onClick={startPurchaseFlow} 
+              className="font-bold py-3 px-4"
+            >
               Purchase for ${product.price?.toFixed(2)}
             </Button>
             <Button variant="outline">
@@ -51,7 +100,51 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
         </div>
       </div>
 
-    )
+      <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Purchase</DialogTitle>
+            <DialogDescription>
+              You are about to purchase "{product.title}" for ${product.price?.toFixed(2)}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Product:</span> 
+                <span>{product.title}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Price:</span> 
+                <span>${product.price?.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">Seller:</span> 
+                <span>{seller?.name} {seller?.surname}</span>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="sm:justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setIsPurchaseDialogOpen(false)}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handlePurchase}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Proceed to Checkout"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
 
 export default ProductPageCard;

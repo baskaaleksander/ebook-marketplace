@@ -105,7 +105,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
                             <TableCell>{order.refundId || ""}</TableCell>
                             <TableCell>{order.sellerId}</TableCell>
                             <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>{order.status === 'REFUNDED' ? ' ' : <Link href={`https://${order.product.fileUrl}`} className="hover:underline">Download</Link>}</TableCell>
+                            <TableCell>{!(order.status === 'COMPLETED') ? ' ' : <Link href={`https://${order.product.fileUrl}`} className="hover:underline">Download</Link>}</TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-2">
                                     {order.status !== 'REFUNDED' && (

@@ -94,8 +94,8 @@ export class OrderService {
                     }
                 ],
                 mode: 'payment',
-                success_url: `${this.configService.get('FRONTEND_URL')}/success`,
-                cancel_url: `${this.configService.get('FRONTEND_URL')}/cancel`,
+                success_url: `${this.configService.get('FRONTEND_URL')}/user/dashboard/purchased`,
+                cancel_url: `${this.configService.get('FRONTEND_URL')}/`,
                 payment_intent_data: {
                     application_fee_amount: product.price * 5,
                     transfer_data: {
