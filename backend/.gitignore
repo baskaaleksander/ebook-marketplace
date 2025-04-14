@@ -5,6 +5,7 @@
 
 TODO
 *.exe
+/uploads
 
 # Logs
 logs

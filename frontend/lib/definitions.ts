@@ -115,3 +115,11 @@ export type Review = {
         avatarUrl?: string;
       };     
 }
+
+export type FileUploaderProps = {
+    onFileSelect: (file: File) => void;
+    accept?: string;
+    maxSize?: number;
+    className?: string;
+    label?: string;
+  }

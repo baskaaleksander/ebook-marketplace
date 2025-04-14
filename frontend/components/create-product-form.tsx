@@ -26,8 +26,11 @@ import {
 } from "./ui/form"
 import { Card, CardContent } from "./ui/card"
 import api from "@/utils/axios"
-import { Loader2 } from "lucide-react"
+import { Loader2, FileIcon, X } from "lucide-react"
 import { Alert, AlertDescription } from "./ui/alert"
+import ImageResizer from "./image-resizer"
+import FileUploader from "./file-uploader"
+import { Badge } from "./ui/badge"
 
 const createProductSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -39,7 +42,7 @@ const createProductSchema = z.object({
 type CreateProductFormValues = z.infer<typeof createProductSchema>;
 
 const categories = [
-  { id: "fiction", name: "Fiction" },
+  { id: "Fiction", name: "Fiction" },
   { id: "nonfiction", name: "Non-Fiction" },
   { id: "educationandprofessional", name: "Education & Professional" },
   { id: "creativeandlifestyle", name: "Creative & Lifestyle" },
@@ -50,9 +53,10 @@ function CreateProductForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
+    const [pdfFile, setPdfFile] = useState<File | null>(null)
     const router = useRouter()
     const { user, loading: authLoading } = useAuth()
-    const { image, setImage } = useImage()
+    const { image } = useImage()
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -70,9 +74,22 @@ function CreateProductForm() {
         },
     });
 
+    const handlePdfSelect = (file: File) => {
+        setPdfFile(file);
+    };
+
+    const clearPdfFile = () => {
+        setPdfFile(null);
+    };
+
     const onSubmit = async (data: CreateProductFormValues) => {
         if (!image) {
             setError("Please upload a product image");
+            return;
+        }
+
+        if (!pdfFile) {
+            setError("Please upload a PDF file for your product");
             return;
         }
 
@@ -80,30 +97,53 @@ function CreateProductForm() {
             setIsLoading(true);
             setError(null);
             
-            const formData = new FormData();
-            formData.append('title', data.title);
-            formData.append('description', data.description);
-            formData.append('price', data.price.toString());
-            formData.append('category', data.category);
-            
-            if (image.startsWith('data:')) {
+            let imageUrl = "";
+            if (image.startsWith('data:') || image.startsWith('blob:')) {
                 const response = await fetch(image);
                 const blob = await response.blob();
-                const file = new File([blob], "product-image.jpg", { type: "image/jpeg" });
-                formData.append('image', file);
+                const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
+                
+                const imageFormData = new FormData();
+                imageFormData.append('file', imageFile);
+                
+                const imageUploadResponse = await api.post('/upload', imageFormData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                });
+                
+                imageUrl = imageUploadResponse.data.imageUrl || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
             }
-            
-            // await api.post('/listing', formData, {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data',
-            //     }
-            // });
-            
-            console.log("Form Data:", formData);
 
+            const pdfFormData = new FormData();
+            pdfFormData.append('file', pdfFile);
+            
+            const pdfUploadResponse = await api.post('/upload/', pdfFormData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+            
+            const pdfUrl = pdfUploadResponse.data.fileUrl || `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
+
+            const productData = {
+                title: data.title,
+                description: data.description,
+                price: data.price,
+                imageUrl: imageUrl,
+                fileUrl: pdfUrl,
+                categories: [
+                    {
+                    name: data.category,
+                }
+            ]
+            };
+            
+            await api.post('/listing', productData);
+            
             setSuccess(true);
             form.reset();
-            setImage(null);
+            setPdfFile(null);
             
             setTimeout(() => {
                 router.push('/dashboard');
@@ -118,6 +158,54 @@ function CreateProductForm() {
     };
 
     return (
+        <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-6">
+                    <div>
+                        <h2 className="text-xl font-semibold mb-4">Product Image</h2>
+                        <ImageResizer />
+                    </div>
+                    
+                    <div>
+                        <h2 className="text-xl font-semibold mb-4">Upload PDF</h2>
+                        {!pdfFile ? (
+                            <FileUploader
+                                onFileSelect={handlePdfSelect}
+                                accept="application/pdf"
+                                maxSize={20}
+                                label="Drag & drop your PDF file here"
+                            />
+                        ) : (
+                            <Card>
+                                <CardContent className="p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <FileIcon className="h-6 w-6 text-red-500" />
+                                            <div>
+                                                <p className="font-medium truncate max-w-[200px]">{pdfFile.name}</p>
+                                                <p className="text-xs text-gray-500">
+                                                    {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={clearPdfFile}
+                                            title="Remove file"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    <Badge variant="outline" className="mt-2 bg-green-50 text-green-700 border-green-200">
+                                        PDF Ready to Upload
+                                    </Badge>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                </div>
+                
                 <div>
                     <Card>
                         <CardContent className="pt-6">
@@ -201,7 +289,6 @@ function CreateProductForm() {
                                                     <Select 
                                                         onValueChange={field.onChange} 
                                                         defaultValue={field.value}
-                                                        
                                                     >
                                                         <FormControl>
                                                             <SelectTrigger>
@@ -227,7 +314,7 @@ function CreateProductForm() {
                                     <Button 
                                         type="submit" 
                                         className="w-full" 
-                                        disabled={isLoading || !image}
+                                        disabled={isLoading || !image || !pdfFile}
                                     >
                                         {isLoading ? (
                                             <>
@@ -241,7 +328,8 @@ function CreateProductForm() {
                         </CardContent>
                     </Card>
                 </div>
-
+            </div>
+        </div>
     );
 }
 

@@ -3,11 +3,10 @@ import React, { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { useImage } from "@/providers/image-provider";
+import FileUploader from "./file-uploader";
 
 type Point = {
   x: number;
@@ -68,7 +67,6 @@ export default function ImageResizer() {
   const [zoom, setZoom] = useState<number>(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [croppedImgUrl, setCroppedImgUrl] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
@@ -86,7 +84,7 @@ export default function ImageResizer() {
     } catch (e) {
       console.error(e);
     }
-  }, [imageSrc, croppedAreaPixels]);
+  }, [imageSrc, croppedAreaPixels, setImage]);
 
   const handleImageClear = () => {
     setImageSrc(null);
@@ -96,12 +94,9 @@ export default function ImageResizer() {
     setZoom(1);
     setCroppedAreaPixels(null);
     setDialogOpen(false);
-    setDragActive(false);
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    if (fileInput) fileInput.value = '';
   }
 
-  const handleFile = (file: File) => {
+  const handleFileSelect = (file: File) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
@@ -113,46 +108,19 @@ export default function ImageResizer() {
     };
   };
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFile(e.target.files[0]);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = () => setDragActive(false);
-
   return (
     <div className="flex flex-col items-center gap-4">
-      <Card className="w-full max-w-md p-4">
-        <CardContent className="flex flex-col gap-4 items-center">
-          <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            className={cn(
-              "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all",
-              dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
-            )}
-          >
-            <p className="mb-2">Drag & drop an image here</p>
-            <Input type="file" accept="image/*" onChange={onFileChange} />
-          </div>
+      <FileUploader
+        onFileSelect={handleFileSelect}
+        accept="image/*"
+        maxSize={5} // 5MB max
+        label="Drag & drop an image here"
+        className="max-w-md"
+      />
 
-          {croppedImgUrl && (
-            <>
+      {croppedImgUrl && (
+        <Card className="w-full max-w-md p-4">
+          <CardContent className="flex flex-col gap-4 items-center">
             <div className="mt-4">
               <img
                 src={croppedImgUrl}
@@ -162,16 +130,13 @@ export default function ImageResizer() {
             </div>
             <Button
               variant="destructive"
-              className="mt-4"
               onClick={handleImageClear}
             >
               Clear Image
             </Button>
-            </>
-          )}
-          
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="w-full max-w-2xl">

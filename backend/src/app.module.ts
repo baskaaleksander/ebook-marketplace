@@ -12,13 +12,14 @@ import { UserService } from './user/user.service';
 import { ListingModule } from './listing/listing.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [ConfigModule.forRoot(
     { 
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'test' ? '.env.dev' : '.env'
-    }), UserModule, AuthModule, ListingModule, StripeModule, ScheduleModule],
+    }), UserModule, AuthModule, ListingModule, StripeModule, ScheduleModule, UploadModule],
   controllers: [AppController, AuthController],
   providers: [AppService, PrismaService],
 })
