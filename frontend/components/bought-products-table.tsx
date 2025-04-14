@@ -62,7 +62,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
         
         setIsSubmitting(selectedOrderId);
         try {
-            await api.post(`/listing/${selectedProductId}/reviews`, {
+            await api.post(`/listing/${selectedOrderId}/reviews`, {
                 rating: reviewRating,
                 comment: reviewComment
             });
@@ -117,13 +117,13 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
                                             >
                                                 Refund
                                             </Button>
-                                            <Button 
+                                            {!order.isReviewed ? <Button 
                                                 variant="outline" 
                                                 size="sm"
                                                 onClick={() => openReviewDialog(order.id, order.product.id)}
                                             >
                                                 Review
-                                            </Button>
+                                            </Button> : <span className="text-gray-500">Already reviewed</span>}
                                         </>
                                     )}
                                     {order.status === 'REFUNDED' && (

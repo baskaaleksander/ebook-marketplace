@@ -150,6 +150,10 @@ export class OrderService {
                 throw new NotFoundException('Payment intent not found');
             }
 
+            if(!order.productId) {
+                throw new NotFoundException('Product not found');
+            }
+
             const product = await this.prismaService.product.findUnique({
                 where: { id: order.productId }
             });

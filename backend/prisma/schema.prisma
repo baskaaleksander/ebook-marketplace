@@ -78,6 +78,7 @@ model Order {
   refundId   String?
   refund     Refund?
   amount     Float
+  isReviewed Boolean @default(false)
   status     OrderStatus @default(PENDING)
   checkoutSessionId String?    @unique
   paymentUrl       String?

@@ -89,10 +89,6 @@ export class ListingController {
         return this.reviewService.getReview(reviewId);
     }
 
-    @Get('reviews/user/:userId')
-    getUserReviews(@Param('userId') userId: string) {
-        return this.reviewService.getUserReviews(userId);
-    }
     
     @UseGuards(AuthGuard('jwt'))
     @Put('reviews/:reviewId')

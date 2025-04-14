@@ -65,6 +65,7 @@ export type Order = {
     id: string;
     sellerId: string;
     buyerId: string;
+    isReviewed: boolean;
     productId: string;
     product: Product;
     refundId?: string | null;

@@ -26,6 +26,7 @@ function Purchased() {
             try {
                 setLoading(true);
                 const soldOrdersResponse = await api.get(`/stripe/orders/`);
+                console.log('Sold Orders Response:', soldOrdersResponse.data);
                 setSoldOrders(soldOrdersResponse.data);
             } catch (err) {
                 console.error("Error fetching data:", err);
