@@ -32,7 +32,13 @@ export class UserController {
     @Get(':id/listings')
     @Serialize(UserResponseDto)
     findUserListings(@Param() idObj: {id: string} ) {
-        return this.userService.findUserListings(idObj.id);
+        return this.userService.findUserListings(idObj.id, false);
+    }
+
+    @Get(':id/listings/url')
+    @Serialize(UserResponseDto)
+    findUserListingsWithUrl(@Param() idObj: {id: string} ) {
+        return this.userService.findUserListings(idObj.id, true);
     }
 
     @Get('avgratings/:id')

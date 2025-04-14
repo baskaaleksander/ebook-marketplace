@@ -66,8 +66,18 @@ export class ListingService {
             },
             include: {
                 categories: true,
-                seller: true  
-            }
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                        avatarUrl: true,
+                        stripeStatus: true,
+                        createdAt: true,
+                    }
+                }
+    }
         });
     }
     
@@ -79,6 +89,17 @@ export class ListingService {
             include: {
                 categories: true,
                 reviews: true,
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                        avatarUrl: true,
+                        stripeStatus: true,
+                        createdAt: true,
+                    }
+                }
             }
         });
 
@@ -86,7 +107,8 @@ export class ListingService {
             throw new NotFoundException('Listing not found');
         }
 
-        return listing;
+        const { fileUrl, ...listingWithoutFile } = listing;
+        return listingWithoutFile;
     }
 
     async findAllListings() {
@@ -96,8 +118,10 @@ export class ListingService {
             throw new NotFoundException('No listings found');
         }
 
-
-        return listings;
+        return listings.map(listing => {
+            const { fileUrl, ...listingWithoutFile } = listing;
+            return listingWithoutFile;
+        });
     }
 
     async getCategories() {
@@ -129,11 +153,24 @@ export class ListingService {
             },
             include: {
                 categories: true,
-                seller: true
-            }
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                        avatarUrl: true,
+                        stripeStatus: true,
+                        createdAt: true,
+                    }
+                }
+    }
         });
 
-        return listings;
+        return listings.map(listing => {
+            const { fileUrl, ...listingWithoutFile } = listing;
+            return listingWithoutFile;
+        });
     }
 
     async findUserListings(userId: string) {
@@ -143,11 +180,24 @@ export class ListingService {
             },
             include: {
                 categories: true,
-                seller: true
-            }
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                        avatarUrl: true,
+                        stripeStatus: true,
+                        createdAt: true,
+                    }
+                }
+    }
         });
         
-        return listings;
+        return listings.map(listing => {
+            const { fileUrl, ...listingWithoutFile } = listing;
+            return listingWithoutFile;
+        });
     }
 
     async getFeaturedListings() {
@@ -157,13 +207,26 @@ export class ListingService {
             },
             include: {
                 categories: true,
-                seller: true
-            }
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                        avatarUrl: true,
+                        stripeStatus: true,
+                        createdAt: true,
+                    }
+                }
+    }
         });
         if(listings.length === 0){
             throw new NotFoundException('No listings found');
         }
-        return listings;
+        return listings.map(listing => {
+            const { fileUrl, ...listingWithoutFile } = listing;
+            return listingWithoutFile;
+        });
     }
     async searchListingsFromCategory(category: string, take: string) {
         const listings = await this.prismaService.product.findMany({
@@ -185,71 +248,83 @@ export class ListingService {
     }
 
 async findListings(filters: SearchFiltersDto) {
-    const {
-      query,
-      category,
-      minPrice,
-      maxPrice,
-      sortBy,
-      sortOrder,
-      isFeatured,
-    } = filters;
-  
-    const where: any = {
-    };
-  
-    if (query) {
-      where.OR = [
-        { title: { contains: query, mode: 'insensitive' } },
-        { description: { contains: query, mode: 'insensitive' } },
-        { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
-        { seller: { name: { contains: query, mode: 'insensitive' } } },
+  const {
+    query,
+    category,
+    minPrice,
+    maxPrice,
+    sortBy,
+    sortOrder,
+    isFeatured,
+  } = filters;
+
+  const where: any = {};
+
+  if (query) {
+    where.OR = [
+      { title: { contains: query, mode: 'insensitive' } },
+      { description: { contains: query, mode: 'insensitive' } },
+      { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
+      { seller: { name: { contains: query, mode: 'insensitive' } } },
     ];
-    }
-  
-    if (category) {
-      where.categories = {
-        some: {
-          name: {
-            contains: category,
-            mode: 'insensitive'
-          }
-        }
-      };
-    }
-  
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.price = {};
-      
-      if (minPrice !== undefined) {
-        where.price.gte = minPrice;
-      }
-      
-      if (maxPrice !== undefined) {
-        where.price.lte = maxPrice;
-      }
-    }
-  
-    if (isFeatured !== undefined) {
-      where.isFeatured = isFeatured;
-    }
-  
-  
-    const orderBy: any = {};
-    if (sortBy) {
-      orderBy[sortBy] = sortOrder || 'desc';
-    }
-  
-    const products = await this.prismaService.product.findMany({
-        where,
-        orderBy,
-        include: {
-          seller: true,          
-        }
-    });
-  
-    return products
   }
+
+  if (category) {
+    where.categories = {
+      some: {
+        name: {
+          contains: category,
+          mode: 'insensitive'
+        }
+      }
+    };
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    where.price = {};
+    
+    if (minPrice !== undefined) {
+      where.price.gte = minPrice;
+    }
+    
+    if (maxPrice !== undefined) {
+      where.price.lte = maxPrice;
+    }
+  }
+
+  if (isFeatured !== undefined) {
+    where.isFeatured = isFeatured;
+  }
+
+  const orderBy: any = {};
+  if (sortBy) {
+    orderBy[sortBy] = sortOrder || 'desc';
+  }
+
+  const products = await this.prismaService.product.findMany({
+    where,
+    orderBy,
+    include: {
+      categories: true,
+      seller: {
+        select: {
+          id: true,
+          name: true,
+          surname: true,
+          email: true,
+          avatarUrl: true,
+          stripeStatus: true,
+          createdAt: true,
+        }
+      }
+    }
+  });
+
+  return products.map(product => {
+    const { fileUrl, ...productWithoutFile } = product;
+    return productWithoutFile;
+  });
+}
 
     async deleteListing(id: string, userId: string) {
 
@@ -367,6 +442,7 @@ async findListings(filters: SearchFiltersDto) {
             orderBy: {
                 createdAt: 'desc'
             }
+
         });
     }
 

@@ -15,14 +15,29 @@ export class FavouritesService {
                 const product = await this.prismaService.product.findUnique({
                     where: { id: favorite.productId },
                     include: {
-                        seller: true
+                        seller: {
+                            select: {
+                                id: true,
+                                name: true,
+                                surname: true,
+                                email: true,
+                                avatarUrl: true,
+                                stripeStatus: true,
+                                createdAt: true,
+                            }
+                        }
                     }
+                });
+                
+                if (product) {
+                    const { fileUrl, ...productWithoutFileUrl } = product;
+                    return productWithoutFileUrl;
                 }
-            )
-                return product;
+                return null;
             })
         );
-        return favouritesProducts;
+        
+        return favouritesProducts.filter(product => product !== null);
     }
 
     async addFavorite(userId: string, productId: string) {

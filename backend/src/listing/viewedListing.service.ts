@@ -64,7 +64,17 @@ export class ViewedListingsService {
                 const product = await this.prismaService.product.findUnique({
                     where: { id: viewedListing.productId },
                     include: {
-                        seller: true
+                        seller: {
+                            select: {
+                                id: true,
+                                name: true,
+                                surname: true,
+                                email: true,
+                                avatarUrl: true,
+                                stripeStatus: true,
+                                createdAt: true,
+                            }
+                        }
                     }
                 }
             )

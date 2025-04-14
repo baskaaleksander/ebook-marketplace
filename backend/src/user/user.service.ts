@@ -21,7 +21,9 @@ export class UserService {
 
         return this.prismaService.user.update({
             where: { id },
-            data
+            data: {
+                ...data,
+            }
         });
     }
 
@@ -60,10 +62,24 @@ export class UserService {
         return { averageRating: avgRating };
     }
     
-    async findUserListings(id: string) {
+    async findUserListings(id: string, includeFileUrl: boolean) {
         const user = await this.prismaService.user.findUnique({
             where: { id },
-            include: { products: true }
+            include: { products: {
+                select: {
+                    id: true,
+                    title: true,
+                    description: true,
+                    price: true,
+                    imageUrl: true,
+                    fileUrl: includeFileUrl ? true : false,
+                    isFeatured: true,
+                    sellerId: true,
+                    reviews: true,
+                    createdAt: true,
+                }
+            } 
+        }
         });
 
         if (!user) {

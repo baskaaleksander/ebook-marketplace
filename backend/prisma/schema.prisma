@@ -34,6 +34,7 @@ model Product {
   title       String
   description String
   price       Float
+  imageUrl   String?
   fileUrl     String
   sellerId    String
   order       Order[]
