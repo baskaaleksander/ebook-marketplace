@@ -113,7 +113,7 @@ export default function ImageResizer() {
       <FileUploader
         onFileSelect={handleFileSelect}
         accept="image/*"
-        maxSize={5} // 5MB max
+        maxSize={5}
         label="Drag & drop an image here"
         className="max-w-md"
       />

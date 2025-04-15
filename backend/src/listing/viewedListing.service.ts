@@ -36,7 +36,7 @@ export class ViewedListingsService {
             });
         }
 
-        return await this.prismaService.product.update({
+        await this.prismaService.product.update({
             where: { id: productId},
             data: {
                 views: {
@@ -46,6 +46,7 @@ export class ViewedListingsService {
         })
 
     }
+    // remove fileUrl from the product object, add isFavourite property
     async getViewedProducts(userId: string) {
         const viewed = await this.prismaService.viewedListing.findMany({
             where: {
@@ -77,6 +78,7 @@ export class ViewedListingsService {
                         }
                     }
                 }
+                
             )
                 return product;
             })

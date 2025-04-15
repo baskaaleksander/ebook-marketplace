@@ -10,7 +10,7 @@ import { ViewedListingsService } from './viewedListing.service';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Request } from 'express';
 import { SearchFiltersDto } from './dtos/search-filters.dto';
-
+import { OptionalAuthGuard } from '../guards/optional-auth.guard';
 
 @Controller('listing')
 export class ListingController {
@@ -20,9 +20,11 @@ export class ListingController {
         private favouritesService: FavouritesService,
         private viewedListingsService: ViewedListingsService
     ){}
+
+    @UseGuards(OptionalAuthGuard)
     @Get()
-    findAllListings() {
-        return this.listingService.findAllListings();
+    findAllListings(@CurrentUser('userId') userId?: string) {
+        return this.listingService.findAllListings(userId);
     }
     
     @Get('recent')
@@ -30,29 +32,40 @@ export class ListingController {
         return this.listingService.getRecentListings();
     }
 
+    @UseGuards(OptionalAuthGuard)
     @Get('featured')
-    findFeaturedListings() {
-        return this.listingService.getFeaturedListings();
+    findFeaturedListings(@CurrentUser('userId') userId?: string) {
+        return this.listingService.getFeaturedListings(userId);
     }
 
+    @UseGuards(OptionalAuthGuard)
     @Get('user/:userId')
-    findUserListings(@Param('userId') userId: string) {
-        return this.listingService.findUserListings(userId);
+    findUserListings(@Param('userId') userId: string, @CurrentUser('userId') currentUserId?: string) {
+        return this.listingService.findUserListings(userId, currentUserId);
     }
     
+    @UseGuards(OptionalAuthGuard)
     @Get('search')
-    searchListings(@Query() query: SearchFiltersDto) {
-        return this.listingService.findListings(query);
+    searchListings(
+        @Query() query: SearchFiltersDto,
+        @CurrentUser('userId') userId?: string
+    ) {
+        return this.listingService.findListings(query, userId);
     }
     
+    @UseGuards(OptionalAuthGuard)
     @Get('categories')
-    getCategories() {
-        return this.listingService.getCategories();
+    getCategories(@CurrentUser('userId') userId?: string) {
+        return this.listingService.getCategories(userId);
     }
 
+    @UseGuards(OptionalAuthGuard)
     @Get('categories/:category/products')
-    getProductsByCategory(@Param('category') category: string) {
-        return this.listingService.getProductsByCategory(category);
+    getProductsByCategory(
+        @Param('category') category: string,
+        @CurrentUser('userId') userId?: string
+    ) {
+        return this.listingService.getProductsByCategory(category, userId);
     }
     
     @UseGuards(AuthGuard('jwt'))

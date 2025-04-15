@@ -20,6 +20,40 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const addToFavorites = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const response = await api.post(`/listing/favourites/${product.id}`);
+
+      if (response.status === 200) {
+        product.isFavourite = true;
+      }
+    } catch (error) {
+      console.error("Error adding to favorites:", error);
+    }
+  }
+
+  const removeFromFavorites = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const response = await api.delete(`/listing/favourites/${product.id}`);
+
+      if (response.status === 200) {
+        product.isFavourite = false;
+      }
+    } catch (error) {
+      console.error("Error removing from favorites:", error);
+    }
+  }
+
   const startPurchaseFlow = () => {
 
     if (!user) {
@@ -93,9 +127,11 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
             >
               Purchase for ${product.price?.toFixed(2)}
             </Button>
-            <Button variant="outline">
+            {product.isFavourite ? <Button onClick={removeFromFavorites} variant="outline">
+              Remove from Favorites
+            </Button> : <Button variant="outline" onClick={addToFavorites}>
               Add to Favorites
-            </Button>
+            </Button>}
           </div>
         </div>
       </div>

@@ -27,9 +27,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import ChangePasswordDialog from "@/components/change-password-dialog";
+import ChangeAvatarDialog from "@/components/change-avatar-dialog";
 
 const userSettingsSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -39,17 +40,8 @@ const userSettingsSchema = z.object({
   avatarUrl: z.string().optional(),
 });
 
-const passwordChangeSchema = z.object({
-  currentPassword: z.string().min(1, { message: "Current password is required" }),
-  newPassword: z.string().min(8, { message: "New password must be at least 8 characters" }),
-  confirmPassword: z.string().min(8, { message: "Password confirmation is required" }),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "New password and confirm password must match",
-  path: ["confirmPassword"],
-});
 
 type UserSettingsFormValues = z.infer<typeof userSettingsSchema>;
-type PasswordChangeFormValues = z.infer<typeof passwordChangeSchema>;
 
 function SettingsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -59,9 +51,7 @@ function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
-  const [changingPassword, setChangingPassword] = useState(false);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const router = useRouter();
   
   const form = useForm<UserSettingsFormValues>({
@@ -75,14 +65,7 @@ function SettingsPage() {
     },
   });
   
-  const passwordForm = useForm<PasswordChangeFormValues>({
-    resolver: zodResolver(passwordChangeSchema),
-    defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    },
-  });
+
   
   useEffect(() => {
     if (!authLoading && !user) {
@@ -123,6 +106,28 @@ function SettingsPage() {
     fetchData();
   }, [user, authLoading, form]);
 
+  const onAvatarChange = (newAvatarUrl: string) => {
+    try {
+      if (!user?.id) return;
+      
+      setUserData(prev => prev ? {
+        ...prev,
+        avatarUrl: newAvatarUrl,
+      } : undefined);
+
+      form.setValue('avatarUrl', newAvatarUrl);
+      
+      setSuccess("Profile picture updated successfully");
+    }
+    catch (error) {
+      console.error("Error changing avatar:", error);
+      setError("Failed to change avatar");
+    }
+    finally {
+      setAvatarDialogOpen(false);
+    }
+  }
+
   const onSubmit = async (data: UserSettingsFormValues) => {
     if (!user?.id) return;
     
@@ -148,35 +153,6 @@ function SettingsPage() {
     }
   };
   
-  const onPasswordChange = async (data: PasswordChangeFormValues) => {
-    if (!user?.id) return;
-    
-    setChangingPassword(true);
-    setPasswordError(null);
-    setPasswordSuccess(null);
-    
-    // FIX: not working
-    try {
-      await api.post(`/auth/change-password`, {
-        email: user.email,
-        password: data.currentPassword,
-        newPassword: data.newPassword
-      });
-      
-      setPasswordSuccess("Password changed successfully");
-      passwordForm.reset();
-      
-      setTimeout(() => {
-        setPasswordDialogOpen(false);
-      }, 2000);
-      
-    } catch (err: any) {
-      console.error("Error changing password:", err);
-      setPasswordError(err?.response?.data?.message || "Failed to change password");
-    } finally {
-      setChangingPassword(false);
-    }
-  };
 
   if (loading || authLoading) {
     return (
@@ -185,7 +161,7 @@ function SettingsPage() {
       </div>
     );
   }
-// to be splitted 
+
   return (
     <div className="container mx-auto py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
@@ -211,17 +187,42 @@ function SettingsPage() {
           )}
           
           <div className="flex items-center space-x-4 mb-8">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={userData?.avatarUrl} alt={userData?.name} />
-              <AvatarFallback>
-                {userData?.name?.[0]}{userData?.surname?.[0]}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={userData?.avatarUrl} alt={userData?.name} />
+                <AvatarFallback>
+                  {userData?.name?.[0]}{userData?.surname?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1">
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  size="icon"
+                  className="h-8 w-8 rounded-full border shadow-sm"
+                  onClick={() => setAvatarDialogOpen(true)}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
             <div>
               <h3 className="font-medium">{userData?.name} {userData?.surname}</h3>
               <p className="text-muted-foreground text-sm">{userData?.email}</p>
             </div>
           </div>
+
+          {userData && (
+            <ChangeAvatarDialog 
+              open={avatarDialogOpen}
+              onOpenChange={setAvatarDialogOpen}
+              currentAvatarUrl={userData.avatarUrl}
+              userName={userData.name}
+              userSurname={userData.surname}
+              onAvatarChange={onAvatarChange}
+            />
+          )}
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -305,98 +306,7 @@ function SettingsPage() {
               />
               
               <div className="flex justify-between items-center">
-                <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      type="button" 
-                      variant="outline"
-                    >
-                      <Lock className="mr-2 h-4 w-4" />
-                      Change Password
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Change Password</DialogTitle>
-                      <DialogDescription>
-                        Enter your current password and a new password below.
-                      </DialogDescription>
-                    </DialogHeader>
-                    
-                    {passwordError && (
-                      <Alert variant="destructive">
-                        <AlertDescription>{passwordError}</AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    {passwordSuccess && (
-                      <Alert className="bg-green-50 text-green-800 border-green-200">
-                        <AlertDescription>{passwordSuccess}</AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    <Form {...passwordForm}>
-                      <form onSubmit={passwordForm.handleSubmit(onPasswordChange)} className="space-y-4">
-                        <FormField
-                          control={passwordForm.control}
-                          name="currentPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Current Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={passwordForm.control}
-                          name="newPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>New Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={passwordForm.control}
-                          name="confirmPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Confirm New Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <DialogFooter>
-                          <Button 
-                            type="submit" 
-                            disabled={changingPassword}
-                          >
-                            {changingPassword ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Changing...
-                              </>
-                            ) : "Change Password"}
-                          </Button>
-                        </DialogFooter>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
-                
+                <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
                 <Button 
                   type="submit" 
                   disabled={submitting}

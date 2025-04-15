@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
+import { Product } from "@prisma/client";
+
+interface ProductWithFavourite extends Product {
+    isFavourite?: boolean;
+}
 
 @Injectable() 
 export class FavouritesService {
@@ -28,6 +33,8 @@ export class FavouritesService {
                         }
                     }
                 });
+
+                (product as ProductWithFavourite).isFavourite = true;
                 
                 if (product) {
                     const { fileUrl, ...productWithoutFileUrl } = product;

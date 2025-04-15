@@ -30,7 +30,7 @@ function Favourites() {
       {error && <div className="text-red-500">{error}</div>}
       {!loading && !error && <h1 className="text-3xl font-bold mb-6">Favourites</h1>}
 
-      <UserProducts products={favourites} emptyMessage="No favourites found" favourites={true} />
+      <UserProducts products={favourites} emptyMessage="No favourites found" />
     </div>
   )
 }

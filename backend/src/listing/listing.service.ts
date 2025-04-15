@@ -4,7 +4,11 @@ import { UserService } from '../user/user.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
 import { SearchFiltersDto } from './dtos/search-filters.dto';
+import { Product } from '@prisma/client';
 
+interface ProductWithFavourite extends Product {
+    isFavourite?: boolean;
+}
 declare module 'express' {
     interface Request {
         user: {
@@ -81,7 +85,7 @@ export class ListingService {
         });
     }
     
-    async findListingById(id: string) {
+    async findListingById(id: string, userId?: string) {
         const listing = await this.prismaService.product.findUnique({
             where: {
                 id: id
@@ -103,6 +107,18 @@ export class ListingService {
             }
         });
 
+
+        if(userId) {
+            const favourite = await this.prismaService.favourite.findFirst({
+                where: {
+                    userId: userId,
+                    productId: id
+                }
+            });
+
+            (listing as ProductWithFavourite).isFavourite = !!favourite;
+        }
+
         if(!listing){
             throw new NotFoundException('Listing not found');
         }
@@ -111,20 +127,35 @@ export class ListingService {
         return listingWithoutFile;
     }
 
-    async findAllListings() {
+    async findAllListings(userId?: string) {
         const listings = await this.prismaService.product.findMany();
-
-        if(listings.length === 0){
-            throw new NotFoundException('No listings found');
-        }
-
-        return listings.map(listing => {
-            const { fileUrl, ...listingWithoutFile } = listing;
-            return listingWithoutFile;
-        });
+        
+        const listingsWithFavourites = await Promise.all(
+            listings.map(async (listing) => {
+                const { fileUrl, ...listingWithoutFile } = listing;
+                
+                if (userId) {
+                    const favourite = await this.prismaService.favourite.findFirst({
+                        where: {
+                            userId: userId,
+                            productId: listing.id
+                        }
+                    });
+                    
+                    return {
+                        ...listingWithoutFile,
+                        isFavourite: !!favourite
+                    };
+                }
+                
+                return listingWithoutFile;
+            })
+        );
+        
+        return listingsWithFavourites;
     }
 
-    async getCategories() {
+    async getCategories(userId?: string) {
         const categories = await this.prismaService.category.findMany({
             include: {
                 products: {
@@ -133,15 +164,56 @@ export class ListingService {
                         createdAt: 'desc'
                     },
                     include: {
-                        seller: true
+                        seller: {
+                            select: {
+                                id: true,
+                                name: true,
+                                surname: true,
+                                email: true,
+                                avatarUrl: true,
+                                stripeStatus: true,
+                                createdAt: true,
+                            }
+                        }
                     }
                 }
             }
         });
 
-        return categories;
+        const processedCategories = await Promise.all(categories.map(async category => {
+            // Process products for each category
+            const processedProducts = await Promise.all(category.products.map(async product => {
+                const { fileUrl, ...productWithoutFileUrl } = product;
+                
+                if (userId) {
+                    // Check if the product is favorited by the current user
+                    const favourite = await this.prismaService.favourite.findFirst({
+                        where: {
+                            userId: userId,
+                            productId: product.id
+                        }
+                    });
+                    
+                    return {
+                        ...productWithoutFileUrl,
+                        isFavourite: !!favourite
+                    };
+                }
+                return productWithoutFileUrl;
+            }));
+            
+            return {
+                ...category,
+                products: processedProducts
+            };
+        }));
+
+        return processedCategories;
     }
-    async getProductsByCategory(category: string) {
+
+    
+
+    async getProductsByCategory(category: string, userId?: string) {
         const categoryName = decodeURIComponent(category);
         const listings = await this.prismaService.product.findMany({
             where: {
@@ -164,16 +236,35 @@ export class ListingService {
                         createdAt: true,
                     }
                 }
-    }
+            }
         });
-
-        return listings.map(listing => {
-            const { fileUrl, ...listingWithoutFile } = listing;
-            return listingWithoutFile;
-        });
+        
+        const listingsWithFavourites = await Promise.all(
+            listings.map(async (listing) => {
+                const { fileUrl, ...listingWithoutFile } = listing;
+                
+                if (userId) {
+                    const favourite = await this.prismaService.favourite.findFirst({
+                        where: {
+                            userId: userId,
+                            productId: listing.id
+                        }
+                    });
+                    
+                    return {
+                        ...listingWithoutFile,
+                        isFavourite: !!favourite
+                    };
+                }
+                
+                return listingWithoutFile;
+            })
+        );
+        
+        return listingsWithFavourites;
     }
 
-    async findUserListings(userId: string) {
+    async findUserListings(userId: string, currentUserId?: string) {
         const listings = await this.prismaService.product.findMany({
             where: {
                 sellerId: userId
@@ -191,16 +282,36 @@ export class ListingService {
                         createdAt: true,
                     }
                 }
-    }
+            }
         });
         
-        return listings.map(listing => {
-            const { fileUrl, ...listingWithoutFile } = listing;
-            return listingWithoutFile;
-        });
+        // Add favorite status for current user if they're logged in
+        const listingsWithFavourites = await Promise.all(
+            listings.map(async (listing) => {
+                const { fileUrl, ...listingWithoutFile } = listing;
+                
+                if (currentUserId) {
+                    const favourite = await this.prismaService.favourite.findFirst({
+                        where: {
+                            userId: currentUserId,
+                            productId: listing.id
+                        }
+                    });
+                    
+                    return {
+                        ...listingWithoutFile,
+                        isFavourite: !!favourite
+                    };
+                }
+                
+                return listingWithoutFile;
+            })
+        );
+        
+        return listingsWithFavourites;
     }
 
-    async getFeaturedListings() {
+    async getFeaturedListings(userId?: string) {
         const listings = await this.prismaService.product.findMany({
             where: {
                 isFeatured: true
@@ -218,15 +329,36 @@ export class ListingService {
                         createdAt: true,
                     }
                 }
-    }
+            }
         });
+        
         if(listings.length === 0){
             throw new NotFoundException('No listings found');
         }
-        return listings.map(listing => {
-            const { fileUrl, ...listingWithoutFile } = listing;
-            return listingWithoutFile;
-        });
+        
+        const listingsWithFavourites = await Promise.all(
+            listings.map(async (listing) => {
+                const { fileUrl, ...listingWithoutFile } = listing;
+                
+                if (userId) {
+                    const favourite = await this.prismaService.favourite.findFirst({
+                        where: {
+                            userId: userId,
+                            productId: listing.id
+                        }
+                    });
+                    
+                    return {
+                        ...listingWithoutFile,
+                        isFavourite: !!favourite
+                    };
+                }
+                
+                return listingWithoutFile;
+            })
+        );
+        
+        return listingsWithFavourites;
     }
     async searchListingsFromCategory(category: string, take: string) {
         const listings = await this.prismaService.product.findMany({
@@ -247,83 +379,102 @@ export class ListingService {
         return listings;
     }
 
-async findListings(filters: SearchFiltersDto) {
-  const {
-    query,
-    category,
-    minPrice,
-    maxPrice,
-    sortBy,
-    sortOrder,
-    isFeatured,
-  } = filters;
+async findListings(filters: SearchFiltersDto, userId?: string) {
+    const {
+        query,
+        category,
+        minPrice,
+        maxPrice,
+        sortBy,
+        sortOrder,
+        isFeatured,
+    } = filters;
 
-  const where: any = {};
+    const where: any = {};
 
-  if (query) {
-    where.OR = [
-      { title: { contains: query, mode: 'insensitive' } },
-      { description: { contains: query, mode: 'insensitive' } },
-      { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
-      { seller: { name: { contains: query, mode: 'insensitive' } } },
-    ];
-  }
+    if (query) {
+        where.OR = [
+            { title: { contains: query, mode: 'insensitive' } },
+            { description: { contains: query, mode: 'insensitive' } },
+            { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
+            { seller: { name: { contains: query, mode: 'insensitive' } } },
+        ];
+    }
 
-  if (category) {
-    where.categories = {
-      some: {
-        name: {
-          contains: category,
-          mode: 'insensitive'
+    if (category) {
+        where.categories = {
+            some: {
+                name: {
+                    contains: category,
+                    mode: 'insensitive'
+                }
+            }
+        };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+        where.price = {};
+        
+        if (minPrice !== undefined) {
+            where.price.gte = minPrice;
         }
-      }
-    };
-  }
-
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    where.price = {};
-    
-    if (minPrice !== undefined) {
-      where.price.gte = minPrice;
-    }
-    
-    if (maxPrice !== undefined) {
-      where.price.lte = maxPrice;
-    }
-  }
-
-  if (isFeatured !== undefined) {
-    where.isFeatured = isFeatured;
-  }
-
-  const orderBy: any = {};
-  if (sortBy) {
-    orderBy[sortBy] = sortOrder || 'desc';
-  }
-
-  const products = await this.prismaService.product.findMany({
-    where,
-    orderBy,
-    include: {
-      categories: true,
-      seller: {
-        select: {
-          id: true,
-          name: true,
-          surname: true,
-          email: true,
-          avatarUrl: true,
-          stripeStatus: true,
-          createdAt: true,
+        
+        if (maxPrice !== undefined) {
+            where.price.lte = maxPrice;
         }
-      }
     }
-  });
 
-  return products.map(product => {
-    const { fileUrl, ...productWithoutFile } = product;
-    return productWithoutFile;
-  });
+    if (isFeatured !== undefined) {
+        where.isFeatured = isFeatured;
+    }
+
+    const orderBy: any = {};
+    if (sortBy) {
+        orderBy[sortBy] = sortOrder || 'desc';
+    }
+
+    const products = await this.prismaService.product.findMany({
+        where,
+        orderBy,
+        include: {
+            categories: true,
+            seller: {
+                select: {
+                    id: true,
+                    name: true,
+                    surname: true,
+                    email: true,
+                    avatarUrl: true,
+                    stripeStatus: true,
+                    createdAt: true,
+                }
+            }
+        }
+    });
+
+    const productsWithFavourites = await Promise.all(
+        products.map(async (product) => {
+            const { fileUrl, ...productWithoutFile } = product;
+            
+            if (userId) {
+                const favourite = await this.prismaService.favourite.findFirst({
+                    where: {
+                        userId: userId,
+                        productId: product.id
+                    }
+                });
+                
+                return {
+                    ...productWithoutFile,
+                    isFavourite: !!favourite
+                };
+            }
+            
+            return productWithoutFile;
+        })
+    );
+    
+    return productsWithFavourites;
 }
 
     async deleteListing(id: string, userId: string) {
