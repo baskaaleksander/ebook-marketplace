@@ -11,6 +11,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { Request } from 'express';
 import { SearchFiltersDto } from './dtos/search-filters.dto';
 import { OptionalAuthGuard } from '../guards/optional-auth.guard';
+import { AnalyticsService } from './analytics.service';
 
 @Controller('listing')
 export class ListingController {
@@ -18,7 +19,8 @@ export class ListingController {
         private listingService: ListingService, 
         private reviewService: ReviewService,
         private favouritesService: FavouritesService,
-        private viewedListingsService: ViewedListingsService
+        private viewedListingsService: ViewedListingsService,
+        private analyticsService: AnalyticsService
     ){}
 
     @UseGuards(OptionalAuthGuard)
@@ -30,6 +32,12 @@ export class ListingController {
     @Get('recent')
     findRecentListings() {
         return this.listingService.getRecentListings();
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('analytics')
+    getAnalytics(@CurrentUser('userId') userId: string) {
+        return this.analyticsService.getUserAnalytics(userId);
     }
 
     @UseGuards(OptionalAuthGuard)

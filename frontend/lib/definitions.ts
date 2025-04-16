@@ -123,4 +123,24 @@ export type FileUploaderProps = {
     maxSize?: number;
     className?: string;
     label?: string;
+}
+
+export type ProductViewData = {
+    id: string;
+    name: string;
+    views: number;
   }
+  
+export type MonthlySalesData = {
+    month: string;
+    monthlySold: number;
+}
+  
+export type AnalyticsData = {
+    totalListings: number;
+    totalSoldListings: number;
+    totalViews: number;
+    totalSoldOrders: number;
+    viewsPerProductResult: ProductViewData[];
+    soldOrdersPerMonthResult: MonthlySalesData[];
+}

@@ -6,10 +6,11 @@ import { UserService } from '../user/user.service';
 import { ReviewService } from './review.service';
 import { FavouritesService } from './favourites.service';
 import { ViewedListingsService } from './viewedListing.service';
+import { AnalyticsService } from './analytics.service';
 
 @Module({
-  providers: [ListingService, PrismaService, UserService, ReviewService, FavouritesService, ViewedListingsService],
+  providers: [ListingService, PrismaService, UserService, ReviewService, FavouritesService, ViewedListingsService, AnalyticsService],
   controllers: [ListingController],
-  exports: [ListingService, ReviewService, FavouritesService, ViewedListingsService]
+  exports: [ListingService, ReviewService, FavouritesService, ViewedListingsService, AnalyticsService]
 })
 export class ListingModule {}
