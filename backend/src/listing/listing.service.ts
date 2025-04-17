@@ -87,6 +87,7 @@ export class ListingService {
     }
     
     async findListingById(id: string, userId?: string) {
+
         const listing = await this.prismaService.product.findUnique({
             where: {
                 id: id
@@ -108,6 +109,8 @@ export class ListingService {
             }
         });
 
+        
+
 
         if(userId) {
             const favourite = await this.prismaService.favourite.findFirst({
@@ -119,9 +122,14 @@ export class ListingService {
 
             (listing as ProductWithFavourite).isFavourite = !!favourite;
         }
+        
 
         if(!listing){
             throw new NotFoundException('Listing not found');
+        }
+
+        if(listing.sellerId == userId){
+            return listing;
         }
 
         const { fileUrl, ...listingWithoutFile } = listing;

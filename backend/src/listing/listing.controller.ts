@@ -123,10 +123,10 @@ export class ListingController {
         return this.reviewService.deleteReview(param, userId);
     }
     
-    //serialize the fileurl
     @Get(':id')
-    findListingById(@Param('id') param: string) {
-        return this.listingService.findListingById(param);
+    @UseGuards(OptionalAuthGuard)
+    findListingById(@Param('id') param: string, @CurrentUser('userId') userId?: string) {
+        return this.listingService.findListingById(param, userId);
     }
     
     @Get(':id/reviews')

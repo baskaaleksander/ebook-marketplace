@@ -7,18 +7,16 @@ import { ApiKeyGuard } from './guards/api-key.guard';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
-
   const app = await NestFactory.create<NestExpressApplication>(AppModule,
     {
       rawBody: true,
     }
   );
 
-
   const configService = app.get(ConfigService);
-
 
   app.use(cookieParser());
 
@@ -33,14 +31,18 @@ async function bootstrap() {
     }),
   );
 
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
-
   app.enableCors({
     origin: true,
     credentials: true,
   });
+
+  const uploadsPath = join(__dirname, '..', 'uploads');
+  app.use('/uploads', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  }, express.static(uploadsPath));
 
   app.useGlobalGuards(new ApiKeyGuard(configService));
 
