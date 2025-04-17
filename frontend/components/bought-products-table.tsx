@@ -108,7 +108,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
                             <TableCell>{!(order.status === 'COMPLETED') ? ' ' : <Link href={order.product.fileUrl} className="hover:underline">Download</Link>}</TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-2">
-                                    {order.status !== 'REFUNDED' && (
+                                    {(order.status !== 'REFUNDED' && order.status !== 'PENDING') && (
                                         <>
                                             <Button 
                                                 variant="outline" 

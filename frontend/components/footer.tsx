@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 interface MenuItem {
   title: string;
   links: {
@@ -24,27 +25,50 @@ interface FooterProps {
 }
 
 function Footer({
-// to be added menu items
   menuItems = [
     {
-      title: "Product",
+      title: "Browse",
       links: [
-        { text: "Overview", url: "#" },
+        { text: "Categories", url: "/products" },
+        { text: "Featured", url: "/featured" },
+        { text: "New Releases", url: "/products?sort=newest" },
+        { text: "Best Sellers", url: "/products?sort=popular" },
       ],
     },
     {
-      title: "Social",
+      title: "Account",
       links: [
-        { text: "Twitter", url: "#" },
-        { text: "Instagram", url: "#" },
-        { text: "LinkedIn", url: "#" },
+        { text: "Dashboard", url: "/user/dashboard" },
+        { text: "My Products", url: "/user/dashboard/my-products" },
+        { text: "Favorites", url: "/user/dashboard/favorites" },
+        { text: "Recently Viewed", url: "/user/dashboard/recently-viewed" },
+      ],
+    },
+    {
+      title: "Sell",
+      links: [
+        { text: "Become a Seller", url: "/user/dashboard/settings" },
+        { text: "Create Listing", url: "/product/create" },
+        { text: "Seller Guidelines", url: "/seller-guidelines" },
+        { text: "Analytics", url: "/user/dashboard/analytics" },
+      ],
+    },
+    {
+      title: "Help",
+      links: [
+        { text: "FAQ", url: "/faq" },
+        { text: "Contact Us", url: "/contact" },
+        { text: "About Us", url: "/about" },
+        { text: "Support", url: "/support" },
       ],
     },
   ],
-  copyright = "© 2024 bookify.com. All rights reserved.",
+  copyright = "© 2025 bookify.com. All rights reserved.",
   bottomLinks = [
-    { text: "Terms and Conditions", url: "#" },
-    { text: "Privacy Policy", url: "#" },
+    { text: "Terms of Service", url: "/terms" },
+    { text: "Privacy Policy", url: "/privacy" },
+    { text: "Cookie Policy", url: "/cookies" },
+    { text: "Accessibility", url: "/accessibility" },
   ],
 }: FooterProps) {
   return (

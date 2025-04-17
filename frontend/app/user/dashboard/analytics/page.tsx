@@ -10,6 +10,7 @@ import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Loader2 } from "lucide-react";
 import { AnalyticsData, MonthlySalesData, ProductViewData } from "@/lib/definitions";
 import Link from "next/link";
+import AnalyticsCards from "@/components/analytics-cards";
 
 function Analytics() {
   const {user, loading: authLoading} = useAuth();
@@ -70,30 +71,7 @@ function Analytics() {
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Analytics</h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold">Total Sales</h2>
-          <p className="text-2xl font-bold">
-            {((data.totalSoldOrders || 0) / 100).toFixed(2)} PLN
-          </p>
-          <p className="text-gray-500">Lifetime</p>
-        </Card>
-        <Card className="p-4 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold">Total Sold Listings</h2>
-          <p className="text-2xl font-bold">{data.totalSoldListings || 0}</p>
-          <p className="text-gray-500">Lifetime</p>
-        </Card>
-        <Card className="p-4 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold">Total Views</h2>
-          <p className="text-2xl font-bold">{data.totalViews || 0}</p>
-          <p className="text-gray-500">Lifetime</p>
-        </Card>
-        <Card className="p-4 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold">Listings Count</h2>
-          <p className="text-2xl font-bold">{data.totalListings || 0}</p>
-          <p className="text-gray-500">Active</p>
-        </Card>
-      </div>
+      <AnalyticsCards data={data} />
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <SoldOrdersChart data={data.soldOrdersPerMonthResult} />
         <ViewsPerProductChart data={data.viewsPerProductResult} />
