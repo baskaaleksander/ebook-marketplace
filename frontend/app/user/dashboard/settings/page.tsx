@@ -272,23 +272,6 @@ function SettingsPage() {
               
               <FormField
                 control={form.control}
-                name="avatarUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Avatar URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://example.com/avatar.jpg" />
-                    </FormControl>
-                    <FormDescription>
-                      Enter a URL for your profile picture
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>

@@ -63,6 +63,7 @@ export class ListingService {
                 description: data.description,
                 price: data.price,
                 fileUrl: data.fileUrl,
+                imageUrl: data.imageUrl,
                 seller: {
                     connect: { id: userId }  
                 },

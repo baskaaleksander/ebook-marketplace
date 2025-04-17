@@ -14,6 +14,7 @@ function UserProducts({ userData, products, emptyMessage }: { userData?: UserDat
                     title={product.title}
                     price={product.price}
                     sellerId={product.sellerId}
+                    imageUrl={product.imageUrl}
                     isFavorite={product.isFavourite || false}
                     createdAt={product.createdAt || new Date().toISOString()}
                     sellerData={{

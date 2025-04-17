@@ -98,21 +98,25 @@ function CreateProductForm() {
             setError(null);
             
             let imageUrl = "";
-            if (image.startsWith('data:') || image.startsWith('blob:')) {
-                const response = await fetch(image);
-                const blob = await response.blob();
-                const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
-                
-                const imageFormData = new FormData();
-                imageFormData.append('file', imageFile);
-                
-                const imageUploadResponse = await api.post('/upload', imageFormData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    }
-                });
-                
-                imageUrl = imageUploadResponse.data.imageUrl || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+            if (image) {
+                if (image.startsWith('data:') || image.startsWith('blob:')) {
+                    const response = await fetch(image);
+                    const blob = await response.blob();
+                    const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
+                    
+                    const imageFormData = new FormData();
+                    imageFormData.append('file', imageFile);
+                    
+                    const imageUploadResponse = await api.post('/upload', imageFormData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        }
+                    });
+                    
+                    imageUrl = imageUploadResponse.data.imageUrl || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+                } else {
+                    imageUrl = image;
+                }
             }
 
             const pdfFormData = new FormData();

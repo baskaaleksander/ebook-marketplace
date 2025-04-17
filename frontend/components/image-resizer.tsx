@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useImage } from "@/providers/image-provider";
 import FileUploader from "./file-uploader";
+import { LiaTimesSolid } from "react-icons/lia";
 
 type Point = {
   x: number;
@@ -61,13 +62,19 @@ function getCroppedImg(imageSrc: string, crop: Area): Promise<string> {
 }
 
 export default function ImageResizer() {
-  const { setImage } = useImage();
+  const { setImage, image } = useImage();
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState<number>(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [croppedImgUrl, setCroppedImgUrl] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (image && !croppedImgUrl) {
+      setCroppedImgUrl(image);
+    }
+  }, [image, croppedImgUrl]);
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels);
@@ -108,32 +115,43 @@ export default function ImageResizer() {
     };
   };
 
+  const handleEditExistingImage = () => {
+    if (croppedImgUrl) {
+      setImageSrc(croppedImgUrl);
+      setDialogOpen(true);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4">
-      <FileUploader
-        onFileSelect={handleFileSelect}
-        accept="image/*"
-        maxSize={5}
-        label="Drag & drop an image here"
-        className="max-w-md"
-      />
-
-      {croppedImgUrl && (
+      {!croppedImgUrl ? (
+        <FileUploader
+          onFileSelect={handleFileSelect}
+          accept="image/*"
+          maxSize={5}
+          label="Drag & drop an image here"
+          className="max-w-md"
+        />
+      ) : (
         <Card className="w-full max-w-md p-4">
-          <CardContent className="flex flex-col gap-4 items-center">
-            <div className="mt-4">
+          <CardContent className="flex flex-col items-center">
+            <div className="mt-4 relative">
               <img
                 src={croppedImgUrl}
-                alt="Cropped"
+                alt="Product image"
                 className="w-64 h-64 object-cover rounded-xl shadow"
               />
+              <div className="absolute -top-3 -right-3 flex gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleImageClear}
+                  className="h-8 w-8 rounded-full p-0"
+                  aria-label="Clear image"
+                >
+                  <LiaTimesSolid />
+                </Button>
+              </div>
             </div>
-            <Button
-              variant="destructive"
-              onClick={handleImageClear}
-            >
-              Clear Image
-            </Button>
           </CardContent>
         </Card>
       )}

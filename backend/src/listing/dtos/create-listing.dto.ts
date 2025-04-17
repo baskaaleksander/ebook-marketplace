@@ -10,6 +10,8 @@ export class CreateListingDto {
     price: number;
     @IsString()
     fileUrl: string;
+    @IsString()
+    imageUrl: string;
     @IsArray()
     categories: {
         name: string;
