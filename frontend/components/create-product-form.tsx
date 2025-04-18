@@ -59,10 +59,20 @@ function CreateProductForm() {
     const { image } = useImage()
 
     useEffect(() => {
-        if (!authLoading && !user) {
+        if (!authLoading && !user) { 
             router.push('/login');
         }
     }, [user, authLoading, router])
+
+    useEffect(() => {
+        if (authLoading) return;
+        
+        const userData = api.get(`/user/id/${user?.id}`);
+
+        if(userData.stripeStatus !== 'verified') {
+            router.push('/user/dashboard/wallet');
+        }
+    }), [user, authLoading]
 
     const form = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
