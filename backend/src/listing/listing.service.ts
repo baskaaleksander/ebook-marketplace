@@ -5,6 +5,7 @@ import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
 import { SearchFiltersDto } from './dtos/search-filters.dto';
 import { Product } from '@prisma/client';
+import { SearchQueryDto } from 'src/dtos/search-query.dto';
 
 interface ProductWithFavourite extends Product {
     isFavourite?: boolean;
@@ -136,12 +137,21 @@ export class ListingService {
         return listingWithoutFile;
     }
 
-    async findAllListings(userId?: string) {
-        const listings = await this.prismaService.product.findMany();
+    async findAllListings(userId?: string, query?: SearchQueryDto) {
+        const [ listings, totalCount ]  = await Promise.all([
+            this.prismaService.product.findMany({
+                take: query?.limit || 10,
+                skip: query?.page ? (query.page - 1) * (query.limit || 10) : 0,
+                orderBy: {
+                    [query?.sortBy || 'createdAt']: query?.sortOrder || 'desc'
+                        }
+            }),
+            this.prismaService.product.count()
+        ]);
         
         const listingsWithFavourites = await Promise.all(
             listings.map(async (listing) => {
-                const { fileUrl, ...listingWithoutFile } = listing;
+
                 
                 if (userId) {
                     const favourite = await this.prismaService.favourite.findFirst({
@@ -150,18 +160,44 @@ export class ListingService {
                             productId: listing.id
                         }
                     });
-                    
+
+        
                     return {
-                        ...listingWithoutFile,
+                        id: listing.id,
+                        title: listing.title,
+                        price: listing.price,
+                        description: listing.description,
+                        imageUrl: listing.imageUrl,
+                        createdAt: listing.createdAt,
+                        updatedAt: listing.updatedAt,
+                        sellerId: listing.sellerId,
                         isFavourite: !!favourite
                     };
                 }
-                
-                return listingWithoutFile;
+                return {
+                    id: listing.id,
+                    title: listing.title,
+                    price: listing.price,
+                    description: listing.description,
+                    imageUrl: listing.imageUrl,
+                    createdAt: listing.createdAt,
+                    updatedAt: listing.updatedAt,
+                    sellerId: listing.sellerId,
+                    isFavourite: false,
+
+                };
             })
         );
         
-        return listingsWithFavourites;
+        return {
+            data: {
+                listings: listingsWithFavourites,
+                totalCount: totalCount,
+                totalPages: Math.ceil(totalCount / (query?.limit || 10)),
+                currentPage: query?.page || 1
+            },
+            message: 'Listings fetched successfully'
+        };
     }
 
     async getCategories(userId?: string) {

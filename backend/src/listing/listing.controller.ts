@@ -12,6 +12,7 @@ import { Request } from 'express';
 import { SearchFiltersDto } from './dtos/search-filters.dto';
 import { OptionalAuthGuard } from '../guards/optional-auth.guard';
 import { AnalyticsService } from './analytics.service';
+import { SearchQueryDto } from 'src/dtos/search-query.dto';
 
 @Controller('listing')
 export class ListingController {
@@ -25,8 +26,8 @@ export class ListingController {
 
     @UseGuards(OptionalAuthGuard)
     @Get()
-    findAllListings(@CurrentUser('userId') userId?: string) {
-        return this.listingService.findAllListings(userId);
+    findAllListings(@CurrentUser('userId') userId?: string, @Query() query?: SearchQueryDto) {
+        return this.listingService.findAllListings(userId, query);
     }
     
     @Get('recent')
