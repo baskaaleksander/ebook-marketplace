@@ -2,9 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { PrismaService } from '../prisma.service';
 import { UserService } from '../user/user.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
-import { UpdateListingDto } from './dtos/update-listing.dto';
-import { SearchFiltersDto } from './dtos/search-filters.dto';
-import { Product } from '@prisma/client';
+import { UpdateListingDto } from './dtos/update-listing.dto';import { Product } from '@prisma/client';
 import { SearchQueryDto } from 'src/dtos/search-query.dto';
 
 interface ProductWithFavourite extends Product {
@@ -137,17 +135,74 @@ export class ListingService {
         return listingWithoutFile;
     }
 
-    async findAllListings(userId?: string, query?: SearchQueryDto) {
-        const [ listings, totalCount ]  = await Promise.all([
-            this.prismaService.product.findMany({
-                take: query?.limit || 10,
-                skip: query?.page ? (query.page - 1) * (query.limit || 10) : 0,
-                orderBy: {
-                    [query?.sortBy || 'createdAt']: query?.sortOrder || 'desc'
+    async findListings(filters: SearchQueryDto, userId?: string) {
+        const {
+            query,
+            category,
+            minPrice,
+            maxPrice,
+            sortBy,
+            sortOrder,
+            isFeatured,
+        } = filters;
+    
+        const where: any = {};
+    
+        if (query) {
+            where.OR = [
+                { title: { contains: query, mode: 'insensitive' } },
+                { description: { contains: query, mode: 'insensitive' } },
+                { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
+                { seller: { name: { contains: query, mode: 'insensitive' } } },
+            ];
+        }
+    
+        if (category) {
+            if(category !== 'all'){
+                where.categories = {
+                    some: {
+                        name: {
+                            contains: category,
+                            mode: 'insensitive'
                         }
-            }),
-            this.prismaService.product.count()
-        ]);
+                    }
+                };
+            }
+
+        }
+    
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            where.price = {};
+            
+            if (minPrice !== undefined) {
+                where.price.gte = minPrice;
+            }
+            
+            if (maxPrice !== undefined) {
+                where.price.lte = maxPrice;
+            }
+        }
+    
+        if (isFeatured !== undefined) {
+            where.isFeatured = isFeatured;
+        }
+    
+        const orderBy: any = {};
+        if (sortBy) {
+            orderBy[sortBy] = sortOrder || 'desc';
+        }
+    
+        const listings  = await 
+            this.prismaService.product.findMany({
+                take: filters.limit || 10,
+                skip: filters.page ? (filters.page - 1) * (filters.limit || 10) : 0,
+                where,
+                orderBy,
+                include: {
+                    seller: true
+                }
+            })
+
         
         const listingsWithFavourites = await Promise.all(
             listings.map(async (listing) => {
@@ -171,7 +226,12 @@ export class ListingService {
                         createdAt: listing.createdAt,
                         updatedAt: listing.updatedAt,
                         sellerId: listing.sellerId,
-                        isFavourite: !!favourite
+                        isFavourite: !!favourite,
+                        seller: {
+                            id: listing.seller.id,
+                            name: listing.seller.name,
+                            surname: listing.seller.surname,
+                        }
                     };
                 }
                 return {
@@ -184,17 +244,24 @@ export class ListingService {
                     updatedAt: listing.updatedAt,
                     sellerId: listing.sellerId,
                     isFavourite: false,
+                    seller: {
+                        id: listing.seller.id,
+                        name: listing.seller.name,
+                        surname: listing.seller.surname,
+                    }
 
                 };
             })
         );
+
+        const totalCount = listingsWithFavourites.length;
         
         return {
             data: {
                 listings: listingsWithFavourites,
                 totalCount: totalCount,
-                totalPages: Math.ceil(totalCount / (query?.limit || 10)),
-                currentPage: query?.page || 1
+                totalPages: Math.ceil(totalCount / (filters.limit || 10)),
+                currentPage: filters.page || 1
             },
             message: 'Listings fetched successfully'
         };
@@ -231,7 +298,6 @@ export class ListingService {
                 const { fileUrl, ...productWithoutFileUrl } = product;
                 
                 if (userId) {
-                    // Check if the product is favorited by the current user
                     const favourite = await this.prismaService.favourite.findFirst({
                         where: {
                             userId: userId,
@@ -424,103 +490,6 @@ export class ListingService {
         return listings;
     }
 
-async findListings(filters: SearchFiltersDto, userId?: string) {
-    const {
-        query,
-        category,
-        minPrice,
-        maxPrice,
-        sortBy,
-        sortOrder,
-        isFeatured,
-    } = filters;
-
-    const where: any = {};
-
-    if (query) {
-        where.OR = [
-            { title: { contains: query, mode: 'insensitive' } },
-            { description: { contains: query, mode: 'insensitive' } },
-            { categories: { some: { name: { contains: query, mode: 'insensitive' } } } },
-            { seller: { name: { contains: query, mode: 'insensitive' } } },
-        ];
-    }
-
-    if (category) {
-        where.categories = {
-            some: {
-                name: {
-                    contains: category,
-                    mode: 'insensitive'
-                }
-            }
-        };
-    }
-
-    if (minPrice !== undefined || maxPrice !== undefined) {
-        where.price = {};
-        
-        if (minPrice !== undefined) {
-            where.price.gte = minPrice;
-        }
-        
-        if (maxPrice !== undefined) {
-            where.price.lte = maxPrice;
-        }
-    }
-
-    if (isFeatured !== undefined) {
-        where.isFeatured = isFeatured;
-    }
-
-    const orderBy: any = {};
-    if (sortBy) {
-        orderBy[sortBy] = sortOrder || 'desc';
-    }
-
-    const products = await this.prismaService.product.findMany({
-        where,
-        orderBy,
-        include: {
-            categories: true,
-            seller: {
-                select: {
-                    id: true,
-                    name: true,
-                    surname: true,
-                    email: true,
-                    avatarUrl: true,
-                    stripeStatus: true,
-                    createdAt: true,
-                }
-            }
-        }
-    });
-
-    const productsWithFavourites = await Promise.all(
-        products.map(async (product) => {
-            const { fileUrl, ...productWithoutFile } = product;
-            
-            if (userId) {
-                const favourite = await this.prismaService.favourite.findFirst({
-                    where: {
-                        userId: userId,
-                        productId: product.id
-                    }
-                });
-                
-                return {
-                    ...productWithoutFile,
-                    isFavourite: !!favourite
-                };
-            }
-            
-            return productWithoutFile;
-        })
-    );
-    
-    return productsWithFavourites;
-}
 
     async deleteListing(id: string, userId: string) {
 

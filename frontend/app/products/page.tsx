@@ -19,7 +19,7 @@ function AllProducts() {
             try {
                 setLoading(true);
                 
-                let url = '/listing/search';
+                let url = '/listing/';
                 const params = new URLSearchParams();
                 
                 if (filtering.query) params.append('query', filtering.query);
@@ -37,7 +37,9 @@ function AllProducts() {
                 
                 console.log('Fetching URL:', url);
                 const response = await api.get(url);
-                setProducts(response.data);
+
+                console.log('Response data:', response.data.data);
+                setProducts(response.data.data.listings);
             }
             catch(err) {
                 console.error("Error fetching data:", err);

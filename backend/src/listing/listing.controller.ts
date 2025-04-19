@@ -9,7 +9,6 @@ import { FavouritesService } from './favourites.service';
 import { ViewedListingsService } from './viewedListing.service';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Request } from 'express';
-import { SearchFiltersDto } from './dtos/search-filters.dto';
 import { OptionalAuthGuard } from '../guards/optional-auth.guard';
 import { AnalyticsService } from './analytics.service';
 import { SearchQueryDto } from 'src/dtos/search-query.dto';
@@ -26,8 +25,8 @@ export class ListingController {
 
     @UseGuards(OptionalAuthGuard)
     @Get()
-    findAllListings(@CurrentUser('userId') userId?: string, @Query() query?: SearchQueryDto) {
-        return this.listingService.findAllListings(userId, query);
+    findListings(@Query() filters: SearchQueryDto, @CurrentUser('userId') userId?: string) {
+        return this.listingService.findListings(filters, userId);
     }
     
     @Get('recent')
@@ -51,15 +50,6 @@ export class ListingController {
     @Get('user/:userId')
     findUserListings(@Param('userId') userId: string, @CurrentUser('userId') currentUserId?: string) {
         return this.listingService.findUserListings(userId, currentUserId);
-    }
-    
-    @UseGuards(OptionalAuthGuard)
-    @Get('search')
-    searchListings(
-        @Query() query: SearchFiltersDto,
-        @CurrentUser('userId') userId?: string
-    ) {
-        return this.listingService.findListings(query, userId);
     }
     
     @UseGuards(OptionalAuthGuard)
