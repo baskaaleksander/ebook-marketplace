@@ -88,12 +88,12 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
         <div className="rounded-lg overflow-hidden shadow-lg">
-          <div className="bg-slate-100 p-8 ">
+          <div className="bg-slate-100">
             {product.imageUrl ? (
               <img 
-                src={product.imageUrl} 
-                alt={product.title} 
-                className="max-w-full object-contain aspect-square" 
+              src={product.imageUrl} 
+              alt={product.title} 
+              className="w-full h-full object-cover" 
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-gray-500 aspect-square h-full">

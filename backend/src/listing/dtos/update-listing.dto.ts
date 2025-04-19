@@ -21,6 +21,10 @@ export class UpdateListingDto {
 
   @IsString()
   @IsOptional()
+  imageUrl?: string;
+
+  @IsString()
+  @IsOptional()
   fileUrl?: string;
 
   @IsArray()

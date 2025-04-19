@@ -58,7 +58,7 @@ function ProductCard({
     
     return (
                 <div className="flex-1 flex flex-col p-4">
-                    <div className="aspect-[3/4] overflow-hidden rounded-md mb-4 relative">
+                    <div className="overflow-hidden rounded-md mb-4 relative">
                         <div className="absolute top-2 right-2 z-10">
                             <FavoriteButton productId={id} initialIsFavorite={isFavorite} />
                         </div>
@@ -66,8 +66,9 @@ function ProductCard({
                         <img
                             src={imageUrl || placeholder.src}
                             alt={title}
-                            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-300"
                             loading="lazy"
+                            style={{ aspectRatio: '1/1' }}
                         />
                         </Link>
                     </div>

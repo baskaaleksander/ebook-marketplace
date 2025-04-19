@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { title } from "process";
 
 const createProductSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -41,7 +42,7 @@ function ProductPageModifyPre({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { image, setImage } = useImage();
     const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false)
+    const [success, setSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [product, setProduct] = useState<Product | null>(null);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -121,10 +122,9 @@ function ProductPageModifyPre({ params }: { params: { id: string } }) {
         setError(null);
         setIsLoading(true);
         
-        let imageUrl = product?.imageUrl || "";
-        if (image && image !== product?.imageUrl) {
+        let imageUrl = "";
+        if (image) {
           if (image.startsWith('data:') || image.startsWith('blob:')) {
-
             const response = await fetch(image);
             const blob = await response.blob();
             const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
@@ -145,12 +145,11 @@ function ProductPageModifyPre({ params }: { params: { id: string } }) {
           }
         }
 
-        // Handle PDF upload if changed
         let fileUrl = product?.fileUrl || "";
         
         if (pdfChanged) {
           if (pdfFile) {
-            // Upload new PDF file
+
             const pdfFormData = new FormData();
             pdfFormData.append('file', pdfFile);
             
@@ -176,7 +175,7 @@ function ProductPageModifyPre({ params }: { params: { id: string } }) {
           fileUrl,
           fileName
         });
-        
+     
         setSuccess(true);
         
         setTimeout(() => {
