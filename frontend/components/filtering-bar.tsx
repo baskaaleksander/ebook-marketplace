@@ -79,9 +79,8 @@ function FilteringBar() {
                                         <SelectItem value="all">All Categories</SelectItem>
                                         <SelectItem value="fiction">Fiction</SelectItem>
                                         <SelectItem value="non-fiction">Non-Fiction</SelectItem>
-                                        <SelectItem value="science">Science</SelectItem>
-                                        <SelectItem value="technology">Technology</SelectItem>
-                                        <SelectItem value="business">Business</SelectItem>
+                                        <SelectItem value="education">Education & Professional</SelectItem>
+                                        <SelectItem value="creative">Creative & Lifestyle</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

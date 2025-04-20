@@ -17,7 +17,7 @@ function AllHomeProducts() {
       try {
         setLoading(true);
         const response = await api.get("/listing/categories");
-        setCategories(response.data);
+        setCategories(response.data.data);
         setError(null);
       } catch (err) {
         console.error("Error fetching categories:", err);

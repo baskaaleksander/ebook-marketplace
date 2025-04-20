@@ -56,7 +56,7 @@ export class ListingService {
             throw new UnauthorizedException('Seller is not verified');
         }
 
-        return this.prismaService.product.create({
+        await this.prismaService.product.create({
             data: {
                 title: data.title,
                 description: data.description,
@@ -83,6 +83,19 @@ export class ListingService {
                 }
     }
         });
+
+        return {
+            message: 'Listing created successfully',
+            data: {
+                title: data.title,
+                description: data.description,
+                price: data.price,
+                fileUrl: data.fileUrl,
+                imageUrl: data.imageUrl,
+                sellerId: userId,
+                categories: categoryConnections
+            }
+        }
     }
     
     async findListingById(id: string, userId?: string) {
@@ -276,27 +289,15 @@ export class ListingService {
                         createdAt: 'desc'
                     },
                     include: {
-                        seller: {
-                            select: {
-                                id: true,
-                                name: true,
-                                surname: true,
-                                email: true,
-                                avatarUrl: true,
-                                stripeStatus: true,
-                                createdAt: true,
-                            }
-                        }
+                        seller: true
                     }
                 }
             }
         });
 
         const processedCategories = await Promise.all(categories.map(async category => {
-            // Process products for each category
-            const processedProducts = await Promise.all(category.products.map(async product => {
-                const { fileUrl, ...productWithoutFileUrl } = product;
-                
+
+            const processedProducts = await Promise.all(category.products.map(async product => {                
                 if (userId) {
                     const favourite = await this.prismaService.favourite.findFirst({
                         where: {
@@ -306,11 +307,40 @@ export class ListingService {
                     });
                     
                     return {
-                        ...productWithoutFileUrl,
-                        isFavourite: !!favourite
+                        id: product.id,
+                        title: product.title,
+                        price: product.price,
+                        description: product.description,
+                        imageUrl: product.imageUrl,
+                        createdAt: product.createdAt,
+                        updatedAt: product.updatedAt,
+                        sellerId: product.sellerId,
+                        isFavourite: !!favourite,
+                        seller: {
+                            id: product.seller.id,
+                            name: product.seller.name,
+                            surname: product.seller.surname,
+                        }
+
                     };
                 }
-                return productWithoutFileUrl;
+                return {
+                    id: product.id,
+                    title: product.title,
+                    price: product.price,
+                    description: product.description,
+                    imageUrl: product.imageUrl,
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt,
+                    sellerId: product.sellerId,
+                    isFavourite: false,
+                    seller: {
+                        id: product.seller.id,
+                        name: product.seller.name,
+                        surname: product.seller.surname,
+                    }
+
+                };
             }));
             
             return {
@@ -319,60 +349,10 @@ export class ListingService {
             };
         }));
 
-        return processedCategories;
-    }
-
-    
-
-    async getProductsByCategory(category: string, userId?: string) {
-        const categoryName = decodeURIComponent(category);
-        const listings = await this.prismaService.product.findMany({
-            where: {
-                categories: {
-                    some: {
-                        name: categoryName
-                    }
-                }
-            },
-            include: {
-                categories: true,
-                seller: {
-                    select: {
-                        id: true,
-                        name: true,
-                        surname: true,
-                        email: true,
-                        avatarUrl: true,
-                        stripeStatus: true,
-                        createdAt: true,
-                    }
-                }
-            }
-        });
-        
-        const listingsWithFavourites = await Promise.all(
-            listings.map(async (listing) => {
-                const { fileUrl, ...listingWithoutFile } = listing;
-                
-                if (userId) {
-                    const favourite = await this.prismaService.favourite.findFirst({
-                        where: {
-                            userId: userId,
-                            productId: listing.id
-                        }
-                    });
-                    
-                    return {
-                        ...listingWithoutFile,
-                        isFavourite: !!favourite
-                    };
-                }
-                
-                return listingWithoutFile;
-            })
-        );
-        
-        return listingsWithFavourites;
+        return {
+            data: processedCategories,
+            message: 'Categories fetched successfully'
+        };
     }
 
     async findUserListings(userId: string, currentUserId?: string) {
@@ -382,44 +362,62 @@ export class ListingService {
             },
             include: {
                 categories: true,
-                seller: {
-                    select: {
-                        id: true,
-                        name: true,
-                        surname: true,
-                        email: true,
-                        avatarUrl: true,
-                        stripeStatus: true,
-                        createdAt: true,
-                    }
-                }
+                seller: true
             }
         });
         
-        // Add favorite status for current user if they're logged in
         const listingsWithFavourites = await Promise.all(
-            listings.map(async (listing) => {
-                const { fileUrl, ...listingWithoutFile } = listing;
+            listings.map(async (product) => {
                 
                 if (currentUserId) {
                     const favourite = await this.prismaService.favourite.findFirst({
                         where: {
                             userId: currentUserId,
-                            productId: listing.id
+                            productId: product.id
                         }
                     });
                     
                     return {
-                        ...listingWithoutFile,
-                        isFavourite: !!favourite
-                    };
+                            id: product.id,
+                            title: product.title,
+                            price: product.price,
+                            description: product.description,
+                            imageUrl: product.imageUrl,
+                            createdAt: product.createdAt,
+                            updatedAt: product.updatedAt,
+                            sellerId: product.sellerId,
+                            isFavourite: !!favourite,
+                            seller: {
+                                id: product.seller.id,
+                                name: product.seller.name,
+                                surname: product.seller.surname,
+                            }
+                        };
                 }
                 
-                return listingWithoutFile;
+                return {
+                    id: product.id,
+                    title: product.title,
+                    price: product.price,
+                    description: product.description,
+                    imageUrl: product.imageUrl,
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt,
+                    sellerId: product.sellerId,
+                    isFavourite: false,
+                    seller: {
+                        id: product.seller.id,
+                        name: product.seller.name,
+                        surname: product.seller.surname,
+                    }
+                };
             })
         );
         
-        return listingsWithFavourites;
+        return {
+            data: listingsWithFavourites,
+            message: 'Listings fetched successfully'
+        };
     }
 
     async getFeaturedListings(userId?: string) {
@@ -448,46 +446,57 @@ export class ListingService {
         }
         
         const listingsWithFavourites = await Promise.all(
-            listings.map(async (listing) => {
-                const { fileUrl, ...listingWithoutFile } = listing;
+            listings.map(async (product) => {
                 
                 if (userId) {
                     const favourite = await this.prismaService.favourite.findFirst({
                         where: {
                             userId: userId,
-                            productId: listing.id
+                            productId: product.id
                         }
                     });
                     
                     return {
-                        ...listingWithoutFile,
-                        isFavourite: !!favourite
+                        id: product.id,
+                        title: product.title,
+                        price: product.price,
+                        description: product.description,
+                        imageUrl: product.imageUrl,
+                        createdAt: product.createdAt,
+                        updatedAt: product.updatedAt,
+                        sellerId: product.sellerId,
+                        isFavourite: !!favourite,
+                        seller: {
+                            id: product.seller.id,
+                            name: product.seller.name,
+                            surname: product.seller.surname,
+                        }
                     };
                 }
                 
-                return listingWithoutFile;
+                return {
+                    id: product.id,
+                    title: product.title,
+                    price: product.price,
+                    description: product.description,
+                    imageUrl: product.imageUrl,
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt,
+                    sellerId: product.sellerId,
+                    isFavourite: false,
+                    seller: {
+                        id: product.seller.id,
+                        name: product.seller.name,
+                        surname: product.seller.surname,
+                    }
+                };
             })
         );
         
-        return listingsWithFavourites;
-    }
-    async searchListingsFromCategory(category: string, take: string) {
-        const listings = await this.prismaService.product.findMany({
-            where: {
-                categories: {
-                    some: {
-                        name: category
-                    }
-                }
-            },
-            take: parseInt(take) || 10,
-        });
-
-        if(listings.length === 0){
-            throw new NotFoundException('No listings found');
-        }
-
-        return listings;
+        return {
+            data: listingsWithFavourites,
+            message: 'Featured listings fetched successfully'
+        };
     }
 
 
@@ -600,16 +609,6 @@ export class ListingService {
         });
     }
 }
-
-    getRecentListings() {
-        return this.prismaService.product.findMany({
-            take: 10,
-            orderBy: {
-                createdAt: 'desc'
-            }
-
-        });
-    }
 
 
 }

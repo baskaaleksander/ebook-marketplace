@@ -10,9 +10,10 @@ async function CategoryPage({ params }: { params: { name: string } }) {
   let error: string | null = null;
   
   try {
-  
-    const response = await api.get(`/listing/categories/${categoryName}/products`);
-    products = response.data;
+    const category = categoryName.split('%20').shift();
+    console.log(category);
+    const response = await api.get(`/listing?category=${category}`);
+    products = response.data.data.listings;
     
   } catch (err) {
     console.error(`Error fetching products for category ${categoryName}:`, err);

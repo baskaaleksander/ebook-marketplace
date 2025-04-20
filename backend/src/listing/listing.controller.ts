@@ -29,9 +29,10 @@ export class ListingController {
         return this.listingService.findListings(filters, userId);
     }
     
-    @Get('recent')
-    findRecentListings() {
-        return this.listingService.getRecentListings();
+    @UseGuards(AuthGuard('jwt')) 
+    @Post()
+    createListing(@Body() body: CreateListingDto, @CurrentUser('userId') userId: string) {
+        return this.listingService.createListing(body, userId);
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -45,32 +46,29 @@ export class ListingController {
     findFeaturedListings(@CurrentUser('userId') userId?: string) {
         return this.listingService.getFeaturedListings(userId);
     }
-
-    @UseGuards(OptionalAuthGuard)
-    @Get('user/:userId')
-    findUserListings(@Param('userId') userId: string, @CurrentUser('userId') currentUserId?: string) {
-        return this.listingService.findUserListings(userId, currentUserId);
-    }
     
     @UseGuards(OptionalAuthGuard)
     @Get('categories')
     getCategories(@CurrentUser('userId') userId?: string) {
         return this.listingService.getCategories(userId);
     }
-
-    @UseGuards(OptionalAuthGuard)
-    @Get('categories/:category/products')
-    getProductsByCategory(
-        @Param('category') category: string,
-        @CurrentUser('userId') userId?: string
-    ) {
-        return this.listingService.getProductsByCategory(category, userId);
-    }
     
     @UseGuards(AuthGuard('jwt'))
     @Get('favourites') 
     getFavorites(@CurrentUser('userId') userId: string) {
         return this.favouritesService.getFavorites(userId);
+    }
+    
+    @UseGuards(AuthGuard('jwt'))
+    @Get('viewed')
+    getViewedProducts(@CurrentUser('userId') userId: string) {
+        return this.viewedListingsService.getViewedProducts(userId);
+    }
+    
+    @UseGuards(OptionalAuthGuard)
+    @Get('user/:userId')
+    findUserListings(@Param('userId') userId: string, @CurrentUser('userId') currentUserId?: string) {
+        return this.listingService.findUserListings(userId, currentUserId);
     }
     
     @UseGuards(AuthGuard('jwt'))
@@ -85,22 +83,10 @@ export class ListingController {
         return this.favouritesService.removeFavorite(userId, param);
     }
     
-    @UseGuards(AuthGuard('jwt'))
-    @Get('viewed')
-    getViewedProducts(@CurrentUser('userId') userId: string) {
-        return this.viewedListingsService.getViewedProducts(userId);
-    }
-
-    @Get(':id/views')
-    getProductViews(@Param('id') param: string) {
-        return this.viewedListingsService.getProductViews(param);
-    }
-    
     @Get('reviews/:reviewId')
     getReview(@Param('reviewId') reviewId: string) {
         return this.reviewService.getReview(reviewId);
     }
-
     
     @UseGuards(AuthGuard('jwt'))
     @Put('reviews/:reviewId')
@@ -114,14 +100,31 @@ export class ListingController {
         return this.reviewService.deleteReview(param, userId);
     }
     
-    @Get(':id')
     @UseGuards(OptionalAuthGuard)
+    @Get(':id')
     findListingById(@Param('id') param: string, @CurrentUser('userId') userId?: string) {
         return this.listingService.findListingById(param, userId);
     }
     
+    @UseGuards(AuthGuard('jwt'))
+    @Put(':id')
+    updateListing(@Param('id') param: string, @Body() updateListingDto: UpdateListingDto, @CurrentUser('userId') userId: string) {
+        return this.listingService.updateListing(param, updateListingDto, userId);
+    }
+    
+    @UseGuards(AuthGuard('jwt'))
+    @Delete(':id')
+    deleteListing(@Param('id') param: string, @CurrentUser('userId') userId: string) {
+        return this.listingService.deleteListing(param, userId);
+    }
+    
+    @Get(':id/views')
+    getProductViews(@Param('id') param: string) {
+        return this.viewedListingsService.getProductViews(param);
+    }
+    
     @Get(':id/reviews')
-    getReviews(@Param('id') param: string ) {
+    getReviews(@Param('id') param: string) {
         return this.reviewService.getReviews(param);
     }
     
@@ -136,23 +139,4 @@ export class ListingController {
         const userId = req.user?.userId || null;
         return this.viewedListingsService.trackListingView(userId, param);
     }
-    
-    @Put(':id')
-    @UseGuards(AuthGuard('jwt'))
-    updateListing(@Param('id') param: string, @Body() updateListingDto: UpdateListingDto, @CurrentUser('userId') userId: string) {
-        return this.listingService.updateListing(param, updateListingDto, userId);
-    }
-    
-    @Delete(':id')
-    @UseGuards(AuthGuard('jwt'))
-    deleteListing(@Param('id') param: string, @CurrentUser('userId') userId: string) {
-        return this.listingService.deleteListing(param, userId);
-    }
-    
-    @UseGuards(AuthGuard('jwt')) 
-    @Post()
-    createListing(@Body() body: CreateListingDto, @CurrentUser('userId') userId: string) {
-        return this.listingService.createListing(body, userId);
-    }
-    
 }

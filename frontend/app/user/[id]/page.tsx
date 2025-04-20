@@ -32,11 +32,11 @@ function User({ params }: { params: Promise<{ id: string }> }) {
                 
                 const productsResponse = await api.get(`/listing/user/${userId}`);
 
-                if (productsResponse.data.length === 0) {
+                if (productsResponse.data.data.length === 0) {
                     setProducts([]);
                 }
 
-                setProducts(productsResponse.data);
+                setProducts(productsResponse.data.data);
             }
             catch (error) {
                 console.error("Error fetching data:", error);
