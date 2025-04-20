@@ -56,26 +56,4 @@ export class UserController {
         return this.userService.getUserReviews(id);
     }
 
-    @ApiOperation({ summary: 'Get listings for a user' })
-    @ApiParam({ name: 'id', description: 'User ID' })
-    @ApiResponse({ status: 200, description: 'User listings retrieved successfully' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @Get(':id/listings')
-    @Serialize(UserResponseDto)
-    findUserListings(@Param('id') id: string) {
-        return this.userService.findUserListings(id, false);
-    }
-
-    @ApiOperation({ summary: 'Get listings for a user including file URLs' })
-    @ApiParam({ name: 'id', description: 'User ID' })
-    @ApiResponse({ status: 200, description: 'User listings with URLs retrieved successfully' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiBearerAuth()
-    @UseGuards(AuthGuard('jwt'))
-    @Get(':id/listings/url')
-    @Serialize(UserResponseDto)
-    findUserListingsWithUrl(@Param('id') id: string) {
-        return this.userService.findUserListings(id, true);
-    }
 }

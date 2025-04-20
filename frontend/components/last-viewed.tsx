@@ -43,17 +43,11 @@ function LastViewed() {
         );
     }
     if (!user && !authLoading) {
-        return (
-            <></>
-        );
+        return null;
     }
 
     if (lastViewed.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-2xl font-bold">No products viewed yet</h1>
-            </div>
-        );
+        return null;
     }
 
     return (

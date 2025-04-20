@@ -39,7 +39,9 @@ export class AuthService {
     }
 
     async validateCredentials(user: UserCredentialsDto){
-        const users = await this.userService.findUserByEmail(user.email);
+        const users = await this.prismaService.user.findUnique({
+            where: { email: user.email }
+        });
 
         if(!users){
             throw new NotFoundException('User not found');

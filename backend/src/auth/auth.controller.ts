@@ -21,8 +21,10 @@ export class AuthController {
     @UseGuards(AuthGuard('jwt'))
     @Get('/me')
     async me(@CurrentUser('userId') userId: string){
-        return userId;
+        return userId
     }
+
+
     @Post('/register')
     async register(@Body() data: CreateUserDto, @Res() res: Response){
         const token = await this.authService.register(data);

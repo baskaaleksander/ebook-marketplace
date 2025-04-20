@@ -21,7 +21,7 @@ function MyProducts() {
         if (productsResponse.data.length === 0) {
           setProducts([]);
         } else {
-          setProducts(productsResponse.data);
+          setProducts(productsResponse.data.data);
         }
       } catch (err) {
         console.error("Error fetching products:", err);

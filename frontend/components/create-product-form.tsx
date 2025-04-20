@@ -51,6 +51,7 @@ const categories = [
 function CreateProductForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [userData, setUserData] = useState<any>(null)
     const [success, setSuccess] = useState(false)
     const [pdfFile, setPdfFile] = useState<File | null>(null)
     const router = useRouter()
@@ -63,20 +64,27 @@ function CreateProductForm() {
         }
     }, [user, authLoading, router])
 
-    /*
-    @todo:
-    - Check if user has a verified stripe account before allowing them to create a product
-    - If not, redirect them to the wallet page
-    */
     useEffect(() => {
         if (authLoading) return;
         
-        const userData = api.get(`/user/id/${user?.id}`);
+        const fetchUserData = async () => {
+            if (!user) return;
+            try {
+                const response = await api.get('/auth/me');
+                const user = await api.get(`/user/${response.data}`);
+                
+                if(user.data.stripeStatus !== 'verified') {
+                    router.push('/user/dashboard/wallet');
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                setError("Failed to load user data");
+            }
+        };
 
-        if(userData.stripeStatus !== 'verified') {
-            router.push('/user/dashboard/wallet');
-        }
-    }), [user, authLoading]
+        fetchUserData();
+
+    }, [user, authLoading])
 
     const form = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
