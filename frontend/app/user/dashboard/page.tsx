@@ -6,7 +6,7 @@ import SoldOrdersTable from "@/components/sold-orders-table";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AnalyticsData } from "@/lib/definitions";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -33,7 +33,7 @@ function Dashboard() {
           api.get('/stripe/orders/')
         ]);
         setAnalyticsData(analyticsResponse.data);
-        setSoldOrders(soldOrdersResponse.data);
+        setSoldOrders(soldOrdersResponse.data.data);
         setBoughtOrders(boughtOrdersResponse.data.data);
       }
       catch (err) {

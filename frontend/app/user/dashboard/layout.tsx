@@ -2,7 +2,7 @@
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { useAuth } from "@/providers/authprovider"
+import { useAuth } from "@/providers/auth-provider"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 

@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { useEffect, useState } from "react";
 import { chartConfig } from "./chart-config";

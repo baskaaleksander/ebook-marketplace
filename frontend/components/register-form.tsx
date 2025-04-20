@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import * as z from 'zod';
 import { useEffect, useState } from "react"
-import { useAuth } from "@/providers/authprovider"
+import { useAuth } from "@/providers/auth-provider"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"

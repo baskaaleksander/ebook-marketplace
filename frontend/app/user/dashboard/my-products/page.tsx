@@ -1,7 +1,7 @@
 'use client';
 import UserProductsTable from "@/components/user-products-table"
 import { Product } from "@/lib/definitions";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { useEffect, useState } from "react";
 

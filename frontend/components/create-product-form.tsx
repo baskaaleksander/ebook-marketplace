@@ -1,5 +1,5 @@
 'use client'
-import { useAuth } from "@/providers/authprovider"
+import { useAuth } from "@/providers/auth-provider"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useImage } from "@/providers/image-provider"
@@ -46,7 +46,6 @@ const categories = [
   { id: "nonfiction", name: "Non-Fiction" },
   { id: "educationandprofessional", name: "Education & Professional" },
   { id: "creativeandlifestyle", name: "Creative & Lifestyle" },
-  { id: "graphics", name: "Graphics & Design" },
 ];
 
 function CreateProductForm() {
@@ -64,6 +63,11 @@ function CreateProductForm() {
         }
     }, [user, authLoading, router])
 
+    /*
+    @todo:
+    - Check if user has a verified stripe account before allowing them to create a product
+    - If not, redirect them to the wallet page
+    */
     useEffect(() => {
         if (authLoading) return;
         

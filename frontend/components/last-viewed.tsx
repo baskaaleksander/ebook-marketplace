@@ -1,12 +1,11 @@
 'use client';
 
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import { Product } from "@/lib/definitions";
 import { useEffect, useState } from "react";
 import api from "@/utils/axios";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import ProductCard from "./product-card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 
 function LastViewed() {
     const { user, loading: authLoading } = useAuth();

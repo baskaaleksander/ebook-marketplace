@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import UserProducts from "@/components/user-products";
 import { mockUserData, Product, UserData } from "@/lib/definitions";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -35,12 +35,13 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
         setLoading(true);
         const productResponse = await api.get(`/listing/${productId}`);
         const [ sellerResponse, sellerProductsResponse, reviewsResponse ] = await Promise.all([
-          api.get(`/user/id/${productResponse.data.sellerId}`),
+          api.get(`/user/${productResponse.data.sellerId}`),
           api.get(`/listing/user/${productResponse.data.sellerId}`),
           api.get(`/listing/${productId}/reviews`)
         ]);
+
         setSeller(sellerResponse.data);
-        setSellerProducts(sellerProductsResponse.data);
+        setSellerProducts(sellerProductsResponse.data.data);
         setProduct(productResponse.data);
         setReviews(reviewsResponse.data);
         

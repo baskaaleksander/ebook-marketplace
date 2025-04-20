@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ChevronRight, Home, ShoppingCart, Wallet, BookOpen, BarChart3, Settings, Heart, Clock } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
-import { useAuth } from "@/providers/authprovider"
+import { useAuth } from "@/providers/auth-provider"
 import Link from "next/link"
 
 import {

@@ -17,7 +17,7 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useState } from "react";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
 
 function Navbar() {

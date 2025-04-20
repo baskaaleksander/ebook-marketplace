@@ -1,6 +1,6 @@
 'use client';
 import { UserData } from "@/lib/definitions";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -78,7 +78,7 @@ function SettingsPage() {
       if (!user?.id) return;
       
       try {
-        const response = await api.get(`/user/id/${user.id}`);
+        const response = await api.get(`/user/${user.id}`);
         const fetchedUser = response.data;
         
         setUserData({

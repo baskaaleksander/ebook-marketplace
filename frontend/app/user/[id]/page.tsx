@@ -21,7 +21,7 @@ function User({ params }: { params: Promise<{ id: string }> }) {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const userResponse = await api.get(`/user/id/${userId}`);
+                const userResponse = await api.get(`/user/${userId}`);
                 const userRatingResponse = await api.get(`/user/avgratings/${userId}`);
                 setUserData({
                     ...userResponse.data, 

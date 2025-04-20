@@ -205,8 +205,22 @@ export class StripeService {
             throw new NotFoundException('User not found or not connected to stripe');
         }
 
-        return this.stripe.balance.retrieve({
+        const balance = await this.stripe.balance.retrieve({
             stripeAccount: user.stripeAccount
         });
+
+        return {
+            data: {
+                available: {
+                    amount: balance.available[0].amount,
+                    currency: balance.available[0].currency,
+
+                },
+                pending: {
+                    amount: balance.pending[0].amount,
+                    currency: balance.pending[0].currency,
+                }
+            }
+        }
     }
 }

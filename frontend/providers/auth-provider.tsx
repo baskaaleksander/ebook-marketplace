@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const checkAuthStatus = async () => {
       try {
         const response = await api.get('/auth/me');
-        const user = await api.get(`/user/id/${response.data}`);
+        const user = await api.get(`/user/${response.data}`);
         setUser(user.data);
         } catch (error) {
         setUser(null);
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
-      const user = await api.get(`/user/id/${response.data.user}`);
+      const user = await api.get(`/user/${response.data.user}`);
       setUser(user.data);
 
     } finally {

@@ -1,7 +1,7 @@
 'use client';
 import { Review } from "@/lib/definitions";
 import StarRating from "./star-rating";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { useState } from "react";

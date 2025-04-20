@@ -43,7 +43,7 @@ function ProductCard({
         if (!sellerData) {
             const fetchSeller = async () => {
                 try {
-                    const response = await api.get(`/user/id/${sellerId}`);
+                    const response = await api.get(`/user/${sellerId}`);
                     setSeller(response.data);
                 } catch (error) {
                     console.error("Error fetching seller data:", error);

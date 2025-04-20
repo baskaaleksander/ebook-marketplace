@@ -4,7 +4,9 @@ import { CreateUserDto } from './dtos/create-user.dto';
 
 @Injectable()
 export class UserService {
-    constructor(private prismaService: PrismaService) {}
+    constructor(
+        private prismaService: PrismaService,
+    ) {}
 
     async createUser(data: CreateUserDto) {
         return this.prismaService.user.create({ data });
@@ -63,6 +65,7 @@ export class UserService {
     }
     
     async findUserListings(id: string, includeFileUrl: boolean) {
+        
         const user = await this.prismaService.user.findUnique({
             where: { id },
             include: { products: {
@@ -86,26 +89,11 @@ export class UserService {
             throw new NotFoundException('User not found');
         }
 
+        console.log(user.products);
+
         return user.products;
     }
 
-    async findUserByEmail(email: string) {
-        const user = await this.prismaService.user.findUnique({
-            where: { email },
-            include: { 
-                products: true,
-                reviews: true,
-                orders: true,
-                payouts: true
-             }
-        });
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        return user;
-    }
     async findUserById(id: string) {
         const user = await this.prismaService.user.findUnique({
             where: { id },

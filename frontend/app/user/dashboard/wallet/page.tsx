@@ -2,7 +2,7 @@
 
 import UserBalance from "@/components/user-balance";
 import { Balance, Order, Payout } from "@/lib/definitions";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,19 +39,9 @@ function Wallet() {
                     api.get(`/stripe/payouts/`)
                 ]);
 
-                const extractedBalance = {
-                    available: {
-                      amount: balanceResponse.data.available[0].amount, 
-                      currency: balanceResponse.data.available[0].currency
-                    },
-                    pending: {
-                      amount: balanceResponse.data.pending[0].amount,
-                      currency: balanceResponse.data.pending[0].currency
-                    }
-                };
 
-                setBalance(extractedBalance);
-                setSoldOrders(soldOrdersResponse.data);
+                setBalance(balanceResponse.data.data);
+                setSoldOrders(soldOrdersResponse.data.data);
                 setPayouts(payoutsResponse.data);
             } catch (err) {
                 console.error("Error fetching data:", err);

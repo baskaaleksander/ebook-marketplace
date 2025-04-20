@@ -29,7 +29,21 @@ export class OrderService {
                 const { fileUrl, ...productWithoutFileUrl } = order.product || {};
                 return { ...order, product: productWithoutFileUrl };
             }
-            return order;
+            return {
+                id: order.id,
+                sellerId: order.sellerId,
+                buyerId: order.buyerId,
+                isReviewed: order.isReviewed,
+                productId: order.productId,
+                product: order.product,
+                refundId: order?.refundId || null,
+                status: order.status,
+                amount: order.amount,
+                checkoutSessionId: order?.checkoutSessionId || null,
+                paymentUrl: order?.paymentUrl || null,
+                createdAt: order.createdAt,
+                updatedAt: order.updatedAt,
+            };
         }));
 
         return {
@@ -38,11 +52,41 @@ export class OrderService {
             message: 'Orders fetched successfully'
         }
     }
-    getAllSoldOrders(userId: string){
-        return this.prismaService.order.findMany({
+    async getAllSoldOrders(userId: string){
+        const orders = await this.prismaService.order.findMany({
             where: { sellerId: userId },
             include: { product: true }
         });
+
+        const mappedOrders = orders.map(order => {
+            if (order.status === 'REFUNDED' || order.status === 'PENDING' && order.product) {
+                const { fileUrl, ...productWithoutFileUrl } = order.product || {};
+                return { ...order, product: productWithoutFileUrl };
+            }
+            return {
+                id: order.id,
+                sellerId: order.sellerId,
+                buyerId: order.buyerId,
+                isReviewed: order.isReviewed,
+                productId: order.productId,
+                product: order.product,
+                refundId: order?.refundId || null,
+                status: order.status,
+                amount: order.amount,
+                checkoutSessionId: order?.checkoutSessionId || null,
+                paymentUrl: order?.paymentUrl || null,
+                createdAt: order.createdAt,
+                updatedAt: order.updatedAt,
+            };
+        }
+        );
+
+        return {
+            data: mappedOrders,
+            count: mappedOrders.length,
+            message: 'Orders fetched successfully'
+        }
+
     }
 
 
@@ -192,7 +236,7 @@ export class OrderService {
             })
 
 
-            return refund
+            return { message: 'Refund created successfully', refund };
         } catch (error) {
             throw new NotFoundException('Stripe error', error);
         }

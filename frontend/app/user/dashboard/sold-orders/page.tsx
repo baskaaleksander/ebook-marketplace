@@ -1,7 +1,7 @@
 'use client'
 import SoldOrdersTable from "@/components/sold-orders-table"
 import { Order } from "@/lib/definitions";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ function SoldOrders() {
             try {
                 setLoading(true);
                 const soldOrdersResponse = await api.get(`/stripe/orders/sold/`);
-                setSoldOrders(soldOrdersResponse.data);
+                setSoldOrders(soldOrdersResponse.data.data);
             } catch (err) {
                 console.error("Error fetching data:", err);
                 setError('Failed to load sold orders');

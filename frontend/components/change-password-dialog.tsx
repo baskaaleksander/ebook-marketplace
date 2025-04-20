@@ -3,7 +3,7 @@ import { useState } from "react";
 import * as z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";

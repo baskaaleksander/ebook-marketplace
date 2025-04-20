@@ -4,53 +4,78 @@ import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
-
+@ApiTags('Users')
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
-    
-    @Get('/id/:id')
-    @Serialize(UserResponseDto)
-    findUserById(@Param() idObj: {id: string} ) {
-        
-        return this.userService.findUserById(idObj.id);
-    }
-    @Get(':email')
-    @Serialize(UserResponseDto)
-    findUserByEmail(@Param() emailObj: {email: string} ) {
-        
-        return this.userService.findUserByEmail(emailObj.email);
-    }
-
-    @Get(':id/reviews')
-    getUserReviews(@Param() idObj: {id: string} ) {
-        return this.userService.getUserReviews(idObj.id);
-    }
-
-    @Get(':id/listings')
-    @Serialize(UserResponseDto)
-    findUserListings(@Param() idObj: {id: string} ) {
-        return this.userService.findUserListings(idObj.id, false);
-    }
-
-    @Get(':id/listings/url')
-    @Serialize(UserResponseDto)
-    findUserListingsWithUrl(@Param() idObj: {id: string} ) {
-        return this.userService.findUserListings(idObj.id, true);
-    }
-
+    // Static path endpoints first
+    @ApiOperation({ summary: 'Get average ratings for a user' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'Average ratings retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
     @Get('avgratings/:id')
-    reviewAvgRatings(@Param() idObj: {id: string} ) {
-        return this.userService.reviewAvgRatings(idObj.id);
+    reviewAvgRatings(@Param('id') id: string) {
+        return this.userService.reviewAvgRatings(id);
     }
 
-    @Put('/:id')
+    // Basic user CRUD operations
+    @ApiOperation({ summary: 'Find user by ID' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @Get(':id')
+    @Serialize(UserResponseDto)
+    findUserById(@Param('id') id: string) {
+        return this.userService.findUserById(id);
+    }
+    
+    @ApiOperation({ summary: 'Update user information' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiBody({ type: CreateUserDto })
+    @ApiResponse({ status: 200, description: 'User updated successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiBearerAuth()
+    @Put(':id')
     @Serialize(UserResponseDto)
     @UseGuards(AuthGuard('jwt'))
-    updateUser(@Param() idObj: {id: string}, @Body() body: Partial<CreateUserDto>) {
-        return this.userService.updateUser(idObj.id, body);
+    updateUser(@Param('id') id: string, @Body() body: Partial<CreateUserDto>) {
+        return this.userService.updateUser(id, body);
     }
 
+    // User related resources
+    @ApiOperation({ summary: 'Get reviews for a user' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User reviews retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @Get(':id/reviews')
+    getUserReviews(@Param('id') id: string) {
+        return this.userService.getUserReviews(id);
+    }
+
+    @ApiOperation({ summary: 'Get listings for a user' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User listings retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @Get(':id/listings')
+    @Serialize(UserResponseDto)
+    findUserListings(@Param('id') id: string) {
+        return this.userService.findUserListings(id, false);
+    }
+
+    @ApiOperation({ summary: 'Get listings for a user including file URLs' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'User listings with URLs retrieved successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':id/listings/url')
+    @Serialize(UserResponseDto)
+    findUserListingsWithUrl(@Param('id') id: string) {
+        return this.userService.findUserListings(id, true);
+    }
 }

@@ -1,7 +1,7 @@
 import { FaCheckCircle, FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import Link from "next/link";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import { Button } from "./ui/button";
 import { UserData } from "@/lib/definitions";
 import StarRating from "./star-rating";

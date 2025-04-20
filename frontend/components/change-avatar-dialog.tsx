@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
-import { useAuth } from "@/providers/authprovider";
+import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { Button } from "./ui/button";
 import {

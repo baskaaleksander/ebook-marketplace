@@ -5,7 +5,7 @@ import { LiaHeart, LiaHeartSolid } from 'react-icons/lia';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import api from '@/utils/axios';
-import { useAuth } from '@/providers/authprovider';
+import { useAuth } from '@/providers/auth-provider';
 
 interface FavoriteButtonProps {
   productId: string;
