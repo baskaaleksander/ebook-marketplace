@@ -27,7 +27,7 @@ function Purchased() {
                 setLoading(true);
                 const soldOrdersResponse = await api.get(`/stripe/orders/`);
                 console.log('Sold Orders Response:', soldOrdersResponse.data);
-                setSoldOrders(soldOrdersResponse.data);
+                setSoldOrders(soldOrdersResponse.data.data);
             } catch (err) {
                 console.error("Error fetching data:", err);
                 setError('Failed to load sold orders');

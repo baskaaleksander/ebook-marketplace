@@ -22,6 +22,14 @@ import { useState } from "react";
 import api from "@/utils/axios";
 import { Textarea } from "@/components/ui/textarea";
 import StarRating from "@/components/star-rating";
+import { 
+    Pagination, 
+    PaginationContent, 
+    PaginationItem, 
+    PaginationLink, 
+    PaginationNext, 
+    PaginationPrevious 
+} from "@/components/ui/pagination";
 
 function BoughtProductsTable({ orders }: { orders: Order[] }) {
     const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
@@ -31,6 +39,18 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
     const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState("");
+    
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(orders.length / itemsPerPage);
+    
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = orders.slice(indexOfFirstItem, indexOfLastItem);
+    
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+    const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
     const openRefundDialog = (orderId: string) => {
         setSelectedOrderId(orderId);
@@ -78,10 +98,63 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
         }
     };
 
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxPagesToShow = 5;
+        
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+        
+        return pageNumbers;
+    };
+
     return (
-        <>
+        <div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="mb-4">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious 
+                                    onClick={prevPage}
+                                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                                />
+                            </PaginationItem>
+                            
+                            {getPageNumbers().map(number => (
+                                <PaginationItem key={number}>
+                                    <PaginationLink
+                                        onClick={() => paginate(number)}
+                                        isActive={currentPage === number}
+                                        className="cursor-pointer"
+                                    >
+                                        {number}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+                            
+                            <PaginationItem>
+                                <PaginationNext 
+                                    onClick={nextPage}
+                                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
+
             <Table>
-                <TableCaption>All your purchased orders</TableCaption>
+                <TableCaption>Your purchased orders - Page {currentPage} of {totalPages}</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Order ID</TableHead>
@@ -96,7 +169,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {orders.map((order) => (
+                    {currentItems.map((order) => (
                         <TableRow key={order.id}>
                             <TableCell>{order.id}</TableCell>
                             <TableCell><Link href={`/product/${order.product.id}`}>{order.product.title}</Link></TableCell>
@@ -135,6 +208,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
                     ))}
                 </TableBody>
             </Table>
+            
 
             {/* Refund Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -207,7 +281,7 @@ function BoughtProductsTable({ orders }: { orders: Order[] }) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </div>
     )
 }
 

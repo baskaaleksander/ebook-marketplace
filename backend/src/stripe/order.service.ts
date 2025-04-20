@@ -17,8 +17,8 @@ export class OrderService {
         });
 
     }
-    getAllUserOrders(userId: string) {
-        return this.prismaService.order.findMany({
+    async getAllUserOrders(userId: string) {
+        const orders = await this.prismaService.order.findMany({
             where: { buyerId: userId },
             include: { 
                 product: true 
@@ -31,6 +31,12 @@ export class OrderService {
             }
             return order;
         }));
+
+        return {
+            data: orders,
+            count: orders.length,
+            message: 'Orders fetched successfully'
+        }
     }
     getAllSoldOrders(userId: string){
         return this.prismaService.order.findMany({

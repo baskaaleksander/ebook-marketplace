@@ -34,7 +34,7 @@ function Dashboard() {
         ]);
         setAnalyticsData(analyticsResponse.data);
         setSoldOrders(soldOrdersResponse.data);
-        setBoughtOrders(boughtOrdersResponse.data);
+        setBoughtOrders(boughtOrdersResponse.data.data);
       }
       catch (err) {
         console.error("Error fetching data:", err);
@@ -63,7 +63,7 @@ function Dashboard() {
         </div>
       )}
       {analyticsData && <AnalyticsCards data={analyticsData} />}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         {soldOrders.length > 0 ? (
           <SoldOrdersTable orders={soldOrders} />
         ) : (
