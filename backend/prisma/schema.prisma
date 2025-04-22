@@ -43,7 +43,7 @@ model Product {
   categories  Category[]
   viewedBy    ViewedListing[]
   isFeatured Boolean @default(false)
-  featuredForTime String? @default("0")
+  featuredForTime DateTime?
   views Int @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

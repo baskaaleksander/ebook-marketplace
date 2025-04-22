@@ -7,6 +7,7 @@ import { OrderService } from './order.service';
 import { IdDto } from '../dtos/id.dto';
 import { AmountDto } from './dtos/amount.dto';
 import { CurrentUser } from '../decorators/current-user.decorator';
+import { FeaturedService } from './featured.service';
   
 
   @Controller('stripe')
@@ -14,7 +15,8 @@ import { CurrentUser } from '../decorators/current-user.decorator';
     constructor(
         private readonly webhookService: WebhookService,
         private readonly stripeService: StripeService,
-        private readonly orderService: OrderService
+        private readonly orderService: OrderService,
+        private readonly featuredService: FeaturedService,
     ) {}
     
     @UseGuards(AuthGuard('jwt'))
@@ -26,6 +28,12 @@ import { CurrentUser } from '../decorators/current-user.decorator';
     @Get('connect/:id')
     getAccountDetails(@Param('id') id: string){
         return this.stripeService.checkAccountStatus(id);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('checkout-featuring/:productId')
+    featureProduct(@Param('productId') productId: string, @CurrentUser('userId') userId: string, @Body() body : { time: number }){
+        return this.featuredService.checkoutFeaturing(productId, body.time, userId);
     }
 
     @UseGuards(AuthGuard('jwt'))

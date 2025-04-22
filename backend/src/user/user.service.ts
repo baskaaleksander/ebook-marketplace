@@ -66,32 +66,16 @@ export class UserService {
     
     async findUserListings(id: string, includeFileUrl: boolean) {
         
-        const user = await this.prismaService.user.findUnique({
-            where: { id },
-            include: { products: {
-                select: {
-                    id: true,
-                    title: true,
-                    description: true,
-                    price: true,
-                    imageUrl: true,
-                    fileUrl: includeFileUrl ? true : false,
-                    isFeatured: true,
-                    sellerId: true,
-                    reviews: true,
-                    createdAt: true,
-                }
-            } 
-        }
-        });
+        const userProducts = await this.prismaService.product.findMany({
+            where: { sellerId: id },
+            include: {
+                reviews: true,
+            }
+        })
 
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        console.log(user.products);
-
-        return user.products;
+        const productsWithFavorites = await Promise.all(userProducts.map(async (product) => {
+            
+        }))
     }
 
     async findUserById(id: string) {
