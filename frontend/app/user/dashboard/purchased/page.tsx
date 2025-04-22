@@ -1,6 +1,5 @@
 'use client'
 import BoughtProductsTable from "@/components/bought-products-table";
-import SoldOrdersTable from "@/components/sold-orders-table"
 import { Order } from "@/lib/definitions";
 import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";

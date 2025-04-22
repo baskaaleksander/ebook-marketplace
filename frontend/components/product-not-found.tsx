@@ -11,7 +11,7 @@ function ProductNotFound() {
           </div>
           <h2 className="text-2xl font-semibold text-gray-700 mb-2">Oops! Product Not Found</h2>
           <p className="text-gray-500 mb-6 text-center max-w-md">
-            The product you're looking for doesn't exist or may have been removed.
+            The product you&apos;re looking for doesn&apos;t exist or may have been removed.
           </p>
           <div className="flex gap-4">
           <Button asChild>

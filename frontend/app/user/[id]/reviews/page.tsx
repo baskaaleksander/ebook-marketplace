@@ -1,13 +1,14 @@
 'use client';
 import ReviewComponent from "@/components/reviews-component";
 import api from "@/utils/axios";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
-function UserReviewsPage({ params }: { params: { id: string } }) {
+function UserReviewsPage({ params }: { params: Promise<{ id: string }> }) {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const userId = params.id;
+    const resolvedParams = use(params);
+    const userId = resolvedParams.id;
 
     useEffect(() => {
         const fetchData = async () => {

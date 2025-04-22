@@ -76,7 +76,7 @@ function Dashboard() {
           <BoughtProductsTable orders={boughtOrders} />
         ) : (
           <Card className="p-12 flex flex-col items-center justify-center mt-6">
-            <h1 className="text-xl text-gray-500">You haven't bought anything yet. Browse for products!</h1>
+            <h1 className="text-xl text-gray-500">You haven&apos;t bought anything yet. Browse for products!</h1>
             <Button variant='outline' onClick={() => router.push('/products')}>All products</Button>
           </Card>
             )}

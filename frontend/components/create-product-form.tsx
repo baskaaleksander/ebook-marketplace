@@ -51,8 +51,7 @@ const categories = [
 function CreateProductForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [userData, setUserData] = useState<any>(null)
-    const [success, setSuccess] = useState(false)
+    const [success, setSuccess] = useState<boolean>(false)
     const [pdfFile, setPdfFile] = useState<File | null>(null)
     const router = useRouter()
     const { user, loading: authLoading } = useAuth()
@@ -175,9 +174,9 @@ function CreateProductForm() {
                 router.push('/dashboard');
             }, 2000);
             
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error creating product:", err);
-            setError(err.response?.data?.message || "Failed to create product");
+            setError("Failed to create product");
         } finally {
             setIsLoading(false);
         }

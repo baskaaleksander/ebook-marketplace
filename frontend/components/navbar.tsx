@@ -19,6 +19,7 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function Navbar() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -41,10 +42,10 @@ function Navbar() {
         <nav className="border-grid sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="w-[80%] px-4 py-2 mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-8">
-                    <a className="flex items-center gap-2" href="/">
+                    <Link className="flex items-center gap-2" href="/">
                         <LiaBookOpenSolid className="text-xl" />
                         <span className="font-medium">bookify</span>
-                    </a>
+                    </Link>
                 </div>
                 
                 {/* Search Bar */}
@@ -70,7 +71,7 @@ function Navbar() {
                                         router.push(`/products?q=${encodeURIComponent(searchQuery)}`);
                                     }}
                                 >
-                                    Search for '{searchQuery}'
+                                    Search for &apos;{searchQuery}&apos;
                                 </div>
                             </div>
                         )}

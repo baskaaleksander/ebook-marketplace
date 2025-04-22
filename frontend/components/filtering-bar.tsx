@@ -57,7 +57,7 @@ function FilteringBar() {
             minPrice: undefined,
             maxPrice: undefined,
             featured: undefined,
-            sortBy: 'createdAt',
+            sortBy: 'createdAt' as 'title' | 'price' | 'createdAt' | 'rating' | 'views',
             sortOrder: 'desc'
         };
         setLocalFilters(resetState);

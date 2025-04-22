@@ -11,7 +11,7 @@ function LastViewed() {
     const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(true);
     const [lastViewed, setLastViewed] = useState<Product[]>([]);
-    const [error, setError] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (user && !authLoading) {
@@ -23,7 +23,8 @@ function LastViewed() {
                     
                     setLastViewed(response.data);
                 } catch (err) {
-                    setError(err);
+                    setError("failed to load last viewed products");
+                    console.error("Error fetching last viewed products:", err);
                 } finally {
                     setLoading(false);
                 }
@@ -39,6 +40,14 @@ function LastViewed() {
         return (
             <div className="flex flex-col items-center justify-center h-full">
                 <h1 className="text-2xl font-bold">Loading...</h1>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-bold text-red-500">{error}</h1>
             </div>
         );
     }

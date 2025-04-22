@@ -7,14 +7,12 @@ import { Button } from "./ui/button";
 
 function ConnectStripeAccount() {
     const [loading, setLoading] = useState(false);
-    const [accountUrl, setAccountUrl] = useState("");
     const [error, setError] = useState<string | null>(null);
   
     const handleConnectStripe = async () => {
       try {
         setLoading(true);
         const response = await api.post('/stripe/connect');
-        setAccountUrl(response.data.url);
         
         window.location.href = response.data.url;
       } catch (err) {
@@ -39,7 +37,7 @@ function ConnectStripeAccount() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Important</AlertTitle>
               <AlertDescription>
-                You won't be able to create listings until your Stripe account is verified.
+                You won&apos;t be able to create listings until your Stripe account is verified.
               </AlertDescription>
             </Alert>
             

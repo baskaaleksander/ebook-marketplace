@@ -141,7 +141,7 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
           <DialogHeader>
             <DialogTitle>Confirm Purchase</DialogTitle>
             <DialogDescription>
-              You are about to purchase "{product.title}" for ${product.price?.toFixed(2)}
+              You are about to purchase &rdquo;{product.title}&rdquo; for ${product.price?.toFixed(2)}
             </DialogDescription>
           </DialogHeader>
           

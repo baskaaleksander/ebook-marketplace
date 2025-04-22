@@ -53,6 +53,11 @@ function User({ params }: { params: Promise<{ id: string }> }) {
     if (loading) {
         return <div className="container mx-auto px-4 py-8">Loading user data...</div>;
     }
+
+    if (error) {
+        return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
+    }
+
     
     return (
         <div className="container mx-auto px-4 py-8 min-h-screen">

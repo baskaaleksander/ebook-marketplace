@@ -17,7 +17,6 @@ import {
 import { 
   Form, 
   FormControl, 
-  FormDescription, 
   FormField, 
   FormItem, 
   FormLabel, 
@@ -145,9 +144,9 @@ function SettingsPage() {
         avatarUrl: data.avatarUrl || prev.avatarUrl,
       } : undefined);
       
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error updating profile:", err);
-      setError(err?.response?.data?.message || "Failed to update profile");
+      setError("Failed to update profile");
     } finally {
       setSubmitting(false);
     }

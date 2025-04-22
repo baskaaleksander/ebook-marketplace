@@ -1,5 +1,4 @@
 import CreateProductForm from '@/components/create-product-form'
-import ImageResizer from '@/components/image-resizer'
 import { ImageProvider } from '@/providers/image-provider'
 import React from 'react'
 

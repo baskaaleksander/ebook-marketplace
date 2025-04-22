@@ -115,13 +115,6 @@ export default function ImageResizer() {
     };
   };
 
-  const handleEditExistingImage = () => {
-    if (croppedImgUrl) {
-      setImageSrc(croppedImgUrl);
-      setDialogOpen(true);
-    }
-  };
-
   return (
     <div className="flex flex-col items-center gap-4">
       {!croppedImgUrl ? (

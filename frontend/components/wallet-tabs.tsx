@@ -37,7 +37,7 @@ function WalletTabs({ activeTab, setActiveTab, soldOrders, payouts }: WalletTabs
               <SoldOrdersTable orders={soldOrders} />
             ) : (
               <p className="text-center py-6 text-gray-500 italic">
-                You haven't sold any orders yet.
+                You haven&apos;t sold any orders yet.
               </p>
             )}
           </CardContent>
@@ -57,7 +57,7 @@ function WalletTabs({ activeTab, setActiveTab, soldOrders, payouts }: WalletTabs
               <PayoutsTable payouts={payouts} />
             ) : (
               <p className="text-center py-6 text-gray-500 italic">
-                You haven't made any payout requests yet.
+                You haven&apos;t made any payout requests yet.
               </p>
             )}
           </CardContent>

@@ -64,8 +64,8 @@ export function RegisterForm({
     
     try {
       await registerUser({"name": data.name, "surname": data.surname, "email": data.email, "password": data.password});
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Registration failed. Please try again.");
+    } catch (err) {
+      setError("Registration failed. Please try again.");
       console.error("Registration error:", err);
     } finally {
       setIsLoading(false);

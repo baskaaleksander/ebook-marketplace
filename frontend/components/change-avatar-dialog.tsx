@@ -27,8 +27,6 @@ interface ChangeAvatarDialogProps {
 
 function ChangeAvatarDialogContent({
   currentAvatarUrl,
-  userName,
-  userSurname,
   onAvatarChange,
   onOpenChange
 }: ChangeAvatarDialogProps) {
@@ -78,9 +76,9 @@ function ChangeAvatarDialogContent({
         onAvatarChange(image);
         onOpenChange(false);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error uploading avatar:", err);
-      setError(err?.response?.data?.message || "Failed to upload avatar");
+      setError("Failed to upload avatar");
     } finally {
       setUploading(false);
     }

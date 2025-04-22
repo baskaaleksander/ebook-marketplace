@@ -5,7 +5,7 @@ import { Product } from "@/lib/definitions";
 import { FilteringProvider, useFiltering } from "@/providers/filtering-provider"
 import api from "@/utils/axios";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 function AllProducts() {
     const router = useRouter();
@@ -87,17 +87,27 @@ function AllProducts() {
         }
         fetchData();
     }, [filtering]);
+
+    if (loading) {
+        return <div className="text-center">Loading...</div>
+    }
+    if (error) {
+        return <div className="text-red-500 text-center">{error}</div>
+    }
     
     return <UserProducts products={products} emptyMessage="No products found" />
 }
 
 export default function AllProductsPage() {
     return (
-        <FilteringProvider>
-            <div className="container mx-auto px-4 py-8 min-h-screen">
-                <FilteringBar />
-                <AllProducts />
-            </div>
-        </FilteringProvider>
+        <Suspense>
+            <FilteringProvider>
+                <div className="container mx-auto px-4 py-8 min-h-screen">
+                    
+                    <FilteringBar />
+                    <AllProducts />
+                </div>
+            </FilteringProvider>
+        </Suspense>
     )
 }

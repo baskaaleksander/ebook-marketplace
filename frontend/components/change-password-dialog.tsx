@@ -84,9 +84,9 @@ function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps)
         setIsOpen(false);
       }, 2000);
       
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error changing password:", err);
-      setPasswordError(err?.response?.data?.message || "Failed to change password");
+      setPasswordError("Failed to change password");
     } finally {
       setChangingPassword(false);
     }

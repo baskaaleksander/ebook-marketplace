@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from "react";
 import api from "@/utils/axios";
-import { Card, CardContent, CardTitle } from "./ui/card";
 import Link from "next/link";
-import { Button } from "./ui/button";
 import FavoriteButton from "./favorite-button";
-import { cn } from "@/lib/utils";
 import placeholder from "@/public/placeholder.jpg";
 
 interface ProductCardProps {
@@ -31,9 +28,7 @@ function ProductCard({
     price,
     sellerId,
     imageUrl,
-    createdAt,
     isFavorite = false,
-    className,
     sellerData,
 }: ProductCardProps) {
     const [seller, setSeller] = useState(sellerData);
