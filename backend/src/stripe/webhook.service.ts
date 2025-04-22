@@ -2,13 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma.service';
 import Stripe from 'stripe';
+import { FeaturedService } from './featured.service';
 
 @Injectable()
 export class WebhookService {
     private stripe: Stripe;
   constructor(
     private configService: ConfigService,
-    private prismaService: PrismaService
+    private prismaService: PrismaService,
+    private featuredService: FeaturedService
 ) {
     const stripeKey = configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeKey) {
@@ -95,6 +97,10 @@ export class WebhookService {
     async handleCheckoutSessionCompleted(event: Stripe.Event) {
 
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+        if(paymentIntent.metadata.productId && paymentIntent.metadata.time) {
+            return this.featuredService.markAsFeatured(paymentIntent.metadata.productId, paymentIntent.metadata.time);
+        }
 
         if (!paymentIntent.metadata || !paymentIntent.metadata.orderId) {
             throw new NotFoundException('Order ID not found in metadata');

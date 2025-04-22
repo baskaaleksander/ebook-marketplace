@@ -466,6 +466,8 @@ export class ListingService {
                         updatedAt: product.updatedAt,
                         sellerId: product.sellerId,
                         isFavourite: !!favourite,
+                        isFeatured: product.isFeatured,
+                        featuredForTime: product.featuredForTime,
                         seller: {
                             id: product.seller.id,
                             name: product.seller.name,
@@ -484,6 +486,8 @@ export class ListingService {
                     updatedAt: product.updatedAt,
                     sellerId: product.sellerId,
                     isFavourite: false,
+                    isFeatured: product.isFeatured,
+                    featuredForTime: product.featuredForTime,
                     seller: {
                         id: product.seller.id,
                         name: product.seller.name,

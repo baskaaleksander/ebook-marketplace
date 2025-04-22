@@ -19,76 +19,8 @@ export class FeaturedService {
         });
     }
 
-    async getFeaturedProducts(currentUserId?: string) {
-        const listings = await this.prismaService.product.findMany({
-            where: {
-                isFeatured: true,
-            },
-            include: {
-                categories: true,
-                seller: true
-            }
-        });
-        
-        const listingsWithFavourites = await Promise.all(
-            listings.map(async (product) => {
-                
-                if (currentUserId) {
-                    const favourite = await this.prismaService.favourite.findFirst({
-                        where: {
-                            userId: currentUserId,
-                            productId: product.id
-                        }
-                    });
-                    
-                    return {
-                            id: product.id,
-                            title: product.title,
-                            price: product.price,
-                            description: product.description,
-                            imageUrl: product.imageUrl,
-                            createdAt: product.createdAt,
-                            updatedAt: product.updatedAt,
-                            sellerId: product.sellerId,
-                            isFavourite: !!favourite,
-                            isFeatured: product.isFeatured,
-                            featuredForTime: product.featuredForTime,
-                            seller: {
-                                id: product.seller.id,
-                                name: product.seller.name,
-                                surname: product.seller.surname,
-                            }
-                        };
-                }
-                
-                return {
-                    id: product.id,
-                    title: product.title,
-                    price: product.price,
-                    description: product.description,
-                    imageUrl: product.imageUrl,
-                    createdAt: product.createdAt,
-                    updatedAt: product.updatedAt,
-                    sellerId: product.sellerId,
-                    isFavourite: false,
-                    isFeatured: product.isFeatured,
-                    featuredForTime: product.featuredForTime,
-                    seller: {
-                        id: product.seller.id,
-                        name: product.seller.name,
-                        surname: product.seller.surname,
-                    }
-                };
-            })
-        );
-        
-        return {
-            data: listingsWithFavourites,
-            message: 'Featured listings fetched successfully'
-        };
-    }
 
-    async markAsFeatured(productId: string, time: number) {
+    async markAsFeatured(productId: string, time: string) {
         const product = await this.prismaService.product.findUnique({
             where: { id: productId }
         });
@@ -97,7 +29,7 @@ export class FeaturedService {
             throw new NotFoundException('Product not found');
         }
 
-        const dateOfExpiring = new Date(Date.now() + time * 24 * 60 * 60 * 1000);
+        const dateOfExpiring = new Date(Date.now() + parseInt(time) * 24 * 60 * 60 * 1000);
 
         await this.prismaService.product.update({
             where: { id: productId },
@@ -154,7 +86,7 @@ export class FeaturedService {
             },
             metadata: {
                 productId,
-                time
+                time,
             }
         });
 
