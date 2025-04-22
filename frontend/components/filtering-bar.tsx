@@ -3,22 +3,45 @@ import { useFiltering } from "@/providers/filtering-provider";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Filter } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { useSearchParams } from "next/navigation";
+import { Checkbox } from "./ui/checkbox";
 
 function FilteringBar() {
     const { filtering, setFiltering } = useFiltering();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [localFilters, setLocalFilters] = useState({ ...filtering });
+    const searchParams = useSearchParams();
+    
+    useEffect(() => {
+        const query = searchParams.get('query') || undefined;
+        const category = searchParams.get('category') || undefined;
+        const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
+        const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
+        const featured = searchParams.get('featured') === 'true' ? true : undefined;
+        const sortBy = searchParams.get('sortBy') || 'createdAt';
+        const sortOrder = searchParams.get('sortOrder') || 'desc';
+        
+        setLocalFilters({
+            query,
+            category,
+            minPrice,
+            maxPrice,
+            featured,
+            sortBy: sortBy as 'title' | 'price' | 'createdAt' | 'rating' | 'views',
+            sortOrder
+        });
+    }, [searchParams]);
 
     const handleSortChange = (value: string) => {
         const [sortBy, sortOrder] = value.split('-');
         setFiltering(prev => ({ 
             ...prev, 
             sortBy: sortBy as 'title' | 'price' | 'createdAt' | 'rating' | 'views',
-            sortOrder: sortOrder
+            sortOrder: sortOrder as 'asc' | 'desc'
         }));
     };
 
@@ -29,17 +52,20 @@ function FilteringBar() {
 
     const resetFilters = () => {
         const resetState = {
-            ...filtering,
             query: undefined,
             category: undefined,
             minPrice: undefined,
             maxPrice: undefined,
-            featured: undefined
+            featured: undefined,
+            sortBy: 'createdAt',
+            sortOrder: 'desc'
         };
         setLocalFilters(resetState);
         setFiltering(resetState);
         setIsDialogOpen(false);
     };
+
+    const currentSortValue = `${filtering.sortBy || 'createdAt'}-${filtering.sortOrder || 'desc'}`;
 
     return (
         <div className="flex justify-between items-center mb-4">
@@ -49,6 +75,12 @@ function FilteringBar() {
                         <Button variant="outline" className="flex items-center gap-2">
                             <Filter className="h-4 w-4" />
                             Filters
+                            {(filtering.query || filtering.category || filtering.minPrice || 
+                             filtering.maxPrice || filtering.featured) && 
+                                <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs bg-primary text-primary-foreground rounded-full">
+                                    
+                                </span>
+                            }
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
@@ -69,8 +101,8 @@ function FilteringBar() {
                             <div className="space-y-2">
                                 <Label htmlFor="category">Category</Label>
                                 <Select 
-                                    value={localFilters.category || ''} 
-                                    onValueChange={(value) => setLocalFilters({...localFilters, category: value || undefined})}
+                                    value={localFilters.category || ''}
+                                    onValueChange={(value) => setLocalFilters({...localFilters, category: value === 'all' ? undefined : value || undefined})}
                                 >
                                     <SelectTrigger id="category">
                                         <SelectValue placeholder="Select a category" />
@@ -91,7 +123,7 @@ function FilteringBar() {
                                     <Input 
                                         type="number"
                                         placeholder="Min"
-                                        value={localFilters.minPrice || ''}
+                                        value={localFilters.minPrice ?? ''}
                                         onChange={(e) => setLocalFilters({
                                             ...localFilters, 
                                             minPrice: e.target.value ? Number(e.target.value) : undefined
@@ -101,7 +133,7 @@ function FilteringBar() {
                                     <Input 
                                         type="number"
                                         placeholder="Max"
-                                        value={localFilters.maxPrice || ''}
+                                        value={localFilters.maxPrice ?? ''}
                                         onChange={(e) => setLocalFilters({
                                             ...localFilters, 
                                             maxPrice: e.target.value ? Number(e.target.value) : undefined
@@ -111,11 +143,12 @@ function FilteringBar() {
                             </div>
                             
                             <div className="flex items-center space-x-2">
-                                <input 
-                                    type="checkbox"
+                                <Checkbox 
                                     id="featured"
                                     checked={!!localFilters.featured}
-                                    onChange={(e) => setLocalFilters({...localFilters, featured: e.target.checked || undefined})}
+                                    onCheckedChange={(checked) => 
+                                        setLocalFilters({...localFilters, featured: checked ? true : undefined})
+                                    }
                                 />
                                 <Label htmlFor="featured">Featured Only</Label>
                             </div>
@@ -135,7 +168,7 @@ function FilteringBar() {
             
             <div>
                 <Select 
-                    defaultValue={`${filtering.sortBy}-${filtering.sortOrder}`}
+                    value={currentSortValue}
                     onValueChange={handleSortChange}
                 >
                     <SelectTrigger className="w-[180px]">
@@ -148,7 +181,6 @@ function FilteringBar() {
                         <SelectItem value="price-desc">Price: High to Low</SelectItem>
                         <SelectItem value="title-asc">Title: A to Z</SelectItem>
                         <SelectItem value="title-desc">Title: Z to A</SelectItem>
-                        {/* <SelectItem value="rating-desc">Highest Rated</SelectItem> */}
                         <SelectItem value="views-desc">Most Popular</SelectItem>
                     </SelectContent>
                 </Select>

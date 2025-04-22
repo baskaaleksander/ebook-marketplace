@@ -33,7 +33,7 @@ function Navbar() {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
-            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+            router.push(`/products?query=${encodeURIComponent(searchQuery)}`);
         }
     }
 
@@ -67,7 +67,7 @@ function Navbar() {
                                     className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded-md"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+                                        router.push(`/products?q=${encodeURIComponent(searchQuery)}`);
                                     }}
                                 >
                                     Search for '{searchQuery}'

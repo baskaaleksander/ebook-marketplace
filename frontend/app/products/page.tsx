@@ -4,15 +4,54 @@ import UserProducts from "@/components/user-products";
 import { Product } from "@/lib/definitions";
 import { FilteringProvider, useFiltering } from "@/providers/filtering-provider"
 import api from "@/utils/axios";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function AllProducts() {
-
-    const { filtering } = useFiltering();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { filtering, setFiltering } = useFiltering();
 
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
+    useEffect(() => {
+        const query = searchParams.get('query') || '';
+        const category = searchParams.get('category') || '';
+        const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
+        const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
+        const sortBy = searchParams.get('sortBy') || '';
+        const sortOrder = searchParams.get('sortOrder') || '';
+        const featured = searchParams.get('featured') === 'true';
+        
+        setFiltering({
+            query,
+            category,
+            minPrice,
+            maxPrice,
+            sortBy: sortBy as 'title' | 'price' | 'createdAt' | 'rating' | 'views',
+            sortOrder,
+            featured
+        });
+    }, [searchParams, setFiltering]);
+    
+    useEffect(() => {
+        const params = new URLSearchParams();
+        
+        if (filtering.query) params.append('query', filtering.query);
+        if (filtering.category) params.append('category', filtering.category);
+        if (filtering.minPrice) params.append('minPrice', filtering.minPrice.toString());
+        if (filtering.maxPrice) params.append('maxPrice', filtering.maxPrice.toString());
+        if (filtering.sortBy) params.append('sortBy', filtering.sortBy);
+        if (filtering.sortOrder) params.append('sortOrder', filtering.sortOrder);
+        if (filtering.featured) params.append('featured', filtering.featured.toString());
+        
+        const queryString = params.toString();
+        const url = queryString ? `/products?${queryString}` : '/products';
+        
+        router.replace(url, { scroll: false });
+    }, [filtering, router]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,10 +74,7 @@ function AllProducts() {
                     url += '?' + queryString;
                 }
                 
-                console.log('Fetching URL:', url);
                 const response = await api.get(url);
-
-                console.log('Response data:', response.data.data);
                 setProducts(response.data.data.listings);
             }
             catch(err) {
@@ -51,8 +87,8 @@ function AllProducts() {
         }
         fetchData();
     }, [filtering]);
+    
     return <UserProducts products={products} emptyMessage="No products found" />
-
 }
 
 export default function AllProductsPage() {

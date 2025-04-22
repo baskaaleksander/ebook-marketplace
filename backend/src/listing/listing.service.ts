@@ -240,6 +240,8 @@ export class ListingService {
                         updatedAt: listing.updatedAt,
                         sellerId: listing.sellerId,
                         isFavourite: !!favourite,
+                        isFeatured: listing.isFeatured,
+                        featuredForTime: listing.featuredForTime,    
                         seller: {
                             id: listing.seller.id,
                             name: listing.seller.name,
@@ -257,6 +259,8 @@ export class ListingService {
                     updatedAt: listing.updatedAt,
                     sellerId: listing.sellerId,
                     isFavourite: false,
+                    isFeatured: listing.isFeatured,
+                    featuredForTime: listing.featuredForTime,
                     seller: {
                         id: listing.seller.id,
                         name: listing.seller.name,
@@ -316,6 +320,8 @@ export class ListingService {
                         updatedAt: product.updatedAt,
                         sellerId: product.sellerId,
                         isFavourite: !!favourite,
+                        isFeatured: product.isFeatured,
+                        featuredForTime: product.featuredForTime,    
                         seller: {
                             id: product.seller.id,
                             name: product.seller.name,
@@ -334,6 +340,8 @@ export class ListingService {
                     updatedAt: product.updatedAt,
                     sellerId: product.sellerId,
                     isFavourite: false,
+                    isFeatured: product.isFeatured,
+                    featuredForTime: product.featuredForTime,
                     seller: {
                         id: product.seller.id,
                         name: product.seller.name,
@@ -387,6 +395,8 @@ export class ListingService {
                             updatedAt: product.updatedAt,
                             sellerId: product.sellerId,
                             isFavourite: !!favourite,
+                            isFeatured: product.isFeatured,
+                            featuredForTime: product.featuredForTime,        
                             seller: {
                                 id: product.seller.id,
                                 name: product.seller.name,
@@ -405,6 +415,8 @@ export class ListingService {
                     updatedAt: product.updatedAt,
                     sellerId: product.sellerId,
                     isFavourite: false,
+                    isFeatured: product.isFeatured,
+                    featuredForTime: product.featuredForTime,
                     seller: {
                         id: product.seller.id,
                         name: product.seller.name,

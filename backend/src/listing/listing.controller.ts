@@ -72,7 +72,7 @@ export class ListingController {
     @ApiResponse({ status: 200, description: 'Featured listings retrieved successfully' })
     @UseGuards(OptionalAuthGuard)
     @Get('featured')
-    findFeaturedListings(@CurrentUser('userId') userId?: string) {
+    findFeaturedListings(@CurrentUser('userId') userId?: string, @Query('limit') limit?: number) {
         return this.listingService.getFeaturedListings(userId);
     }
     
