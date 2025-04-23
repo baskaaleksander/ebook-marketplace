@@ -1,4 +1,3 @@
-'use client';
 import FeaturedProducts from "@/components/featured-products";
 import HomeProducts from "@/components/all-home-products";
 import LastViewed from "@/components/last-viewed";

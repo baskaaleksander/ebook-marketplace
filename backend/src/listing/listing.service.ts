@@ -476,9 +476,6 @@ export class ListingService {
             }
         });
         
-        if(listings.length === 0){
-            throw new NotFoundException('No listings found');
-        }
         
         const listingsWithFavourites = await Promise.all(
             listings.map(async (product) => {
