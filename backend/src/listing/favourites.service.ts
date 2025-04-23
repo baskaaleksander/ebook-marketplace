@@ -55,7 +55,14 @@ export class FavouritesService {
             },
         });
 
-        return favorite;
+        return {
+            data: {
+                id: favorite.id,
+                productId: favorite.productId,
+                userId: favorite.userId,
+            },
+            message: 'Favorite added successfully',
+        };
     }
 
     async removeFavorite(userId: string, productId: string) {
@@ -70,10 +77,19 @@ export class FavouritesService {
             throw new NotFoundException('Favorite not found');
         }
 
-        return this.prismaService.favourite.delete({
+        await this.prismaService.favourite.delete({
             where: {
                 id: favorite.id,
             }
         });
+
+        return {
+            data: {
+                id: favorite.id,
+                productId: favorite.productId,
+                userId: favorite.userId,
+            },
+            message: 'Favorite removed successfully',
+        }
     }
 }

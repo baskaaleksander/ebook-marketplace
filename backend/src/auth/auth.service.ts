@@ -71,7 +71,7 @@ export class AuthService {
             throw new NotFoundException('User not found');
         }
 
-        return this.login({username: updatedUser.email, userId: updatedUser.id});
+        return this.login({username: updatedUser.data.email, userId: updatedUser.data.id});
     }
 
     async login(user: LoginUserDto){

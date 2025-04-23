@@ -11,6 +11,10 @@ export class ApiKeyGuard implements CanActivate {
     if (request.url.startsWith('/stripe/webhook')) {
       return true;
     }
+
+    if (request.url === '/ping' || request.url === '/api/v1/ping') {
+      return true;
+    }
     
     const apiKey = request.headers['x-api-key'];
 

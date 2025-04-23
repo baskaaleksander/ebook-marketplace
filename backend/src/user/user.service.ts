@@ -21,12 +21,21 @@ export class UserService {
             throw new NotFoundException('User not found');
         }
 
-        return this.prismaService.user.update({
+        await this.prismaService.user.update({
             where: { id },
             data: {
                 ...data,
             }
         });
+
+        return {
+            data: {
+                id: user.id,
+                email: user.email,
+                name: data.name || user.name,
+                surname: data.surname || user.surname,
+            }
+        }
     }
 
     async getUserReviews(userId: string) {
@@ -64,6 +73,13 @@ export class UserService {
         return { averageRating: avgRating };
     }
     
+    /*
+    todo:
+    - add include for seller
+    - add include for reviews
+    - add include for favorites
+    - check if its necessary
+    */
     async findUserListings(id: string, includeFileUrl: boolean) {
         
         const userProducts = await this.prismaService.product.findMany({

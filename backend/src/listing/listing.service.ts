@@ -144,8 +144,31 @@ export class ListingService {
             return listing;
         }
 
-        const { fileUrl, ...listingWithoutFile } = listing;
-        return listingWithoutFile;
+        return {
+            data: {
+                id: listing.id,
+                title: listing.title,
+                price: listing.price,
+                description: listing.description,
+                imageUrl: listing.imageUrl,
+                createdAt: listing.createdAt,
+                updatedAt: listing.updatedAt,
+                sellerId: listing.sellerId,
+                isFavourite: !!(listing as ProductWithFavourite).isFavourite,
+                isFeatured: listing.isFeatured,
+                featuredForTime: listing.featuredForTime,    
+                seller: {
+                    id: listing.seller.id,
+                    name: listing.seller.name,
+                    surname: listing.seller.surname,
+                    email: listing.seller.email,
+                    avatarUrl: listing.seller.avatarUrl,
+                    stripeStatus: listing.seller.stripeStatus,
+                    createdAt: listing.seller.createdAt
+                },
+                message: 'Listing fetched successfully'
+            }
+        }
     }
 
     async findListings(filters: SearchQueryDto, userId?: string) {
@@ -549,11 +572,18 @@ export class ListingService {
             }
         });
 
-        return this.prismaService.product.delete({
+        await this.prismaService.product.delete({
             where: {
                 id: id
             }
         });
+
+        return {
+            data: {
+                id: id,
+            },
+            message: 'Listing deleted successfully'
+        }
     }
 
     async updateListing(id: string, body: UpdateListingDto, userId: string){ {
@@ -610,7 +640,7 @@ export class ListingService {
         
         const { categories, ...updateData } = body;
         
-        return this.prismaService.product.update({
+        await this.prismaService.product.update({
             where: {
                 id: id
             },
@@ -623,6 +653,15 @@ export class ListingService {
                 seller: true
             }
         });
+
+        return {
+            data: {
+                id: id,
+                ...updateData,
+                categories: categoryConnections,
+            },
+            message: 'Listing updated successfully'
+        }
     }
 }
 
