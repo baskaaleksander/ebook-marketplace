@@ -35,7 +35,7 @@ function UserProductsTable({ products }: { products: Product[] }) {
     }),
     columnHelper.accessor('price', {
       header: 'Price',
-      cell: info => `$${info.getValue().toFixed(2)}`,
+      cell: info => `${info.getValue().toFixed(2)}PLN`,
     }),
     columnHelper.accessor('createdAt', {
       header: 'Created',

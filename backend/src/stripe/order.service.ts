@@ -22,7 +22,8 @@ export class OrderService {
             where: { buyerId: userId },
             include: { 
                 product: true 
-            }
+            },
+            orderBy: { createdAt: 'desc' }
         }).then(orders => orders.map(order => {
 
             if (order.status === 'REFUNDED' || order.status === 'PENDING' && order.product) {
@@ -55,7 +56,8 @@ export class OrderService {
     async getAllSoldOrders(userId: string){
         const orders = await this.prismaService.order.findMany({
             where: { sellerId: userId },
-            include: { product: true }
+            include: { product: true },
+            orderBy: { createdAt: 'desc' }
         });
 
         const mappedOrders = orders.map(order => {

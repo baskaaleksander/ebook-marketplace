@@ -125,7 +125,7 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
               onClick={startPurchaseFlow} 
               className="font-bold py-3 px-4"
             >
-              Purchase for ${product.price?.toFixed(2)}
+              Purchase for {product.price?.toFixed(2)}PLN
             </Button>
             {product.isFavourite ? <Button onClick={removeFromFavorites} variant="outline">
               Remove from Favorites
@@ -141,7 +141,7 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
           <DialogHeader>
             <DialogTitle>Confirm Purchase</DialogTitle>
             <DialogDescription>
-              You are about to purchase &rdquo;{product.title}&rdquo; for ${product.price?.toFixed(2)}
+              You are about to purchase &rdquo;{product.title}&rdquo; for {product.price?.toFixed(2)}PLN
             </DialogDescription>
           </DialogHeader>
           

@@ -11,7 +11,7 @@ async function FeaturedProducts() {
         <section className="py-12">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center mb-8">
-                    <Link href="/featured"><h2 className="text-2xl md:text-3xl font-bold">⭐ Featured Books</h2></Link>
+                    <Link href="/products?featured=true"><h2 className="text-2xl md:text-3xl font-bold">⭐ Featured Books</h2></Link>
                     <Link href="/products?featured=true" className="text-blue-600 hover:underline text-sm">
                         View all &rarr;
                     </Link>

@@ -12,15 +12,23 @@ function SoldOrders() {
     const [soldOrders, setSoldOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
     const router = useRouter();
     
     useEffect(() => {
-        if (!authLoading && !user) {
+
+        if (!authLoading && user === null) {
             router.push('/login');
+            return;
         }
 
         const fetchData = async () => {
-            if (authLoading || !user || user.stripeStatus !== 'verified') return;
+            if (authLoading || !user) return;
+            
+            if (user.stripeStatus !== 'verified') {
+                router.push('/user/dashboard/wallet');
+                return;
+            }
 
             try {
                 setLoading(true);
@@ -32,17 +40,22 @@ function SoldOrders() {
             } finally {
                 setLoading(false);
             }
-        }
+        };
+        
         fetchData();
     }, [user, router, authLoading]);
-  return (
-    <div>
-        {loading && <div>Loading sold orders...</div>}
-        {error && <div className="text-red-500">{error}</div>}
-        {soldOrders.length === 0 ? <div>You have no sold orders yet.</div> : <SoldOrdersTable orders={soldOrders}/>}
-        
-    </div>
-  )
+    
+    if (authLoading) {
+        return <div>Checking authentication...</div>;
+    }
+    
+    return (
+        <div>
+            {loading && <div>Loading sold orders...</div>}
+            {error && <div className="text-red-500">{error}</div>}
+            {soldOrders.length === 0 ? <div>You have no sold orders yet.</div> : <SoldOrdersTable orders={soldOrders}/>}
+        </div>
+    );
 }
 
 export default SoldOrders

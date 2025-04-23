@@ -29,10 +29,9 @@ function Footer({
     {
       title: "Browse",
       links: [
-        { text: "Categories", url: "/products" },
-        { text: "Featured", url: "/featured" },
-        { text: "New Releases", url: "/products?sort=newest" },
-        { text: "Best Sellers", url: "/products?sort=popular" },
+        { text: "All products", url: "/products" },
+        { text: "Featured", url: "/products?featured=true" },
+        { text: "New Releases", url: "/products?sortBy=createdAt&sortOrder=desc"},
       ],
     },
     {
@@ -40,14 +39,14 @@ function Footer({
       links: [
         { text: "Dashboard", url: "/user/dashboard" },
         { text: "My Products", url: "/user/dashboard/my-products" },
-        { text: "Favorites", url: "/user/dashboard/favorites" },
+        { text: "Favourites", url: "/user/dashboard/favorites" },
         { text: "Recently Viewed", url: "/user/dashboard/recently-viewed" },
       ],
     },
     {
       title: "Sell",
       links: [
-        { text: "Become a Seller", url: "/user/dashboard/settings" },
+        { text: "Become a Seller", url: "/user/dashboard/wallet" },
         { text: "Create Listing", url: "/product/create" },
         { text: "Seller Guidelines", url: "/seller-guidelines" },
         { text: "Analytics", url: "/user/dashboard/analytics" },
