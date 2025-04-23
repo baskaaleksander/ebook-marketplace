@@ -134,7 +134,7 @@ function CreateProductForm() {
                         }
                     });
                     
-                    imageUrl = imageUploadResponse.data.imageUrl || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+                    imageUrl = imageUploadResponse.data.url || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
                 } else {
                     imageUrl = image;
                 }

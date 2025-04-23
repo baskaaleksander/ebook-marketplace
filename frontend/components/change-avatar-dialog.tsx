@@ -62,7 +62,7 @@ function ChangeAvatarDialogContent({
           }
         });
         
-        const avatarUrl = imageUploadResponse.data.imageUrl || 
+        const avatarUrl = imageUploadResponse.data.url || 
                          `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
         
         await api.put(`/user/${user.id}`, { avatarUrl });
