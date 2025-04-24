@@ -10,8 +10,24 @@ import { mockUserData, Product, UserData } from "@/lib/definitions";
 import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
 import { AlertCircle } from "lucide-react";
+import { Metadata } from "next";
 import Link from "next/link";
 import { use, useEffect, useState, useRef } from "react";
+
+// export async function generateMetaData({ params }: { params: Promise<{ id: string }> }) {
+//   const resolvedParams = await params;
+//   const productId = resolvedParams.id;
+//   const productResponse = await api.get(`/listing/${productId}`);
+//   const product = productResponse.data.data;
+
+//   return {
+//     title: product.title,
+//   }
+// }
+
+// export const metaData: Metadata = {
+//   title: "dupa"
+// }
 
 function ProductPage({ params }: { params: Promise<{ id: string }> }) {
 
@@ -34,15 +50,20 @@ function ProductPage({ params }: { params: Promise<{ id: string }> }) {
       try {
         setLoading(true);
         const productResponse = await api.get(`/listing/${productId}`);
+
+        const productData = productResponse.data.data;
+
+        console.log("Product data:", productData);
+
         const [ sellerResponse, sellerProductsResponse, reviewsResponse ] = await Promise.all([
-          api.get(`/user/${productResponse.data.sellerId}`),
-          api.get(`/listing/user/${productResponse.data.sellerId}`),
+          api.get(`/user/${productData.sellerId}`),
+          api.get(`/listing/user/${productData.sellerId}`),
           api.get(`/listing/${productId}/reviews`)
         ]);
 
         setSeller(sellerResponse.data);
         setSellerProducts(sellerProductsResponse.data.data);
-        setProduct(productResponse.data);
+        setProduct(productResponse.data.data);
         setReviews(reviewsResponse.data);
         
         viewCounted.current = true;

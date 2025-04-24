@@ -141,7 +141,32 @@ export class ListingService {
         }
 
         if(listing.sellerId == userId){
-            return listing;
+            return {
+                data: {
+                    id: listing.id,
+                    title: listing.title,
+                    price: listing.price,
+                    description: listing.description,
+                    imageUrl: listing.imageUrl,
+                    createdAt: listing.createdAt,
+                    updatedAt: listing.updatedAt,
+                    sellerId: listing.sellerId,
+                    fileUrl: listing.fileUrl,
+                    isFavourite: !!(listing as ProductWithFavourite).isFavourite,
+                    isFeatured: listing.isFeatured,
+                    featuredForTime: listing.featuredForTime,    
+                    seller: {
+                        id: listing.seller.id,
+                        name: listing.seller.name,
+                        surname: listing.seller.surname,
+                        email: listing.seller.email,
+                        avatarUrl: listing.seller.avatarUrl,
+                        stripeStatus: listing.seller.stripeStatus,
+                        createdAt: listing.seller.createdAt
+                    },
+                    message: 'Listing fetched successfully'
+                }
+            }
         }
 
         return {
