@@ -2,6 +2,15 @@ import CreateProductForm from '@/components/create-product-form'
 import { ImageProvider } from '@/providers/image-provider'
 import React from 'react'
 
+export const metadata = {
+  title: 'Create product | bookify',
+  description: 'Create your product on bookify',
+  openGraph: {
+    title: 'Create product | bookify',
+    description: 'Create your product on bookify',
+  },
+}
+
 function CreateProduct() {
   return (
     <ImageProvider>

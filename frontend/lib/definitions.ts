@@ -144,3 +144,7 @@ export type AnalyticsData = {
     viewsPerProductResult: ProductViewData[];
     soldOrdersPerMonthResult: MonthlySalesData[];
 }
+
+export type Props = {
+    params: { id: string }
+  }

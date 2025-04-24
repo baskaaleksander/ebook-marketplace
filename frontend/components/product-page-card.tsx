@@ -14,11 +14,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-function ProductPageCard({product, seller}: {product: Product, seller: UserData}) {
+function ProductPageCard({product: initialProduct, seller}: {product: Product, seller: UserData}) {
   const { user } = useAuth();
   const router = useRouter();
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const [product, setProduct] = useState<Product>(initialProduct);
 
   const addToFavorites = async () => {
     if (!user) {
@@ -30,7 +32,10 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
       const response = await api.post(`/listing/favourites/${product.id}`);
 
       if (response.status === 200) {
-        product.isFavourite = true;
+        setProduct({
+          ...product,
+          isFavourite: true
+        });
       }
     } catch (error) {
       console.error("Error adding to favorites:", error);
@@ -47,7 +52,10 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
       const response = await api.delete(`/listing/favourites/${product.id}`);
 
       if (response.status === 200) {
-        product.isFavourite = false;
+        setProduct({
+          ...product,
+          isFavourite: false
+        });
       }
     } catch (error) {
       console.error("Error removing from favorites:", error);
@@ -127,11 +135,15 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
             >
               Purchase for {product.price?.toFixed(2)}PLN
             </Button>
-            {product.isFavourite ? <Button onClick={removeFromFavorites} variant="outline">
-              Remove from Favorites
-            </Button> : <Button variant="outline" onClick={addToFavorites}>
-              Add to Favorites
-            </Button>}
+            {product.isFavourite ? (
+              <Button onClick={removeFromFavorites} variant="outline">
+                Remove from Favorites
+              </Button> 
+            ) : (
+              <Button variant="outline" onClick={addToFavorites}>
+                Add to Favorites
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -153,7 +165,7 @@ function ProductPageCard({product, seller}: {product: Product, seller: UserData}
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">Price:</span> 
-                <span>${product.price?.toFixed(2)}</span>
+                <span>{product.price?.toFixed(2)}PLN</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">Seller:</span> 

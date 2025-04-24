@@ -6,10 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@/lib/definitions";
-import { useImage } from "@/providers/image-provider";
+import { ImageProvider, useImage } from "@/providers/image-provider";
 import api from "@/utils/axios";
 import { FileIcon, Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import * as z from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -37,7 +37,7 @@ const categories = [
   { id: "graphics", name: "Graphics & Design" },
 ];
 
-export default function ProductPageModifyPre({ id }: { id: string }) {
+function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const { image, setImage } = useImage();
     const [error, setError] = useState<string | null>(null)
@@ -48,6 +48,9 @@ export default function ProductPageModifyPre({ id }: { id: string }) {
     const [pdfLoading, setPdfLoading] = useState(true);
     const [pdfError, setPdfError] = useState(false);
     const [pdfChanged, setPdfChanged] = useState(false);
+    const resolvedParams = use(params);
+    const id = resolvedParams.id;
+    
     
     const form = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
@@ -65,7 +68,7 @@ export default function ProductPageModifyPre({ id }: { id: string }) {
           setPdfLoading(true);
           
           const response = await api.get(`/listing/${id}`);
-          const productData = response.data;
+          const productData = response.data.data;
           
           setProduct(productData);
           setImage(productData.imageUrl);
@@ -191,6 +194,8 @@ export default function ProductPageModifyPre({ id }: { id: string }) {
     const fileName = product?.fileUrl ? product.fileUrl.split('/').pop() : "No file selected";
     
     return (
+      <ImageProvider>
+
       <div className="flex flex-col gap-8">
         <h1 className="text-3xl font-bold">Edit Product</h1>
         
@@ -392,6 +397,14 @@ export default function ProductPageModifyPre({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      </ImageProvider>
     );
 }
   
+export default function ModifyProduct({ params }: { params: Promise<{ id: string }> }) {
+    return (
+      <ImageProvider>
+        <ModifyProductChildren params={params} />
+      </ImageProvider>
+    );
+}

@@ -1,37 +1,34 @@
-'use client';
-import ReviewComponent from "@/components/reviews-component";
 import api from "@/utils/axios";
-import { use, useEffect, useState } from "react";
+import UserReviews from "./user-reviews";
 
-function UserReviewsPage({ params }: { params: Promise<{ id: string }> }) {
-    const [reviews, setReviews] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const resolvedParams = use(params);
-    const userId = resolvedParams.id;
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    try {
+        const resolvedParams = await params;
+        const userId = resolvedParams.id;
+        const response = await api.get(`/user/${userId}`);
+        const user = response.data;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await api.get(`/user/${userId}/reviews`);
-                setReviews(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setError("Failed to load data");
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchData();
-    }, [userId]);
-  return (
-    <div className="container mx-auto px-4 py-8 min-h-screen">
-        {loading && <div>Loading...</div>}
-        {error && <div className="text-red-500">{error}</div>}
-        <ReviewComponent reviews={reviews} withProductLink={true}/>
-    </div>
-  );
+        return {
+            title: `${user.name} ${user.surname} - reviews | bookify`,
+            description: user.description?.slice(0, 160) || "User description",
+            openGraph: {
+                title: user.name,
+                description: user.description?.slice(0, 160) || "User description",
+                images: user.profileImageUrl ? [user.profileImageUrl] : [],
+            },
+        };
+    }
+    catch (error) {
+        console.error("Error fetching user metadata:", error);
+        return {
+            title: "User | bookify",
+            description: "User details page",
+        };
+    }
 }
 
-export default UserReviewsPage;
+export default function UserReviewsPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <UserReviews params={params} />
+  );
+}
