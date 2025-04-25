@@ -1,11 +1,33 @@
+'use client';
 import Link from "next/link";
 import ProductCard from "./product-card";
 import api from "@/utils/axios";
 import { Product } from "@/lib/definitions";
+import { useState, useEffect } from "react";
 
 async function FeaturedProducts() {
 
-    const featured = await api.get('/listing/featured?limit=4');
+    const [featured, setFeatured] = useState<Product[]>();
+
+    useEffect(() => {
+        const fetchFeatured = async () => {
+            try {
+                const response = await api.get('/listing/featured?limit=4');
+                setFeatured(response.data.data);
+            } catch (error) {
+                console.error("Failed to fetch featured products:", error);
+            }
+        };
+        
+        fetchFeatured();
+    }, []);
+
+    if (!featured) {
+        return <div className="text-center py-10">Loading...</div>;
+    }
+    if (featured.length === 0) {
+        return <div className="text-center py-10">No featured products found...</div>;
+    }
 
     return (
         <section className="py-12">
@@ -18,10 +40,10 @@ async function FeaturedProducts() {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {featured.data.data.length === 0 && (
+                {featured.length === 0 && (
                     <p className="text-gray-500">No featured products found...</p>
                 )}
-                {featured.data.data.map((product: Product) => (
+                {featured.map((product: Product) => (
                     <ProductCard
                         key={product.id}
                         id={product.id}
