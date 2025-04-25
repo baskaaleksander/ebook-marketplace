@@ -1,7 +1,7 @@
 import { RegisterForm } from "@/components/register-form";
 import { Metadata } from "next";
 
-const metadata : Metadata = {
+export const metadata : Metadata = {
     title: "Register | bookify",
     description: "Register to bookify",
     openGraph: {

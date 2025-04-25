@@ -32,39 +32,6 @@ async function FeaturedProducts() {
                         imageUrl={product.imageUrl}
                     />
                 ))}
-
-                {/* <ProductCard
-                    id="cm906osis0001il7kdwdsf5cd"
-                    title="The Great Adventure"
-                    price={49.99}
-                    sellerId="cm92nodda00006mwfk9tyt43j"
-                    createdAt="2025-04-02T17:11:25.540Z"
-                    imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
-                />
-                <ProductCard
-                    id="cm906osis0002il7kdwdsf5cd"
-                    title="Mystery in the Mountains"
-                    price={29.99}
-                    sellerId="cm92nodda00006mwfk9tyt43j"
-                    createdAt="2025-04-02T17:11:25.540Z"
-                    imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
-                />
-                <ProductCard
-                    id="cm906osis0003il7kdwdsf5cd"
-                    title="The History of Everything"
-                    price={19.99}
-                    sellerId="cm92nodda00006mwfk9tyt43j"
-                    createdAt="2025-04-02T17:11:25.540Z"
-                    imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
-                />
-                <ProductCard
-                    id="cm906osis0004il7kdwdsf5cd"
-                    title="Learning JavaScript"
-                    price={34.99}
-                    sellerId="cm92nodda00006mwfk9tyt43j"
-                    createdAt="2025-04-02T17:11:25.540Z"
-                    imageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop"
-                />                 */}
                 </div>
             </div>
         </section>

@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import RecentlyViewed from "./recently-viewed"
 
 export const metadata : Metadata = {
   title: "Recently Viewed | bookify",
@@ -10,5 +11,5 @@ export const metadata : Metadata = {
 }
 
 export default function RecentlyViewedPage() {
-  return <RecentlyViewedPage />
+  return <RecentlyViewed />
 }

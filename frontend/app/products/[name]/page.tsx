@@ -3,12 +3,13 @@ import { Product } from "@/lib/definitions";
 import api from "@/utils/axios";
 import { Metadata } from "next";
 import Link from "next/link";
-import { decode } from "punycode";
 import { use } from "react";
 
-export async function generateMetadata({ params }: {params: { name: string}}): Promise<Metadata> {
+export async function generateMetadata({ params }: {params: Promise<{ name: string}>}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const categoryNameParam = resolvedParams.name;
 
-  const categoryName = decodeURIComponent(params.name);
+  const categoryName = decodeURIComponent(categoryNameParam);
     return {
       title: `${categoryName} category | bookify`,
       description: `${categoryName} category products | bookify`,

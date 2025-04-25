@@ -1,7 +1,15 @@
-import FeaturedProducts from "@/components/featured-products";
-import HomeProducts from "@/components/all-home-products";
-import LastViewed from "@/components/last-viewed";
+'use client';
+import dynamic from "next/dynamic";
 
+const FeaturedProducts = dynamic(() => import('@/components/featured-products'), {
+  ssr: false,
+})
+const HomeProducts = dynamic(() => import('@/components/all-home-products'), {
+  ssr: false,
+})
+const LastViewed = dynamic(() => import('@/components/last-viewed'), {
+  ssr: false,
+})
 export default function Home() {
 
   return (
