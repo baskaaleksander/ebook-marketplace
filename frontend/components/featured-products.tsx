@@ -5,7 +5,7 @@ import api from "@/utils/axios";
 import { Product } from "@/lib/definitions";
 import { useState, useEffect } from "react";
 
-async function FeaturedProducts() {
+function FeaturedProducts() {
 
     const [featured, setFeatured] = useState<Product[]>();
 
