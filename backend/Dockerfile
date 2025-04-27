@@ -8,8 +8,11 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma generate
+
 RUN npm run build
 
-CMD ["npx", "prisma", "migrate", "deploy"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-CMD ["node", "dist/main"]
+CMD ["/entrypoint.sh"]
