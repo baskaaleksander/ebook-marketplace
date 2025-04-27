@@ -1,6 +1,7 @@
 'use client';
 
 import UserBalance from "@/components/user-balance";
+import WalletSkeleton from "@/components/wallet-skeleton";
 import { Balance, Order, Payout } from "@/lib/definitions";
 import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
@@ -94,9 +95,7 @@ function Wallet() {
     }
 
     if (loading) {
-        return <div className="container flex items-center justify-center h-screen">
-            <div className="text-center py-10">Loading your financial information...</div>
-        </div>;
+        return <WalletSkeleton />;
     }    
 
     return (

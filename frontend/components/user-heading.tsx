@@ -5,11 +5,15 @@ import { useAuth } from "@/providers/auth-provider";
 import { Button } from "./ui/button";
 import { UserData } from "@/lib/definitions";
 import StarRating from "./star-rating";
+import UserHeadingSkeleton from "./user-heading-skeleton";
 
 
-function UserHeading(userData : UserData) {
+function UserHeading({userData, loading} : {userData: UserData, loading?: boolean}) {
     const { user } = useAuth();
     
+    if (loading || !userData) {
+        return <UserHeadingSkeleton />;
+    }
 
     return (
         <div className="flex flex-col">

@@ -88,14 +88,11 @@ function AllProducts() {
         fetchData();
     }, [filtering]);
 
-    if (loading) {
-        return <div className="text-center">Loading...</div>
-    }
     if (error) {
         return <div className="text-red-500 text-center">{error}</div>
     }
     
-    return <UserProducts products={products} emptyMessage="No products found" />
+    return <UserProducts products={products} emptyMessage="No products found" loading={loading} />
 }
 
 export default function AllProductsPage() {

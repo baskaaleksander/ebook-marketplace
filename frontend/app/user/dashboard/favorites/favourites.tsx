@@ -26,11 +26,10 @@ function Favourites() {
   }, [])
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
-      {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
       {!loading && !error && <h1 className="text-3xl font-bold mb-6">Favourites</h1>}
 
-      <UserProducts products={favourites} emptyMessage="No favourites found" />
+      <UserProducts products={favourites} emptyMessage="No favourites found" loading={loading} />
     </div>
   )
 }

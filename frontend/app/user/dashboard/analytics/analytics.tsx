@@ -7,10 +7,10 @@ import api from "@/utils/axios";
 import { useEffect, useState } from "react";
 import { chartConfig } from "./chart-config";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
-import { Loader2 } from "lucide-react";
 import { AnalyticsData, MonthlySalesData, ProductViewData } from "@/lib/definitions";
 import Link from "next/link";
 import AnalyticsCards from "@/components/analytics-cards";
+import AnalyticsSkeleton from "@/components/analytics-skeleton";
 
 function Analytics() {
   const {user, loading: authLoading} = useAuth();
@@ -31,7 +31,7 @@ function Analytics() {
         setError('Failed to load data');
       }
       finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 1500);
       }
     }
 
@@ -39,11 +39,7 @@ function Analytics() {
   }, [user, authLoading]);
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AnalyticsSkeleton />;
   }
 
   if (error) {
@@ -104,7 +100,6 @@ function SoldOrdersChart({data}: {data: MonthlySalesData[]}) {
 }
 
 function ViewsPerProductChart({data}: {data: ProductViewData[]}) {
-
   return (
     <Card className="p-4">
       <div className="flex justify-between items-center mb-4">

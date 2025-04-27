@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import ModifyProductSkeleton from "@/components/modify-product-skeleton";
 
 const createProductSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters" }),
@@ -48,9 +49,9 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
     const [pdfLoading, setPdfLoading] = useState(true);
     const [pdfError, setPdfError] = useState(false);
     const [pdfChanged, setPdfChanged] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
     const resolvedParams = use(params);
     const id = resolvedParams.id;
-    
     
     const form = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
@@ -65,6 +66,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
     useEffect(() => {
       const fetchData = async () => {
         try {
+          setPageLoading(true);
           setPdfLoading(true);
           
           const response = await api.get(`/listing/${id}`);
@@ -82,7 +84,6 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
 
           if (productData.fileUrl) {
             try {
-
               const emptyBlob = new Blob([], { type: 'application/pdf' });
               const fileName = productData.fileName || productData.fileUrl.split('/').pop() || 'file.pdf';
               
@@ -101,6 +102,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
           setError("Failed to load product data");
         } finally {
           setPdfLoading(false);
+          setPageLoading(false);
         }
       };
       
@@ -190,6 +192,10 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
         setIsLoading(false);
       }
     };
+
+    if (pageLoading) {
+      return <ModifyProductSkeleton />;
+    }
 
     const fileName = product?.fileUrl ? product.fileUrl.split('/').pop() : "No file selected";
     

@@ -5,6 +5,7 @@ import UserHeading from "@/components/user-heading";
 import UserProducts from "@/components/user-products";
 import api from "@/utils/axios";
 import { use, useEffect, useState } from "react";
+import UserHeadingSkeleton from "@/components/user-heading-skeleton";
 
 
 
@@ -49,23 +50,21 @@ function User({ params }: { params: Promise<{ id: string }> }) {
         
         fetchData();
     }, [userId]);
-    
-    if (loading) {
-        return <div className="container mx-auto px-4 py-8">Loading user data...</div>;
-    }
 
     if (error) {
         return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
     }
+
+
 
     
     return (
         <div className="container mx-auto px-4 py-8 min-h-screen">
             {userData ? (
                 <>
-                    <UserHeading {...userData} />
+                    <UserHeading userData={userData} loading={loading}/>
                     
-                    <UserProducts products={products} userData={userData} emptyMessage="No products available from this user yet."/>
+                    <UserProducts products={products} userData={userData} emptyMessage="No products available from this user yet." loading={loading}/>
                 </>
             ) : (
                 <div className="text-center py-10">

@@ -33,7 +33,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['https://ebook-marketplace-chi.vercel.app'],
+    origin: ['https://ebook-marketplace-chi.vercel.app', 'http://localhost:3000'],
     credentials: true,
   });
 

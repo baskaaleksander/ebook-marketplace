@@ -14,12 +14,12 @@ function ProductNotFound() {
             The product you&apos;re looking for doesn&apos;t exist or may have been removed.
           </p>
           <div className="flex gap-4">
-          <Button asChild>
+          <Button>
             <Link href="/">
               Go Home
             </Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline">
             <Link href="/products">
               Browse Books
             </Link>

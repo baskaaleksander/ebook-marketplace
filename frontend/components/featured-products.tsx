@@ -1,6 +1,7 @@
 'use client';
 import Link from "next/link";
 import ProductCard from "./product-card";
+import ProductCardSkeleton from "./product-card-skeleton";
 import api from "@/utils/axios";
 import { Product } from "@/lib/definitions";
 import { useState, useEffect } from "react";
@@ -8,6 +9,7 @@ import { useState, useEffect } from "react";
 function FeaturedProducts() {
 
     const [featured, setFeatured] = useState<Product[]>();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchFeatured = async () => {
@@ -16,18 +18,13 @@ function FeaturedProducts() {
                 setFeatured(response.data.data);
             } catch (error) {
                 console.error("Failed to fetch featured products:", error);
+            } finally {
+                setLoading(false);
             }
         };
         
         fetchFeatured();
     }, []);
-
-    if (!featured) {
-        return <div className="text-center py-10">Loading...</div>;
-    }
-    if (featured.length === 0) {
-        return <div className="text-center py-10">No featured products found...</div>;
-    }
 
     return (
         <section className="py-12">
@@ -40,20 +37,25 @@ function FeaturedProducts() {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {featured.length === 0 && (
-                    <p className="text-gray-500">No featured products found...</p>
+                {loading ? (
+                    Array.from({ length: 4 }).map((_, index) => (
+                        <ProductCardSkeleton key={index} />
+                    ))
+                ) : featured && featured.length > 0 ? (
+                    featured.map((product: Product) => (
+                        <ProductCard
+                            key={product.id}
+                            id={product.id}
+                            title={product.title}
+                            price={product.price}
+                            sellerId={product.sellerId}
+                            createdAt={product.createdAt}
+                            imageUrl={product.imageUrl}
+                        />
+                    ))
+                ) : (
+                    <p className="text-gray-500 col-span-full text-center py-4">No featured products found...</p>
                 )}
-                {featured.map((product: Product) => (
-                    <ProductCard
-                        key={product.id}
-                        id={product.id}
-                        title={product.title}
-                        price={product.price}
-                        sellerId={product.sellerId}
-                        createdAt={product.createdAt}
-                        imageUrl={product.imageUrl}
-                    />
-                ))}
                 </div>
             </div>
         </section>

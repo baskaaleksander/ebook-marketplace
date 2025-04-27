@@ -1,4 +1,5 @@
 'use client';
+import TableSkeleton from "@/components/table-skeleton";
 import UserProductsTable from "@/components/user-products-table"
 import { Product } from "@/lib/definitions";
 import { useAuth } from "@/providers/auth-provider";
@@ -33,9 +34,16 @@ function MyProducts() {
     }
     fetchData();
   }, [user.id, authLoading]);
-  if (loading) {
-    return <div className="container mx-auto px-4 py-8">Loading your products...</div>;
-  }
+
+  if (authLoading || loading) {
+    return (
+        <div className="p-4">
+            <div className="h-8 w-48 bg-gray-300 rounded animate-pulse mb-4"></div>
+            <TableSkeleton rowCount={3} columnCount={5} />
+        </div>
+    );
+}
+
   if (error) {
     return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
   }

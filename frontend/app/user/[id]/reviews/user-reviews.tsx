@@ -27,9 +27,8 @@ function UserReviews({ params }: { params: Promise<{ id: string }> }) {
     }, [userId]);
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
-        {loading && <div>Loading...</div>}
         {error && <div className="text-red-500">{error}</div>}
-        <ReviewComponent reviews={reviews} withProductLink={true}/>
+        <ReviewComponent reviews={reviews} withProductLink={true} loading={loading}/>
     </div>
   );
 }

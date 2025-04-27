@@ -1,5 +1,6 @@
 'use client'
 import SoldOrdersTable from "@/components/sold-orders-table"
+import TableSkeleton from "@/components/table-skeleton"
 import { Order } from "@/lib/definitions";
 import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
@@ -46,14 +47,25 @@ function SoldOrders() {
     }, [user, router, authLoading]);
     
     if (authLoading) {
-        return <div>Checking authentication...</div>;
+        return (
+            <div className="p-4">
+                <div className="h-8 w-48 bg-gray-300 rounded animate-pulse mb-4"></div>
+                <TableSkeleton rowCount={3} columnCount={5} />
+            </div>
+        );
     }
     
     return (
-        <div>
-            {loading && <div>Loading sold orders...</div>}
-            {error && <div className="text-red-500">{error}</div>}
-            {soldOrders.length === 0 ? <div>You have no sold orders yet.</div> : <SoldOrdersTable orders={soldOrders}/>}
+        <div className="p-4">
+            {loading && <TableSkeleton rowCount={5} columnCount={5} />}
+            {error && <div className="text-red-500 font-medium p-4 bg-red-50 rounded-md">{error}</div>}
+            {!loading && !error && soldOrders.length === 0 ? (
+                <div className="text-center py-10 bg-gray-50 rounded-md">
+                    <p className="text-gray-500 font-medium">You have no sold orders yet.</p>
+                </div>
+            ) : (
+                !loading && !error && <SoldOrdersTable orders={soldOrders}/>
+            )}
         </div>
     );
 }
