@@ -32,10 +32,8 @@ async function bootstrap() {
     }),
   );
 
-  //temporarily disable cors
-
   app.enableCors({
-    origin: ['*'],
+    origin: ['https://ebook-marketplace-chi.vercel.app'],
     credentials: true,
   });
 
