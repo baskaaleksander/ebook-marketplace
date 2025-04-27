@@ -5,7 +5,6 @@ import UserHeading from "@/components/user-heading";
 import UserProducts from "@/components/user-products";
 import api from "@/utils/axios";
 import { use, useEffect, useState } from "react";
-import UserHeadingSkeleton from "@/components/user-heading-skeleton";
 
 
 

@@ -1,5 +1,4 @@
 import { Card, CardContent } from "./ui/card";
-import { Skeleton } from "./ui/skeleton";
 
 function ModifyProductSkeleton() {
   return (

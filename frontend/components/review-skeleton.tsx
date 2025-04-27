@@ -1,5 +1,3 @@
-import { Card } from "./ui/card";
-
 interface ReviewSkeletonProps {
   count?: number;
 }

@@ -1,4 +1,3 @@
-import { Card } from "./ui/card";
 
 interface TableSkeletonProps {
   rowCount?: number;

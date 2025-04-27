@@ -1,5 +1,3 @@
-import { Skeleton } from "./ui/skeleton";
-
 function UserHeadingSkeleton() {
   return (
     <div className="flex flex-col animate-pulse">

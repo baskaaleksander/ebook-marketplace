@@ -1,5 +1,4 @@
 import { Card } from "./ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 function WalletSkeleton() {
   return (

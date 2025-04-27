@@ -4,7 +4,6 @@ import TableSkeleton from "@/components/table-skeleton";
 import { Order } from "@/lib/definitions";
 import { useAuth } from "@/providers/auth-provider";
 import api from "@/utils/axios";
-import { Table } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
