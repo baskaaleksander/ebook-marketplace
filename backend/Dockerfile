@@ -7,6 +7,8 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma migrate deploy
+RUN npx prisma generate
 RUN npm run build
 
-CMD sh -c "npx prisma generate && npx prisma migrate deploy && node dist/main"
+CMD ["node", "dist/main"]
