@@ -32,18 +32,13 @@ async function bootstrap() {
     }),
   );
 
+  //temporarily disable cors
+
   app.enableCors({
-    origin: ['https://ebook-marketplace-chi.vercel.app'],
+    origin: ['*'],
     credentials: true,
   });
 
-  const uploadsPath = join(__dirname, '..', 'uploads');
-  app.use('/uploads', (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-  }, express.static(uploadsPath));
 
   app.useGlobalGuards(new ApiKeyGuard(configService));
 
