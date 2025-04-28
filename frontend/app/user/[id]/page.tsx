@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         const user = response.data;
 
         return {
-            title: `${user.name} ${user.surname} profile | bookify`,
+            title: `${user.name} ${user.surname} &apos; profile | bookify`,
             description: user.description?.slice(0, 160) || "User description",
             openGraph: {
                 title: user.name,

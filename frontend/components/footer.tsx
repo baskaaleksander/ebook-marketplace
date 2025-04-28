@@ -48,7 +48,6 @@ function Footer({
       links: [
         { text: "Become a Seller", url: "/user/dashboard/wallet" },
         { text: "Create Listing", url: "/product/create" },
-        { text: "Seller Guidelines", url: "/seller-guidelines" },
         { text: "Analytics", url: "/user/dashboard/analytics" },
       ],
     },
@@ -64,7 +63,7 @@ function Footer({
     <section className="pt-16 pb-10 bg-gray-50">
       <div className="container mx-auto px-4">
         <footer className="text-center">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
+          <div className="flex flex-col md:grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
             {menuItems.map((section, sectionIdx) => (
               <div key={sectionIdx} className="text-center">
                 <h3 className="mb-4 font-bold">{section.title}</h3>
