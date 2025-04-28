@@ -60,7 +60,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     try {
       const response = await api.post('/auth/register', userData);
-      setUser(response.data.user);
+      const user = await api.get(`/user/${response.data.user}`);
+      setUser(user.data);
     } finally {
       setLoading(false);
     }

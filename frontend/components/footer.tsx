@@ -52,29 +52,19 @@ function Footer({
         { text: "Analytics", url: "/user/dashboard/analytics" },
       ],
     },
-    {
-      title: "Help",
-      links: [
-        { text: "FAQ", url: "/faq" },
-        { text: "Contact Us", url: "/contact" },
-        { text: "About Us", url: "/about" },
-        { text: "Support", url: "/support" },
-      ],
-    },
   ],
   copyright = "© 2025 bookify.com. All rights reserved.",
   bottomLinks = [
     { text: "Terms of Service", url: "/terms" },
     { text: "Privacy Policy", url: "/privacy" },
     { text: "Cookie Policy", url: "/cookies" },
-    { text: "Accessibility", url: "/accessibility" },
   ],
 }: FooterProps) {
   return (
     <section className="pt-16 pb-10 bg-gray-50">
       <div className="container mx-auto px-4">
         <footer className="text-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
             {menuItems.map((section, sectionIdx) => (
               <div key={sectionIdx} className="text-center">
                 <h3 className="mb-4 font-bold">{section.title}</h3>

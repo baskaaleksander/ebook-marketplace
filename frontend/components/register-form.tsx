@@ -11,18 +11,27 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import * as z from 'zod';
 import { useEffect, useState } from "react"
 import { useAuth } from "@/providers/auth-provider"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import Link from "next/link"
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   surname: z.string().min(2, { message: "Surname must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions"
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -55,6 +64,8 @@ export function RegisterForm({
       surname: "",
       email: "",
       password: "",
+      confirmPassword: "",
+      acceptTerms: false,
     },
   });
 
@@ -63,12 +74,18 @@ export function RegisterForm({
     setError(null);
     
     try {
-      await registerUser({"name": data.name, "surname": data.surname, "email": data.email, "password": data.password});
+      await registerUser({
+        "name": data.name, 
+        "surname": data.surname, 
+        "email": data.email, 
+        "password": data.password
+      });
     } catch (err) {
       setError("Registration failed. Please try again.");
       console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
+      
     }
   };
 
@@ -146,6 +163,37 @@ export function RegisterForm({
                 )}
               </div>
               
+              <div className="grid gap-3">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  {...register("confirmPassword")}
+                  aria-invalid={errors.confirmPassword ? "true" : "false"}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                )}
+              </div>
+              
+              <div className="flex items-start space-x-2 mt-2">
+                <Checkbox
+                  id="acceptTerms"
+                  {...register("acceptTerms")}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="acceptTerms"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I accept the <Link href="/terms" className="text-blue-600 hover:underline">terms and conditions</Link>
+                  </label>
+                  {errors.acceptTerms && (
+                    <p className="text-sm text-red-500">{errors.acceptTerms.message}</p>
+                  )}
+                </div>
+              </div>
+              
               <div className="flex flex-col gap-3">
                 <Button 
                   type="submit" 
@@ -158,9 +206,9 @@ export function RegisterForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <a href="/login" className="underline underline-offset-4">
+              <Link href="/login" className="underline underline-offset-4">
                 Sign in
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>

@@ -288,7 +288,14 @@ function Settings() {
               />
               
               <div className="flex justify-between items-center">
-                <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
+                <div className="flex items-center space-x-4">
+                  <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    >Delete account
+                    </Button>
+                </div>
                 <Button 
                   type="submit" 
                   disabled={submitting}
