@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 
 @ApiTags('Users')
 @Controller('user')
@@ -54,6 +55,17 @@ export class UserController {
     @Get(':id/reviews')
     getUserReviews(@Param('id') id: string) {
         return this.userService.getUserReviews(id);
+    }
+
+    // Delete user
+    @ApiOperation({ summary: 'Get all users' })
+    @ApiParam({ name: 'id', description: 'User ID' })
+    @ApiResponse({ status: 200, description: 'All users retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'No users found' })
+    @UseGuards(AuthGuard('jwt'))
+    @Delete(':id')
+    deleteUser(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+        return this.userService.deleteUser(id, userId);
     }
 
 }

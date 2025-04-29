@@ -442,7 +442,8 @@ export class ListingService {
                             sellerId: product.sellerId,
                             isFavourite: !!favourite,
                             isFeatured: product.isFeatured,
-                            featuredForTime: product.featuredForTime,        
+                            featuredForTime: product.featuredForTime,
+                            views: product.views,        
                             seller: {
                                 id: product.seller.id,
                                 name: product.seller.name,
@@ -463,6 +464,7 @@ export class ListingService {
                     isFavourite: false,
                     isFeatured: product.isFeatured,
                     featuredForTime: product.featuredForTime,
+                    views: product.views,
                     seller: {
                         id: product.seller.id,
                         name: product.seller.name,

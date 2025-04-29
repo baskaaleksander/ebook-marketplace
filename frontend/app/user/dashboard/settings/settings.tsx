@@ -28,8 +28,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import ChangePasswordDialog from "@/components/change-password-dialog";
 import ChangeAvatarDialog from "@/components/change-avatar-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ChangePasswordDialog from "@/components/change-password-dialog";
 
 const userSettingsSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -43,7 +44,7 @@ const userSettingsSchema = z.object({
 type UserSettingsFormValues = z.infer<typeof userSettingsSchema>;
 
 function Settings() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [userData, setUserData] = useState<UserData>();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -51,6 +52,9 @@ function Settings() {
   const [submitting, setSubmitting] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
+  const [deleteMyAccount, setDeleteMyAccount] = useState<string>("");
+  const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(true);
   const router = useRouter();
   
   const form = useForm<UserSettingsFormValues>({
@@ -105,6 +109,14 @@ function Settings() {
     fetchData();
   }, [user, authLoading, form]);
 
+  useEffect(() => {
+    if (deleteMyAccount === "delete my account") {
+      setDeleteButtonDisabled(false);
+    } else {
+      setDeleteButtonDisabled(true);
+    }
+  }, [deleteMyAccount]);
+
   const onAvatarChange = (newAvatarUrl: string) => {
     try {
       if (!user?.id) return;
@@ -124,6 +136,24 @@ function Settings() {
     }
     finally {
       setAvatarDialogOpen(false);
+    }
+  }
+
+  const onDeleteAccount = async () => {
+    try {
+      if (!user?.id) return;
+      
+      await api.delete(`/user/${user.id}`);
+      setSuccess("Account deleted successfully");
+    }
+    catch (error) {
+      console.error("Error deleting account:", error);
+      setError("Failed to delete account");
+    }
+    finally {
+      setDeleteAccountDialogOpen(false);
+      logout();
+      router.push('/login');
     }
   }
 
@@ -184,7 +214,7 @@ function Settings() {
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
-          
+          {/* User avatar and name */}
           <div className="flex items-center space-x-4 mb-8">
             <div className="relative">
               <Avatar className="h-20 w-20">
@@ -223,6 +253,7 @@ function Settings() {
             />
           )}
           
+          {/* Form for updating user settings */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -288,14 +319,7 @@ function Settings() {
               />
               
               <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                  <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    >Delete account
-                    </Button>
-                </div>
+                <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
                 <Button 
                   type="submit" 
                   disabled={submitting}
@@ -308,6 +332,62 @@ function Settings() {
                   ) : "Save Changes"}
                 </Button>
               </div>
+
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="flex flex-col">
+                  <h3 className="text-lg font-medium text-red-600 mb-2">Delete your account</h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Once you delete your account, there is no going back. Please be certain.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setDeleteAccountDialogOpen(true)}
+                    className="w-full md:w-auto md:self-start"
+                    disabled={submitting}
+                  >
+                    Delete Account
+                  </Button>
+                </div>
+              </div>
+
+              {/* Dialog for deleting account */}
+              <Dialog open={deleteAccountDialogOpen} onOpenChange={setDeleteAccountDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle className="text-red-600">Delete Your Account</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="py-4">
+                    <p className="font-medium mb-2">Are you absolutely sure you want to delete your account?</p>
+                    <p className="text-sm text-gray-500">Please type &quot;delete my account&quot; to delete your account.</p>
+                    <Input 
+                      className="mt-2"
+                      placeholder="delete my account"
+                      onChange={(e) => setDeleteMyAccount(e.target.value)}
+                      value={deleteMyAccount}
+                    />
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setDeleteAccountDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      onClick={() => {
+                        onDeleteAccount();
+                      }}
+                      disabled={deleteButtonDisabled}
+                    >
+                      Delete My Account
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </form>
           </Form>
         </CardContent>
