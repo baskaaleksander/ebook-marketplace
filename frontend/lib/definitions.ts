@@ -20,6 +20,7 @@ export type Product = {
     fileUrl: string;
     sellerId: string;
     isFeatured: boolean;
+    featuredForTime: Date | null;
     isFavourite: boolean;
     seller: UserData;
     reviews: Review[];

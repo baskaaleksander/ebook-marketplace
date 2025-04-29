@@ -1,5 +1,6 @@
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Home, BookOpen } from 'lucide-react'; // Import icons explicitly
 
 export default function NotFound() {
   return (
@@ -10,16 +11,16 @@ export default function NotFound() {
         Oops! The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>
       <div className="flex gap-4">
-        <Button asChild>
-          <Link href="/">
-            Go Home
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/products">
-            Browse Books
-          </Link>
-        </Button>
+        <Link href="/">
+          <Button className="flex items-center gap-2">
+            <Home size={16} /> <span>Go Home</span>
+          </Button>
+        </Link>
+        <Link href="/products">
+          <Button variant="outline" className="flex items-center gap-2">
+            <BookOpen size={16} /> <span>Browse Books</span>
+          </Button>
+        </Link>
       </div>
     </div>
   );

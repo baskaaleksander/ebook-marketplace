@@ -121,7 +121,9 @@ export class ListingService {
             }
         });
 
-        
+        if(!listing){
+            throw new NotFoundException('Listing not found');
+        }
 
 
         if(userId) {
@@ -135,10 +137,6 @@ export class ListingService {
             (listing as ProductWithFavourite).isFavourite = !!favourite;
         }
         
-
-        if(!listing){
-            throw new NotFoundException('Listing not found');
-        }
 
         if(listing.sellerId == userId){
             return {

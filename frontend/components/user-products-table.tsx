@@ -11,19 +11,56 @@ import {
   createColumnHelper,
   SortingState
 } from '@tanstack/react-table'
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, Star } from "lucide-react"
 import { Button } from "./ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
 import api from "@/utils/axios"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
 
 function UserProductsTable({ products }: { products: Product[] }) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isFeatureDialogOpen, setIsFeatureDialogOpen] = useState(false)
   const [deletedProductId, setDeletedProductId] = useState<string | null>(null)
+  const [tableProducts, setTableProducts] = useState<Product[]>(products)
+  const [productToFeature, setProductToFeature] = useState<Product | null>(null)
+  const [featureLoading, setFeatureLoading] = useState(false)
+
+  const FEATURE_COST = 15.00;
+  const FEATURE_CURRENCY = "PLN";
 
   const handleDelete = async (productId: string) => {
     setIsDialogOpen(true)
     setDeletedProductId(productId)
+  }
+  
+  const handleFeature = async (product: Product) => {
+    
+    if (product.isFeatured) return;
+    
+    setProductToFeature(product);
+    setIsFeatureDialogOpen(true);
+   
+  }
+  
+  const handleFeatureConfirm = async () => {
+    if (!productToFeature) return;
+    
+    try {
+      setFeatureLoading(true);
+      
+      const response = await api.post(`/stripe/checkout-featuring/${productToFeature.id}/`, {time: 30});
+      
+      if (response.data.data.url) {
+        window.location.href = response.data.data.url;
+      } else {
+        throw new Error("No payment URL returned");
+      }
+    } catch (error) {
+      console.error("Error initiating feature payment:", error);
+    } finally {
+      setFeatureLoading(false);
+    }
   }
   
   const columnHelper = createColumnHelper<Product>()
@@ -46,6 +83,35 @@ function UserProductsTable({ products }: { products: Product[] }) {
       header: 'Views',
       cell: info => info.getValue(),
     }),
+    columnHelper.accessor('isFeatured', {
+      header: 'Featured',
+      cell: info => {
+        const product = info.row.original;
+        
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant={product.isFeatured ? "default" : "outline"}
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={() => handleFeature(product)}
+                >
+                  <Star className={`h-4 w-4 ${product.isFeatured ? "fill-yellow-400" : ""}`} />
+                  {product.isFeatured ? "Featured" : "Feature"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {product.isFeatured 
+                  ? `Featured until ${new Date(product.featuredForTime!).toLocaleDateString()}`
+                  : "Feature this product to increase visibility"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      },
+    }),
     columnHelper.display({
       id: 'modify',
       header: 'Modify',
@@ -59,7 +125,7 @@ function UserProductsTable({ products }: { products: Product[] }) {
   ], [columnHelper])
 
   const table = useReactTable({
-    data: products,
+    data: tableProducts,
     columns,
     state: {
       sorting,
@@ -102,19 +168,75 @@ function UserProductsTable({ products }: { products: Product[] }) {
           ))}
         </TableBody>
       </Table>
-      <DeleteDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} productId={deletedProductId!} />
+      
+      <DeleteDialog 
+        isDialogOpen={isDialogOpen} 
+        setIsDialogOpen={setIsDialogOpen} 
+        productId={deletedProductId!}
+        onProductDeleted={() => {
+          setTableProducts(prev => prev.filter(p => p.id !== deletedProductId))
+        }}
+      />
+      
+      <Dialog open={isFeatureDialogOpen} onOpenChange={setIsFeatureDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Feature Your Product</DialogTitle>
+            <DialogDescription>
+              <p className="mb-2">
+                Featuring your product will give it special placement and visibility to potential buyers.
+              </p>
+              <p className="text-sm">
+                Your product will be featured for 30 days and will appear at the top of search results and category pages.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="flex justify-between items-center font-medium">
+              <span>Product:</span> 
+              <span>{productToFeature?.title}</span>
+            </div>
+            
+            <div className="flex justify-between items-center mt-4 text-lg font-bold">
+              <span>Cost:</span> 
+              <span>{FEATURE_COST.toFixed(2)} {FEATURE_CURRENCY}</span>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFeatureDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleFeatureConfirm}
+              disabled={featureLoading}
+              className="ml-2"
+            >
+              {featureLoading ? "Processing..." : "Proceed to Payment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
 
-function DeleteDialog({ isDialogOpen, setIsDialogOpen, productId }: { 
+function DeleteDialog({ 
+  isDialogOpen, 
+  setIsDialogOpen, 
+  productId,
+  onProductDeleted
+}: { 
   isDialogOpen: boolean, 
   setIsDialogOpen: (open: boolean) => void, 
-  productId: string 
+  productId: string,
+  onProductDeleted: () => void
 }) {
   const handleDelete = async (productId: string) => {
     try {
       await api.delete(`/listing/${productId}`)
+      onProductDeleted()
     }
     catch (err) {
       console.error("Error deleting product:", err)
