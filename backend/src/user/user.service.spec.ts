@@ -42,14 +42,16 @@ describe('UserService', () => {
   describe('createUser', () => {
     it('should create a new user successfully', async () => {
       const createUserDto: CreateUserDto = {
-        name: 'Test User',
+        name: 'Test',
         email: 'test@example.com',
         password: 'password123',
+        surname: 'User'
       };
 
       const expectedUser = {
         id: 'user-123',
-        name: 'Test User',
+        name: 'Test',
+        surname: 'User',
         email: 'test@example.com',
         password: 'password123',
         createdAt: new Date(),
@@ -68,7 +70,8 @@ describe('UserService', () => {
 
     it('should pass through any errors from the database', async () => {
       const createUserDto: CreateUserDto = {
-        name: 'Test User',
+        name: 'Test',
+        surname: 'User',
         email: 'test@example.com',
         password: 'password123',
       };
@@ -83,12 +86,13 @@ describe('UserService', () => {
     });
   });
 
-  describe('findUserByEmail', () => {
+  describe('findUserById', () => {
     it('should find a user by email successfully', async () => {
-      const email = 'test@example.com';
+      const id = 'user-123';
       const expectedUser = {
         id: 'user-123',
-        name: 'Test User',
+        name: 'Test',
+        surname: 'User',
         email: 'test@example.com',
         password: 'hashed-password',
         createdAt: new Date(),
@@ -101,51 +105,33 @@ describe('UserService', () => {
 
       mockPrismaService.user.findUnique.mockResolvedValue(expectedUser);
 
-      const result = await service.findUserByEmail(email);
+      const result = await service.findUserById(id);
 
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email },
-        include: { 
-          products: true,
-          reviews: true,
-          orders: true,
-          payouts: true
-        }
+        where: { id },
       });
       expect(result).toEqual(expectedUser);
     });
 
     it('should throw NotFoundException when user not found', async () => {
-      const email = 'nonexistent@example.com';
+      const id = 'non-user-id';
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.findUserByEmail(email)).rejects.toThrow(NotFoundException);
+      await expect(service.findUserById(id)).rejects.toThrow(NotFoundException);
 
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email },
-        include: { 
-          products: true,
-          reviews: true,
-          orders: true,
-          payouts: true
-        }
+        where: { id },
       });
     });
 
     it('should pass through any errors from the database', async () => {
-      const email = 'test@example.com';
+      const id = 'user-123';
       const dbError = new Error('Database error');
       mockPrismaService.user.findUnique.mockRejectedValue(dbError);
 
-      await expect(service.findUserByEmail(email)).rejects.toThrow(dbError);
+      await expect(service.findUserById(id)).rejects.toThrow(dbError);
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email },
-        include: { 
-          products: true,
-          reviews: true,
-          orders: true,
-          payouts: true
-        }
+        where: { id },
       });
     });
   });
