@@ -49,22 +49,14 @@ export class ViewedListingsService {
     // remove fileUrl from the product object, add isFavourite property
     async getViewedProducts(userId: string) {
         const viewed = await this.prismaService.viewedListing.findMany({
-            where: {
-                userId
-            },
-            orderBy: {
-                viewedAt: 'desc'
-            },
+            where: { userId },
+            orderBy: { viewedAt: 'desc' },
             take: 10,
             include: {
-                product: true
-            }
-        })
-        const viewedProducts = await Promise.all(
-            viewed.map(async (viewedListing) => {
-                const product = await this.prismaService.product.findUnique({
-                    where: { id: viewedListing.productId },
-                    include: {
+                product: {
+                    select: {
+                        id: true,
+                        title: true,
                         seller: {
                             select: {
                                 id: true,
@@ -78,16 +70,12 @@ export class ViewedListingsService {
                         }
                     }
                 }
-                
-            )
-                return product;
-            })
-        );
-        
-        return viewedProducts;
-
+            }
+        });
+    
+        return viewed.filter(v => v.product !== null);
     }
-
+    
     async clearViewedProducts() {
         const result = await this.prismaService.viewedListing.deleteMany({
             where: {

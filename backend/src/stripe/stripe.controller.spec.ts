@@ -7,12 +7,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { ExecutionContext } from '@nestjs/common';
 import { IdDto } from '../dtos/id.dto';
 import { AmountDto } from './dtos/amount.dto';
+import { FeaturedService } from './featured.service';
 
 describe('StripeController', () => {
   let controller: StripeController;
   let stripeService: StripeService;
   let webhookService: WebhookService;
   let orderService: OrderService;
+  let featuredService: FeaturedService;
 
   const mockStripeService = {
     connectAccount: jest.fn(),
@@ -22,17 +24,25 @@ describe('StripeController', () => {
     getPayout: jest.fn(),
     cancelPayout: jest.fn(),
     getCurrentBalance: jest.fn(),
+    getAllUserPayouts: jest.fn(),
   };
 
   const mockWebhookService = {
     handleWebhookEvent: jest.fn(),
     returnAllWebhooks: jest.fn(),
+    processWebhookEvent: jest.fn(),
   };
 
   const mockOrderService = {
     checkoutOrder: jest.fn(),
     createRefund: jest.fn(),
     getAllUserOrders: jest.fn(),
+    getAllSoldOrders: jest.fn(),
+  };
+
+  const mockFeaturedService = {
+    markAsFeatured: jest.fn(),
+    checkoutFeaturing: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -42,6 +52,7 @@ describe('StripeController', () => {
         { provide: StripeService, useValue: mockStripeService },
         { provide: WebhookService, useValue: mockWebhookService },
         { provide: OrderService, useValue: mockOrderService },
+        { provide: FeaturedService, useValue: mockFeaturedService },
       ],
     })
       .overrideGuard(AuthGuard('jwt'))
@@ -58,6 +69,7 @@ describe('StripeController', () => {
     stripeService = module.get<StripeService>(StripeService);
     webhookService = module.get<WebhookService>(WebhookService);
     orderService = module.get<OrderService>(OrderService);
+    featuredService = module.get<FeaturedService>(FeaturedService);
   });
 
   it('should be defined', () => {

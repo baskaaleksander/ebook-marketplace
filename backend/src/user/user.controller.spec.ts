@@ -34,16 +34,16 @@ describe('UserController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findUserByEmail', () => {
+  describe('findUserById', () => {
     it('should return a user when a valid email is provided', async () => {
-      const mockUser = { id: 1, email: 'test@example.com', name: 'Test User' };
+      const mockUser = { id: 'user-1', email: 'test@example.com', name: 'Test User' };
       mockUserService.findUserByEmail.mockResolvedValue(mockUser);
 
-      const result = await controller.findUserByEmail({ email: 'test@example.com' });
+      const result = await controller.findUserById('user-1');
       
       expect(result).toEqual(mockUser);
-      expect(userService.findUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(userService.findUserByEmail).toHaveBeenCalledTimes(1);
+      expect(userService.findUserById).toHaveBeenCalledWith('user-1');
+      expect(userService.findUserById).toHaveBeenCalledTimes(1);
     });
 
     it('should propagate NotFoundException if user is not found', async () => {

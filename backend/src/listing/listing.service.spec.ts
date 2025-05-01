@@ -49,8 +49,14 @@ describe('ListingService', () => {
       findFirst: jest.fn(),
       create: jest.fn(),
     },
+    categoryOnProduct: {
+      findFirst: jest.fn(),
+    },
     user: {
       findUnique: jest.fn(),
+    },
+    favourite: {
+      findFirst: jest.fn(),
     }
   };
 
@@ -87,6 +93,7 @@ describe('ListingService', () => {
         title: 'New E-book',
         description: 'Great content',
         price: 19.99,
+        imageUrl: 'https://example.com/image.jpg',
         fileUrl: 'https://example.com/ebook.pdf',
         categories: [{ name: 'Fiction' }]
       };
@@ -102,22 +109,21 @@ describe('ListingService', () => {
         ...mockProduct,
         title: createListingDto.title,
         description: createListingDto.description,
+        imageUrl: createListingDto.imageUrl,
         price: createListingDto.price,
         fileUrl: createListingDto.fileUrl,
         categories: [mockCategory]
       });
 
-      // Act
       const result = await service.createListing(createListingDto, 'user1');
 
-      // Assert
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'user1' }
       });
       
       expect(mockPrismaService.product.create).toHaveBeenCalled();
-      expect(result).toHaveProperty('title', createListingDto.title);
-      expect(result).toHaveProperty('price', createListingDto.price);
+      expect(result.data).toHaveProperty('title', createListingDto.title);
+      expect(result.data).toHaveProperty('price', createListingDto.price);
     });
 
     it('should throw UnauthorizedException if seller is not verified', async () => {
@@ -126,6 +132,7 @@ describe('ListingService', () => {
         title: 'New E-book',
         description: 'Great content',
         price: 19.99,
+        imageUrl: 'https://example.com/image.jpg',
         fileUrl: 'https://example.com/ebook.pdf',
         categories: [{ name: 'Fiction' }]
       };
@@ -135,7 +142,6 @@ describe('ListingService', () => {
         stripeStatus: 'unverified'
       });
 
-      // Act & Assert
       await expect(service.createListing(createListingDto, 'user1'))
         .rejects.toThrow(UnauthorizedException);
     });
@@ -143,35 +149,61 @@ describe('ListingService', () => {
 
   describe('findListingById', () => {
     it('should return a listing when it exists', async () => {
-      // Arrange
       mockPrismaService.product.findUnique.mockResolvedValue({
         ...mockProduct,
-        categories: [mockCategory]
+        imageUrl: 'https://example.com/image.jpg',
+        isFeatured: false,
+        featuredForTime: null,
+        categories: [mockCategory],
+        seller: {
+          id: 'user1',
+          name: 'Test User',
+          surname: 'Smith',
+          email: 'test@example.com',
+          avatarUrl: 'https://example.com/avatar.jpg',
+          stripeStatus: 'verified',
+          createdAt: new Date()
+        },
+        reviews: []
       });
 
-      // Act
-      const result = await service.findListingById('product1');
+      const id = 'product1';
 
-      // Assert
+      const result = await service.findListingById(id);
+
       expect(mockPrismaService.product.findUnique).toHaveBeenCalledWith({
         where: { id: 'product1' },
-        include: { categories: true }
+        include: {
+          categories: true,
+          reviews: true,
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              surname: true,
+              email: true,
+              avatarUrl: true,
+              stripeStatus: true,
+              createdAt: true,
+            }
+          }
+        }
       });
-      expect(result).toEqual({
-        ...mockProduct,
-        categories: [mockCategory]
-      });
+      
+      expect(result).toHaveProperty('data');
+      expect(result.data).toHaveProperty('id', 'product1');
+      expect(result.data).toHaveProperty('title', 'Test Product');
+      expect(result.data).toHaveProperty('seller');
+      expect(result.data.seller).toHaveProperty('id', 'user1');
     });
 
     it('should throw NotFoundException when listing does not exist', async () => {
-      // Arrange
+
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      // Act & Assert
       await expect(service.findListingById('nonexistent'))
         .rejects.toThrow(NotFoundException);
     });
   });
 
-  // Add more tests for other methods...
 });

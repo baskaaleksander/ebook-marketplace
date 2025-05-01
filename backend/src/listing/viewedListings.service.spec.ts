@@ -6,21 +6,32 @@ import { NotFoundException } from '@nestjs/common';
 describe('ViewedListingsService', () => {
   let service: ViewedListingsService;
   let prismaService: PrismaService;
-
+  
   const mockViewedListing = {
     id: 'view1',
     userId: 'user1',
     productId: 'product1',
-    viewedAt: new Date(),
+    viewedAt: new Date('2025-05-01T12:34:31.812Z'),
     product: {
       id: 'product1',
-      title: 'Test Product'
+      title: 'Test Product',
+      seller: {
+        id: 'seller1',
+        name: 'John',
+        surname: 'Doe',
+        email: 'john@example.com',
+        avatarUrl: null,
+        stripeStatus: 'active',
+        createdAt: new Date('2025-01-01T10:00:00.000Z'),
+      }
     }
   };
+  
 
   const mockPrismaService = {
     product: {
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
     viewedListing: {
       upsert: jest.fn(),
@@ -82,7 +93,6 @@ describe('ViewedListingsService', () => {
     it('should throw NotFoundException when product does not exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
       
-      // Expect the method to throw NotFoundException
       await expect(service.trackListingView('user1', 'nonexistent'))
         .rejects.toThrow(NotFoundException);
       
@@ -93,20 +103,60 @@ describe('ViewedListingsService', () => {
       expect(mockPrismaService.viewedListing.upsert).not.toHaveBeenCalled();
     });
   });
-
+  
   describe('getViewedProducts', () => {
     it('should return recently viewed products', async () => {
-      mockPrismaService.viewedListing.findMany.mockResolvedValue([mockViewedListing]);
-
+      const mockResults = [mockViewedListing];
+      mockPrismaService.viewedListing.findMany.mockResolvedValue(mockResults);
+      
       const result = await service.getViewedProducts('user1');
 
+      expect(result).toEqual([
+        {
+          id: 'view1',
+          userId: 'user1',
+          productId: 'product1',
+          viewedAt: new Date('2025-05-01T12:34:31.812Z'),
+          product: {
+            id: 'product1',
+            title: 'Test Product',
+            seller: {
+              id: 'seller1',
+              name: 'John',
+              surname: 'Doe',
+              email: 'john@example.com',
+              avatarUrl: null,
+              stripeStatus: 'active',
+              createdAt: new Date('2025-01-01T10:00:00.000Z'),
+            }
+          }
+        }
+      ]);
+      
       expect(mockPrismaService.viewedListing.findMany).toHaveBeenCalledWith({
         where: { userId: 'user1' },
         orderBy: { viewedAt: 'desc' },
         take: 10,
-        include: { product: true }
-      });
-      expect(result).toEqual([mockViewedListing]);
+        include: {
+            product: {
+                select: {
+                    id: true,
+                    title: true,
+                    seller: {
+                        select: {
+                            id: true,
+                            name: true,
+                            surname: true,
+                            email: true,
+                            avatarUrl: true,
+                            stripeStatus: true,
+                            createdAt: true,
+                        }
+                    }
+                }
+            }
+        }
+  });
     });
   });
 

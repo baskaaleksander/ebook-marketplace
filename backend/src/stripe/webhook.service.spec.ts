@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { WebhookService } from './webhook.service';
 import Stripe from 'stripe';
+import { FeaturedService } from './featured.service';
 
 jest.mock('stripe');
 
@@ -12,6 +13,7 @@ describe('WebhookService', () => {
     let stripeService: StripeService;
     let prismaService: PrismaService;
     let configService: ConfigService;
+    let featuredService: FeaturedService;
     let stripe: Stripe;
     let stripeMock: {
         webhooks: {
@@ -67,6 +69,11 @@ describe('WebhookService', () => {
         },
     };
 
+    let mockFeaturedService = {
+        markAsFeatured: jest.fn(),
+        checkoutFeaturing: jest.fn(),
+    }
+
     beforeEach(async () => {
         jest.clearAllMocks();
 
@@ -105,12 +112,14 @@ describe('WebhookService', () => {
                 WebhookService,
                 { provide: ConfigService, useValue: mockConfigService },
                 { provide: PrismaService, useValue: mockPrismaService },
+                { provide: FeaturedService, useValue: mockFeaturedService },
             ],
         }).compile();
 
         service = module.get<WebhookService>(WebhookService);
         prismaService = module.get<PrismaService>(PrismaService);
         configService = module.get<ConfigService>(ConfigService);
+        featuredService = module.get<FeaturedService>(FeaturedService);
 
         stripe = new Stripe('test_key')
     });
@@ -169,7 +178,7 @@ describe('WebhookService', () => {
             });
             
             expect(() => {
-                const newService = new WebhookService(mockConfigService as any, mockPrismaService as any);
+                const newService = new WebhookService(mockConfigService as any, mockPrismaService as any, featuredService as any);
             }).toThrowError('STRIPE_SECRET_KEY is not defined');
         });
 
