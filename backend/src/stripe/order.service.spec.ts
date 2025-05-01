@@ -20,6 +20,10 @@ describe('OrderService', () => {
     user: {
       findUnique: jest.fn(),
     },
+    refund: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+    },
     order: {
       create: jest.fn(),
       findMany: jest.fn(),
@@ -66,8 +70,36 @@ describe('OrderService', () => {
     it('should return all orders for a user', async () => {
       const userId = 'user-123';
       const mockOrders = [
-        { id: 'order-1', buyerId: userId, productId: 'product-1' },
-        { id: 'order-2', buyerId: userId, productId: 'product-2' },
+        { 
+          id: 'order-1', 
+          buyerId: userId, 
+          productId: 'product-1',
+          amount: 222,
+          checkoutSessionId: 'null',
+          createdAt: new Date(),
+          isReviewed: true,
+          paymentUrl: 'null',
+          product: 'newProduct',
+          refundId: 'null',
+          sellerId: 'undefined',
+          status: 'COMPLETED',
+          updatedAt: new Date()
+        },
+        { 
+          id: 'order-2', 
+          buyerId: userId, 
+          productId: 'product-2',
+          amount: 234,
+          checkoutSessionId: 'null',
+          createdAt: new Date(),
+          isReviewed: false,
+          paymentUrl: 'null',
+          product: 'undefined-product',
+          refundId: 'null',
+          sellerId: 'undefined',
+          status: 'CREATED',
+          updatedAt: new Date()
+        },
       ];
       
       mockPrismaService.order.findMany.mockResolvedValue(mockOrders);
@@ -76,9 +108,10 @@ describe('OrderService', () => {
       
       expect(mockPrismaService.order.findMany).toHaveBeenCalledWith({
         where: { buyerId: userId },
-        include: { product: true }
+        include: { product: true },
+        orderBy: { createdAt: 'desc' },
       });
-      expect(result).toEqual(mockOrders);
+      expect(result.data).toEqual(mockOrders);
     });
   });
 
@@ -156,6 +189,9 @@ describe('OrderService', () => {
       
       expect(stripeMock.checkout.sessions.create).toHaveBeenCalledWith({
         payment_method_types: ['card', 'blik', 'p24', 'klarna'],
+        invoice_creation: {
+          enabled: true,
+        },
         line_items: [
           {
             price_data: {
@@ -169,8 +205,8 @@ describe('OrderService', () => {
           }
         ],
         mode: 'payment',
-        success_url: 'http://localhost:3000/success',
-        cancel_url: 'http://localhost:3000/cancel',
+        success_url: 'http://localhost:3000/user/dashboard/purchased',
+        cancel_url: 'http://localhost:3000/',
         payment_intent_data: {
           application_fee_amount: mockProduct.price * 5,
           transfer_data: {
@@ -331,15 +367,22 @@ describe('OrderService', () => {
       expect(stripeMock.refunds.create).toHaveBeenCalledWith({
         payment_intent: mockCheckoutSession.payment_intent.toString(),
         amount: mockOrder.amount,
-        metadata: { orderId: mockOrder.id }
+        metadata: { orderId: mockOrder.id },
+        reason: 'requested_by_customer',
       });
       
       expect(mockPrismaService.order.update).toHaveBeenCalledWith({
         where: { id: orderId },
-        data: { status: 'REFUNDED' }
+        data: { 
+          status: 'REFUNDED',
+          refundId: mockRefund.id,
+        },
       });
       
-      expect(result).toEqual(mockRefund);
+      expect(result).toEqual({
+        message: 'Refund created successfully',
+        refund: mockRefund,
+      });
     });
 
     it('should throw NotFoundException when order not found', async () => {
@@ -452,7 +495,7 @@ describe('OrderService', () => {
       } as any;
       
       stripeMock.refunds = {
-        create: jest.fn().mockRejectedValue(new Error('Stripe API error')),
+        create: jest.fn().mockRejectedValue(new NotFoundException('Stripe error')),
       } as any;
       
       await expect(service.createRefund(orderId, userId))

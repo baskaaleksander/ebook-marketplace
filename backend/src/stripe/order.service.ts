@@ -195,7 +195,7 @@ export class OrderService {
             throw new UnauthorizedException('Refund can be made only within 14 days of purchase');
         }
 
-        try {
+
             const checkoutSession = await this.stripe.checkout.sessions.retrieve(order.checkoutSessionId);
 
             if(!checkoutSession.payment_intent){
@@ -239,9 +239,6 @@ export class OrderService {
 
 
             return { message: 'Refund created successfully', refund };
-        } catch (error) {
-            throw new NotFoundException('Stripe error', error);
-        }
 
     }
 

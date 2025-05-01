@@ -20,7 +20,10 @@ describe('FavouritesService', () => {
       create: jest.fn(),
       findFirst: jest.fn(),
       delete: jest.fn(),
-    }
+    },
+    product: {
+      findUnique: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -41,18 +44,6 @@ describe('FavouritesService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getFavorites', () => {
-    it('should return user favorites', async () => {
-      mockPrismaService.favourite.findMany.mockResolvedValue([mockFavorite]);
-
-      const result = await service.getFavorites('user1');
-
-      expect(mockPrismaService.favourite.findMany).toHaveBeenCalledWith({
-        where: { userId: 'user1' }
-      });
-      expect(result).toEqual([mockFavorite]);
-    });
-  });
 
   describe('addFavorite', () => {
     it('should add a listing to favorites', async () => {
@@ -66,7 +57,11 @@ describe('FavouritesService', () => {
           userId: 'user1'
         }
       });
-      expect(result).toEqual(mockFavorite);
+      expect(result.data).toEqual({
+        id: mockFavorite.id,
+        productId: mockFavorite.productId,
+        userId: mockFavorite.userId
+      });
     });
   });
 

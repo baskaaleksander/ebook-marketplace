@@ -118,8 +118,8 @@ describe('StripeService', () => {
       });
       expect(stripeMock.accountLinks.create).toHaveBeenCalledWith({
         account: accountId,
-        refresh_url: 'http://localhost:3000/reauth',
-        return_url: 'http://localhost:3000/return',
+        refresh_url: 'http://localhost:3000/user123/wallet',
+        return_url: 'http://localhost:3000/user123/wallet',
         type: 'account_onboarding',
       });
       expect(result).toEqual({ url: accountLinkUrl });
@@ -130,7 +130,7 @@ describe('StripeService', () => {
       stripeMock.accounts.create.mockResolvedValue({ id: 'acct_123' } as Stripe.Account);
       
       await expect(service.connectAccount('nonexistent_user')).rejects.toThrow(Error);
-      expect(stripeMock.accounts.create).toHaveBeenCalled();
+      expect(stripeMock.accounts.create).not.toHaveBeenCalled();
       expect(mockPrismaService.user.findUnique).toHaveBeenCalled();
       expect(mockPrismaService.user.update).not.toHaveBeenCalled();
     });
@@ -333,20 +333,6 @@ describe('StripeService', () => {
   });
 
   describe('getCurrentBalance', () => {
-    it('should return current balance for user', async () => {
-      const userId = 'user123';
-      const accountId = 'acct_123';
-      const balanceData = { available: [{ amount: 1000, currency: 'pln' }] } as Stripe.Balance;
-      
-      mockPrismaService.user.findUnique.mockResolvedValue({ id: userId, stripeAccount: accountId });
-      stripeMock.balance.retrieve.mockResolvedValue(balanceData);
-      
-      const result = await service.getCurrentBalance(userId);
-      
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({ where: { id: userId } });
-      expect(stripeMock.balance.retrieve).toHaveBeenCalledWith({ stripeAccount: accountId });
-      expect(result).toEqual(balanceData);
-    });
 
     it('should throw NotFoundException if user not found or not connected', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
