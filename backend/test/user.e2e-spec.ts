@@ -36,7 +36,8 @@ describe('UserController (e2e)', () => {
       it('should return a user when found by email', async () => {
         const testUser = await prismaService.user.create({
           data: {
-            name: 'Test User',
+            name: 'Test',
+            surname: 'User',
             email: 'test-e2e@example.com',
             password: 'password-hash',
           },

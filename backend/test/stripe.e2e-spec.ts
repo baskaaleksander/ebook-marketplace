@@ -11,19 +11,19 @@ import { OrderService } from '../src/stripe/order.service';
 import { WebhookService } from '../src/stripe/webhook.service';
 import { createStripeMock } from './mocks/stripe.mock';
 import { ConfigService } from '@nestjs/config';
+import { FeaturedService } from 'src/stripe/featured.service';
 
 describe('StripeController (e2e)', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
+  let featuredService: FeaturedService;
   let authToken: string;
   let testProductId: string;
   let stripeMock: ReturnType<typeof createStripeMock>;
   let userId: string;
 
   beforeAll(async () => {
-    prismaService = await setupTestDatabase();
-    stripeMock = createStripeMock();
-    
+
     const mockConfigService = {
       get: (key: string) => {
         if (key === 'STRIPE_SECRET_KEY') return 'sk_test_mock';
@@ -32,6 +32,12 @@ describe('StripeController (e2e)', () => {
         return process.env[key];
       }
     };
+    
+    prismaService = await setupTestDatabase();
+    stripeMock = createStripeMock();
+    featuredService = new FeaturedService(prismaService, mockConfigService as ConfigService);
+    
+
     
     const stripeServiceFactory = {
       provide: StripeService,
@@ -56,7 +62,7 @@ describe('StripeController (e2e)', () => {
     const webhookServiceFactory = {
       provide: WebhookService,
       factory: () => {
-        const service = new WebhookService(mockConfigService as ConfigService, prismaService);
+        const service = new WebhookService(mockConfigService as ConfigService, prismaService, featuredService);
         // @ts-ignore - Replace the private Stripe instance with our mock
         service.stripe = stripeMock;
         return service;

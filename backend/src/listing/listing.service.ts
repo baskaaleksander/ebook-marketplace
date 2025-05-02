@@ -48,7 +48,7 @@ export class ListingService {
             throw new UnauthorizedException('Seller is not verified');
         }
 
-        await this.prismaService.product.create({
+        const product = await this.prismaService.product.create({
             data: {
                 title: data.title,
                 description: data.description,
@@ -79,6 +79,7 @@ export class ListingService {
         return {
             message: 'Listing created successfully',
             data: {
+                id: product.id,
                 title: data.title,
                 description: data.description,
                 price: data.price,

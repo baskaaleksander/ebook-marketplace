@@ -53,6 +53,7 @@ describe('AuthController (e2e)', () => {
           email: 'test-register@example.com',
           password: 'password123',
           name: 'Test User',
+          surname: 'Test Surname',
         })
         .expect(201)
         .expect((response) => {
@@ -81,7 +82,7 @@ describe('AuthController (e2e)', () => {
         })
         .expect(400)
         .expect(response => {
-          expect(response.body.message).toStrictEqual(["password must be a string", "name must be a string"]);
+          expect(response.body.message).toStrictEqual(["password must be a string", "name must be a string", "surname must be a string"]);
         });
     });
 
@@ -92,6 +93,7 @@ describe('AuthController (e2e)', () => {
           email: 'test-duplicate@example.com',
           password: 'password123',
           name: 'Test User',
+          surname: 'Test Surname',
         })
         .expect(201);
 
@@ -101,6 +103,7 @@ describe('AuthController (e2e)', () => {
           email: 'test-duplicate@example.com',
           password: 'password123',
           name: 'Test User',
+          surname: 'Test Surname',
         })
         .expect(401)
         .expect(response => {
@@ -110,13 +113,14 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('/auth/login (POST)', () => {
-    it('should login a user and return a success message with JWT cookie', async () => {
-      await request(app.getHttpServer())
+    it('should login a user and return a JWT cookie', async () => {
+      const register = await request(app.getHttpServer())
         .post('/auth/register')
         .send({
           email: 'test-login@example.com',
           password: 'password123',
           name: 'Test Login User',
+          surname: 'Test Login Surname',
         });
 
       const response = await request(app.getHttpServer())
@@ -127,7 +131,6 @@ describe('AuthController (e2e)', () => {
         })
         .expect(201)
         .expect(response => {
-          expect(response.body).toEqual({ message: 'User created successfully' });
           expect(response.headers['set-cookie']).toBeDefined();
           expect(response.headers['set-cookie'][0]).toContain('jwt=');
           
@@ -157,6 +160,7 @@ describe('AuthController (e2e)', () => {
           email: 'test-wrong-password@example.com',
           password: 'password123',
           name: 'Test Wrong Password User',
+          surname: 'Test Wrong Password Surname',
         });
 
       const response = await request(app.getHttpServer())

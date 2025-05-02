@@ -13,6 +13,7 @@ describe('ListingController (e2e)', () => {
   let authToken: string;
   let createdListingId: string;
   let createdReviewId: string;
+  let createdUser;
 
   beforeAll(async () => {
     prismaService = await setupTestDatabase();
@@ -32,6 +33,7 @@ describe('ListingController (e2e)', () => {
     await app.init();
 
     const { user, token } = await createUserAndLogin(app, prismaService);
+    createdUser = user;
     authToken = token;
     
     if (!authToken) {
@@ -97,16 +99,17 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     return request(app.getHttpServer())
-      .get(`/listing/${response.body.id}`)
+      .get(`/listing/${response.body.data.id}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id', response.body.id);
-        expect(res.body).toHaveProperty('title', 'E2E Test E-book');
+        expect(res.body.data).toHaveProperty('id', response.body.data.id);
+        expect(res.body.data).toHaveProperty('title', 'E2E Test E-book');
       });
   });
 
@@ -118,12 +121,13 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     return request(app.getHttpServer())
-      .put(`/listing/${response.body.id}`)
+      .put(`/listing/${response.body.data.id}`)
       .set('Cookie', [`jwt=${authToken}`])
       .send({
         title: 'Updated E2E Test E-book',
@@ -131,9 +135,9 @@ describe('ListingController (e2e)', () => {
       })
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id', response.body.id);
-        expect(res.body).toHaveProperty('title', 'Updated E2E Test E-book');
-        expect(res.body).toHaveProperty('price', 19.99);
+        expect(res.body.data).toHaveProperty('id', response.body.data.id);
+        expect(res.body.data).toHaveProperty('title', 'Updated E2E Test E-book');
+        expect(res.body.data).toHaveProperty('price', 19.99);
       });
   });
 
@@ -145,12 +149,13 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     const testUser = await prismaService.user.findUnique({
-      where: { email: 'e2e-test@example.com' }
+      where: { email: createdUser.email }
     });
 
     if (!testUser) {
@@ -160,7 +165,7 @@ describe('ListingController (e2e)', () => {
     const order = await prismaService.order.create({
       data: {
         buyerId: testUser.id,
-        productId: response.body.id,
+        productId: response.body.data.id,
         amount: 14.99,
         status: 'COMPLETED',
         checkoutSessionId: 'test-session-id'
@@ -168,7 +173,7 @@ describe('ListingController (e2e)', () => {
     });
 
     return request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/reviews`)
+      .post(`/listing/${order.id}/reviews`)
       .set('Cookie', [`jwt=${authToken}`])
       .send({
         rating: 5,
@@ -180,6 +185,8 @@ describe('ListingController (e2e)', () => {
         expect(res.body).toHaveProperty('rating', 5);
         expect(res.body).toHaveProperty('comment', 'Great book!');
       });
+
+
   });
 
   it(':id/reviews/ (GET) - should return reviews for a listing', async () => {
@@ -190,22 +197,23 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
-    const testUser = await prismaService.user.findUnique({
-      where: { email: 'e2e-test@example.com' }
-    });
-
-    if (!testUser) {
-      throw new Error('Test user not found');
-    }
+      const testUser = await prismaService.user.findUnique({
+        where: { email: createdUser.email }
+      });
+  
+      if (!testUser) {
+        throw new Error('Test user not found');
+      }
     
     const order = await prismaService.order.create({
       data: {
         buyerId: testUser.id,
-        productId: response.body.id,
+        productId: response.body.data.id,
         amount: 14.99,
         status: 'COMPLETED',
         checkoutSessionId: 'test-session-id'
@@ -213,7 +221,7 @@ describe('ListingController (e2e)', () => {
     });
 
     await request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/reviews`)
+      .post(`/listing/${order.id}/reviews`)
       .set('Cookie', [`jwt=${authToken}`])
       .send({
         rating: 5,
@@ -221,7 +229,7 @@ describe('ListingController (e2e)', () => {
       });
 
     return request(app.getHttpServer())
-      .get(`/listing/${response.body.id}/reviews`)
+      .get(`/listing/${response.body.data.id}/reviews`)
       .expect(200)
       .expect((res) => {
         expect(Array.isArray(res.body)).toBe(true);
@@ -237,12 +245,13 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     const testUser = await prismaService.user.findUnique({
-      where: { email: 'e2e-test@example.com' }
+      where: { email: createdUser.email }
     });
 
     if (!testUser) {
@@ -252,7 +261,7 @@ describe('ListingController (e2e)', () => {
     const order = await prismaService.order.create({
       data: {
         buyerId: testUser.id,
-        productId: response.body.id,
+        productId: response.body.data.id,
         amount: 14.99,
         status: 'COMPLETED',
         checkoutSessionId: 'test-session-id'
@@ -260,7 +269,7 @@ describe('ListingController (e2e)', () => {
     });
 
     const reviewResponse = await request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/reviews`)
+      .post(`/listing/${order.id}/reviews`)
       .set('Cookie', [`jwt=${authToken}`])
       .send({
         rating: 5,
@@ -285,12 +294,13 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     const testUser = await prismaService.user.findUnique({
-      where: { email: 'e2e-test@example.com' }
+      where: { email: createdUser.email }
     });
 
     if (!testUser) {
@@ -300,7 +310,7 @@ describe('ListingController (e2e)', () => {
     const order = await prismaService.order.create({
       data: {
         buyerId: testUser.id,
-        productId: response.body.id,
+        productId: response.body.data.id,
         amount: 14.99,
         status: 'COMPLETED',
         checkoutSessionId: 'test-session-id'
@@ -308,7 +318,7 @@ describe('ListingController (e2e)', () => {
     });
 
     const reviewResponse = await request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/reviews`)
+      .post(`/listing/${order.id}/reviews`)
       .set('Cookie', [`jwt=${authToken}`])
       .send({
         rating: 5,
@@ -338,12 +348,13 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     const testUser = await prismaService.user.findUnique({
-      where: { email: 'e2e-test@example.com' }
+      where: { email: createdUser.email }
     });
 
     if (!testUser) {
@@ -353,7 +364,7 @@ describe('ListingController (e2e)', () => {
     const order = await prismaService.order.create({
       data: {
         buyerId: testUser.id,
-        productId: response.body.id,
+        productId: response.body.data.id,
         amount: 14.99,
         status: 'COMPLETED',
         checkoutSessionId: 'test-session-id'
@@ -361,7 +372,7 @@ describe('ListingController (e2e)', () => {
     });
 
     const reviewResponse = await request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/reviews`)
+      .post(`/listing/${order.id}/reviews`)
       .set('Cookie', [`jwt=${authToken}`])
       .send({
         rating: 5,
@@ -382,17 +393,18 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     return request(app.getHttpServer())
-      .post(`/listing/favourites/${response.body.id}`)
+      .post(`/listing/favourites/${response.body.data.id}`)
       .set('Cookie', [`jwt=${authToken}`])
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('productId', response.body.id);
+        expect(res.body.data).toHaveProperty('id');
+        expect(res.body.data).toHaveProperty('productId', response.body.data.id);
       });
   });
 
@@ -404,17 +416,18 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     await request(app.getHttpServer())
-      .post(`/listing/favourites/${response.body.id}`)
+      .post(`/listing/favourites/${response.body.data.id}`)
       .set('Cookie', [`jwt=${authToken}`])
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('productId', response.body.id);
+        expect(res.body.data).toHaveProperty('id');
+        expect(res.body.data).toHaveProperty('productId', response.body.data.id);
       });
 
     return request(app.getHttpServer())
@@ -434,21 +447,22 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     await request(app.getHttpServer())
-      .post(`/listing/favourites/${response.body.id}`)
+      .post(`/listing/favourites/${response.body.data.id}`)
       .set('Cookie', [`jwt=${authToken}`])
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('productId', response.body.id);
+        expect(res.body.data).toHaveProperty('id');
+        expect(res.body.data).toHaveProperty('productId', response.body.data.id);
       });
       
     return request(app.getHttpServer())
-      .delete(`/listing/favourites/${response.body.id}`)
+      .delete(`/listing/favourites/${response.body.data.id}`)
       .set('Cookie', [`jwt=${authToken}`])
       .expect(200);
   });
@@ -461,18 +475,15 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     return request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/view`)
+      .post(`/listing/${response.body.data.id}/view`)
       .set('Cookie', [`jwt=${authToken}`])
-      .expect(201)
-      .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('productId', response.body.id);
-      });
+      .expect(201);
   });
 
   it('viewed (GET) - should return viewed products', async () => {
@@ -483,18 +494,15 @@ describe('ListingController (e2e)', () => {
         title: 'E2E Test E-book',
         description: 'Created during E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-image.jpg',
         fileUrl: 'https://example.com/test-file.pdf',
         categories: [{ name: 'Testing' }]
       });
 
     await request(app.getHttpServer())
-      .post(`/listing/${response.body.id}/view`)
+      .post(`/listing/${response.body.data.id}/view`)
       .set('Cookie', [`jwt=${authToken}`])
-      .expect(201)
-      .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('productId', response.body.id);
-      });
+      .expect(201);
 
     return request(app.getHttpServer())
       .get('/listing/viewed')

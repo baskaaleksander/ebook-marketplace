@@ -21,6 +21,7 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
       email: 'e2e-test-acc@example.com',
       password: hashedPassword,
       name: 'E2E Test User',
+      surname: 'E2E Test Surname',
       stripeStatus: 'verified'
     }
   });
