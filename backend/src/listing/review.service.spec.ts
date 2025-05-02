@@ -1,14 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReviewService } from './review.service';
 import { PrismaService } from '../prisma.service';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { ReviewOrderDto } from './dtos/review-order.dto';
 
 describe('ReviewService', () => {
   let service: ReviewService;
   let prismaService: PrismaService;
 
-  // Mock data
   const mockReview = {
     id: 'review1',
     rating: 5,
@@ -31,13 +30,13 @@ describe('ReviewService', () => {
     ]
   };
 
-  // Mock PrismaService
   const mockPrismaService = {
     product: {
       findUnique: jest.fn(),
     },
     review: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -47,6 +46,7 @@ describe('ReviewService', () => {
     },
     order: {
       findFirst: jest.fn(),
+      update: jest.fn(),
     }
   };
 
@@ -61,7 +61,7 @@ describe('ReviewService', () => {
     service = module.get<ReviewService>(ReviewService);
     prismaService = module.get<PrismaService>(PrismaService);
     
-    // Reset mocks before each test
+
     jest.clearAllMocks();
   });
 
@@ -71,23 +71,34 @@ describe('ReviewService', () => {
 
   describe('getReviews', () => {
     it('should return reviews for a product', async () => {
-      // Arrange
-      mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
 
-      // Act
+      mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
+      mockPrismaService.review.findMany.mockResolvedValue([mockReview]);
+
       const result = await service.getReviews('product1');
 
-      // Assert
-      expect(mockPrismaService.product.findUnique).toHaveBeenCalledWith({
-        where: { id: 'product1' },
-        include: { reviews: true }
-      });
+      expect(mockPrismaService.review.findMany).toHaveBeenCalledWith(
+        {
+          where: { productId: 'product1' },
+          include: {
+            buyer: {
+              select: {
+                avatarUrl: true,
+                email: true,
+                id: true,
+                name: true,
+                surname: true,
+              }
+            }
+          }
+        }
+      );
       expect(result).toEqual([mockReview]);
     });
 
     it('should throw NotFoundException when product does not exist', async () => {
       // Arrange
-      mockPrismaService.product.findUnique.mockResolvedValue(null);
+      mockPrismaService.review.findMany.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.getReviews('nonexistent'))
@@ -97,27 +108,22 @@ describe('ReviewService', () => {
 
   describe('createReview', () => {
     it('should create a review for a purchased product', async () => {
-      // Arrange
+
       const reviewDto: ReviewOrderDto = {
         rating: 5,
         comment: 'Excellent read!'
       };
       
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      mockPrismaService.order.findFirst.mockResolvedValue({ id: 'order1' });
+      mockPrismaService.order.findFirst.mockResolvedValue({ id: 'order1', productId: 'product1', buyerId: mockUser.id});
       mockPrismaService.review.create.mockResolvedValue({
         ...mockReview,
         comment: reviewDto.comment
       });
 
-      // Act
       await service.createReview('product1', 'user1', reviewDto);
 
-      // Assert
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 'user1' },
-        include: { orders: true }
-      });
+
       expect(mockPrismaService.review.create).toHaveBeenCalledWith({
         data: {
           buyerId: 'user1',
@@ -129,7 +135,7 @@ describe('ReviewService', () => {
     });
 
     it('should throw NotFoundException when user has not purchased the product', async () => {
-      // Arrange
+
       const reviewDto: ReviewOrderDto = {
         rating: 5,
         comment: 'Great book!'
@@ -138,11 +144,10 @@ describe('ReviewService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.order.findFirst.mockResolvedValue(null);
 
-      // Act & Assert
       await expect(service.createReview('product2', 'user1', reviewDto))
         .rejects.toThrow(NotFoundException);
     });
   });
 
-  // Add more tests for other methods...
+
 });

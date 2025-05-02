@@ -8,7 +8,7 @@ describe('UserController', () => {
   let userService: UserService;
 
   const mockUserService = {
-    findUserByEmail: jest.fn(),
+    findUserById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -37,7 +37,7 @@ describe('UserController', () => {
   describe('findUserById', () => {
     it('should return a user when a valid email is provided', async () => {
       const mockUser = { id: 'user-1', email: 'test@example.com', name: 'Test User' };
-      mockUserService.findUserByEmail.mockResolvedValue(mockUser);
+      mockUserService.findUserById.mockResolvedValue(mockUser);
 
       const result = await controller.findUserById('user-1');
       
@@ -47,13 +47,13 @@ describe('UserController', () => {
     });
 
     it('should propagate NotFoundException if user is not found', async () => {
-      mockUserService.findUserByEmail.mockRejectedValue(new NotFoundException('User not found'));
+      mockUserService.findUserById.mockRejectedValue(new NotFoundException('User not found'));
 
-      await expect(controller.findUserByEmail({ email: 'nonexistent@example.com' }))
+      await expect(controller.findUserById('not-existing-id'))
         .rejects
         .toThrow(NotFoundException);
         
-      expect(userService.findUserByEmail).toHaveBeenCalledWith('nonexistent@example.com');
+      expect(userService.findUserById).toHaveBeenCalledWith('not-existing-id');
     });
   });
 });

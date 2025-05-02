@@ -5,6 +5,7 @@ import { CreateUserDto } from '../user/dtos/create-user.dto';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
 import { Response } from 'express';
 
+
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
@@ -49,7 +50,8 @@ describe('AuthController', () => {
       const createUserDto: CreateUserDto = {
         email: 'test@example.com',
         password: 'password123',
-        name: 'Test User',
+        name: 'Test',
+        surname: 'User',
       };
       
       const mockToken = { access_token: 'mock-jwt-token' };
@@ -62,8 +64,8 @@ describe('AuthController', () => {
       expect(authService.register).toHaveBeenCalledWith(createUserDto);
       expect(res.cookie).toHaveBeenCalledWith('jwt', 'mock-jwt-token', {
         httpOnly: true,
-        secure: false,
-        sameSite: 'strict',
+        secure: true,
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000,
       });
       expect(res.send).toHaveBeenCalledWith({ message: 'User created successfully' });
@@ -73,7 +75,8 @@ describe('AuthController', () => {
       const createUserDto: CreateUserDto = {
         email: 'test@example.com',
         password: 'password123',
-        name: 'Test User',
+        name: 'Test',
+        surname: 'User',
       };
       
       const error = new Error('Email already exists');
@@ -106,11 +109,10 @@ describe('AuthController', () => {
       expect(authService.validateCredentials).toHaveBeenCalledWith(userCredentials);
       expect(res.cookie).toHaveBeenCalledWith('jwt', 'mock-jwt-token', {
         httpOnly: true,
-        secure: false,
-        sameSite: 'strict',
+        secure: true,
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000,
       });
-      expect(res.send).toHaveBeenCalledWith({ message: 'User created successfully' });
     });
 
     it('should propagate errors from auth service during login', async () => {

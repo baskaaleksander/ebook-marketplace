@@ -8,14 +8,6 @@ import { SearchQueryDto } from 'src/dtos/search-query.dto';
 interface ProductWithFavourite extends Product {
     isFavourite?: boolean;
 }
-declare module 'express' {
-    interface Request {
-        user: {
-            username: string;
-            userId: string;
-        }
-    }
-}
 
 @Injectable()
 export class ListingService {

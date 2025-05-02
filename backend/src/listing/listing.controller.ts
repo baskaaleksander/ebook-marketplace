@@ -11,7 +11,7 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { Request } from 'express';
 import { OptionalAuthGuard } from '../guards/optional-auth.guard';
 import { AnalyticsService } from './analytics.service';
-import { SearchQueryDto } from 'src/dtos/search-query.dto';
+import { SearchQueryDto } from '../dtos/search-query.dto';
 import { 
   ApiBearerAuth, 
   ApiOperation, 
@@ -239,9 +239,9 @@ export class ListingController {
     @ApiParam({ name: 'id', description: 'Listing ID to track view for' })
     @ApiResponse({ status: 200, description: 'View tracked successfully' })
     @ApiResponse({ status: 404, description: 'Listing not found' })
+    @UseGuards(OptionalAuthGuard)
     @Post(':id/view')
-    trackListingView(@Param('id') param: string, @Req() req: Request) {
-        const userId = req.user?.userId || null;
+    trackListingView(@Param('id') param: string, @CurrentUser('userId') userId: string | null) {
         return this.viewedListingsService.trackListingView(userId, param);
     }
 }

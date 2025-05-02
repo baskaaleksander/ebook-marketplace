@@ -7,6 +7,10 @@ import { ViewedListingsService } from './viewedListing.service';
 import { CreateListingDto } from './dtos/create-listing.dto';
 import { UpdateListingDto } from './dtos/update-listing.dto';
 import { ReviewOrderDto } from './dtos/review-order.dto';
+import { SearchQueryDto } from '../dtos/search-query.dto';
+import { AnalyticsService } from './analytics.service';
+import { Request } from 'express';
+
 
 describe('ListingController', () => {
   let controller: ListingController;
@@ -14,10 +18,12 @@ describe('ListingController', () => {
   let reviewService: ReviewService;
   let favouritesService: FavouritesService;
   let viewedListingsService: ViewedListingsService;
+  let analyticsService: AnalyticsService
 
   const mockListingService = {
-    findAllListings: jest.fn(),
+    findListings: jest.fn(),
     getRecentListings: jest.fn(),
+    findUserListings: jest.fn(),
     findListingById: jest.fn(),
     createListing: jest.fn(),
     updateListing: jest.fn(),
@@ -43,6 +49,8 @@ describe('ListingController', () => {
     trackListingView: jest.fn(),
   };
 
+  const mockAnalyticsService = {}
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ListingController],
@@ -51,6 +59,7 @@ describe('ListingController', () => {
         { provide: ReviewService, useValue: mockReviewService },
         { provide: FavouritesService, useValue: mockFavouritesService },
         { provide: ViewedListingsService, useValue: mockViewedListingsService },
+        { provide: AnalyticsService, useValue: mockAnalyticsService },
       ],
     }).compile();
 
@@ -59,6 +68,7 @@ describe('ListingController', () => {
     reviewService = module.get<ReviewService>(ReviewService);
     favouritesService = module.get<FavouritesService>(FavouritesService);
     viewedListingsService = module.get<ViewedListingsService>(ViewedListingsService);
+    analyticsService = module.get<AnalyticsService>(AnalyticsService);
   });
 
   afterEach(() => {
@@ -72,34 +82,16 @@ describe('ListingController', () => {
   describe('findAllListings', () => {
     it('should return all listings', async () => {
       const mockListings = [{ id: '1', title: 'Test Listing' }];
-      mockListingService.findAllListings.mockResolvedValue(mockListings);
+      const filterQuery : SearchQueryDto = {}
+      mockListingService.findListings.mockResolvedValue(mockListings);
 
-      const result = await controller.findAllListings();
+      const result = await controller.findListings(filterQuery);
       
       expect(result).toEqual(mockListings);
-      expect(listingService.findAllListings).toHaveBeenCalledTimes(1);
+      expect(listingService.findListings).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('findRecentListings', () => {
-    it('should return recent listings', async () => {
-      const mockListings = [{ id: '1', title: 'Recent Listing' }];
-      mockListingService.getRecentListings.mockResolvedValue(mockListings);
-
-      const result = await controller.findRecentListings();
-      
-      expect(result).toEqual(mockListings);
-      expect(listingService.getRecentListings).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('searchListings', () => {
-    it('should return search results', async () => {
-      const result = controller.searchListings();
-      
-      expect(result).toEqual('this.listingService.findListings(filterQuery)');
-    });
-  });
 
   describe('getFavorites', () => {
     it('should return user favorites', async () => {
@@ -157,7 +149,7 @@ describe('ListingController', () => {
       const result = await controller.findListingById('1');
       
       expect(result).toEqual(mockListing);
-      expect(listingService.findListingById).toHaveBeenCalledWith('1');
+      expect(listingService.findListingById).toHaveBeenCalledWith('1', undefined);
     });
   });
 
@@ -191,6 +183,28 @@ describe('ListingController', () => {
       const mockResponse = { success: true };
       mockViewedListingsService.trackListingView.mockResolvedValue(mockResponse);
 
+      const result = await controller.trackListingView('listing123', 'user123');
+      
+      expect(result).toEqual(mockResponse);
+      expect(viewedListingsService.trackListingView).toHaveBeenCalledWith('user123', 'listing123');
+    });
+
+    it('should track listing view with undefined user', async () => {
+      const mockResponse = { success: true };
+      mockViewedListingsService.trackListingView.mockResolvedValue(mockResponse);
+      
+      
+      const result = await controller.trackListingView('listing123', null);
+      
+      expect(result).toEqual(mockResponse);
+      expect(viewedListingsService.trackListingView).toHaveBeenCalledWith(null, 'listing123');
+    });
+    
+    it('should track listing view with user ID', async () => {
+      const mockResponse = { success: true };
+      mockViewedListingsService.trackListingView.mockResolvedValue(mockResponse);
+      
+      
       const result = await controller.trackListingView('listing123', 'user123');
       
       expect(result).toEqual(mockResponse);
@@ -230,7 +244,7 @@ describe('ListingController', () => {
       mockListingService.deleteListing.mockResolvedValue(mockResponse);
       const updateDto = {} as UpdateListingDto;
 
-      const result = await controller.deleteListing('1', updateDto, 'user123');
+      const result = await controller.deleteListing('1', 'user123');
       
       expect(result).toEqual(mockResponse);
       expect(listingService.deleteListing).toHaveBeenCalledWith('1', 'user123');

@@ -5,7 +5,7 @@ import { UserResponseDto } from './dtos/user-response.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 
 @ApiTags('Users')
 @Controller('user')

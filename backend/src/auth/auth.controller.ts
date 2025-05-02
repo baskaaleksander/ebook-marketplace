@@ -3,7 +3,7 @@ import { CreateUserDto } from '../user/dtos/create-user.dto';
 import { AuthService } from './auth.service';
 import { UserCredentialsDto } from './dtos/user-credentials.dto';
 import { Request, Response } from 'express';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 

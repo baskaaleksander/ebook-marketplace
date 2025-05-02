@@ -118,20 +118,25 @@ describe('AuthService', () => {
         password: hashedPassword 
       };
       
+      mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
+      mockJwtService.sign.mockReturnValue('mock-jwt-token');
+      
       const result = await authService.validateCredentials(credentials);
-
-      expect(authService.validateCredentials).toHaveBeenCalledWith(credentials);
+      
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: credentials.email }
+      });
+      expect(result).toEqual({ access_token: 'mock-jwt-token', user: existingUser.id });
     });
 
     it('should throw exception if user does not exist', async () => {
-      const credentials = { 
-        email: 'nonexistent@example.com', 
-        password: 'password123'
-      };
       
-      mockUserService.findUserByEmail.mockResolvedValue(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
       
-      await expect(authService.validateCredentials(credentials))
+      await expect(authService.validateCredentials({
+        email: 'nonexistent@example.com',
+        password: 'asdasdada.asdasdasd'
+      }))
         .rejects
         .toThrow(NotFoundException);
       
@@ -154,7 +159,7 @@ describe('AuthService', () => {
         password: hashedPassword 
       };
       
-      mockUserService.findUserByEmail.mockResolvedValue(existingUser);
+      mockUserService.findUserById.mockResolvedValue(existingUser);
       
       // Mock the implementation to throw the expected exception
       const validateSpy = jest.spyOn(authService, 'validateCredentials');
