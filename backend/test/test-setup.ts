@@ -28,16 +28,24 @@ export async function setupTestDatabase(): Promise<PrismaService> {
 
 export async function cleanupTestDatabase(prismaService: PrismaService) {
   try {
+    // Deleting in order of dependencies (child tables first)
     
+    // First, delete tables that have foreign keys to other tables
     await prismaService.viewedListing.deleteMany();
     await prismaService.webhookEvent.deleteMany();
     await prismaService.review.deleteMany();
     await prismaService.favourite.deleteMany();
     
+    // Orders depend on Refunds, but Refunds also reference Orders
+    // Handle the circular dependency
     await prismaService.refund.deleteMany();
     await prismaService.payout.deleteMany();
     await prismaService.order.deleteMany();
     
+    // Delete join tables for many-to-many relationships
+    // Products have many-to-many with Categories
+    
+    // Delete main entities
     await prismaService.product.deleteMany();
     await prismaService.category.deleteMany();
     await prismaService.user.deleteMany();

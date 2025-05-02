@@ -18,7 +18,7 @@ export async function createUserAndLogin(app, prisma: PrismaService) {
   
   const user = await prisma.user.create({
     data: {
-      email: 'e2e-test-acc@example.com',
+      email: 'e2e-test-acc1@example.com',
       password: hashedPassword,
       name: 'E2E Test User',
       surname: 'E2E Test Surname',

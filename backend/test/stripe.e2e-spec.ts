@@ -11,7 +11,7 @@ import { OrderService } from '../src/stripe/order.service';
 import { WebhookService } from '../src/stripe/webhook.service';
 import { createStripeMock } from './mocks/stripe.mock';
 import { ConfigService } from '@nestjs/config';
-import { FeaturedService } from 'src/stripe/featured.service';
+import { FeaturedService } from '../src/stripe/featured.service';
 
 describe('StripeController (e2e)', () => {
   let app: INestApplication;
@@ -121,11 +121,12 @@ describe('StripeController (e2e)', () => {
         title: 'E2E Test E-book for Stripe',
         description: 'Created during Stripe E2E testing',
         price: 14.99,
+        imageUrl: 'https://example.com/test-stripe-image.jpg',
         fileUrl: 'https://example.com/test-stripe-file.pdf',
         categories: [{ name: 'Testing' }]
       });
     
-    testProductId = productResponse.body.id;
+    testProductId = productResponse.body.data.id;
 
 
   });
@@ -185,7 +186,7 @@ describe('StripeController (e2e)', () => {
       .set('Cookie', [`jwt=${authToken}`])
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('available');
+        expect(res.body.data).toHaveProperty('available');
         expect(stripeMock.balance.retrieve).toHaveBeenCalled();
       });
   });
@@ -245,7 +246,7 @@ describe('StripeController (e2e)', () => {
       .send({ id: order.id })
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id', 're_mock123');
+        expect(res.body.refund).toHaveProperty('id', 're_mock123');
         expect(stripeMock.refunds.create).toHaveBeenCalled();
       });
   });
