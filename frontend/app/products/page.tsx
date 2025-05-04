@@ -87,7 +87,7 @@ function AllProducts() {
         }
         fetchData();
     }, [filtering]);
-
+    
     if (error) {
         return <div className="text-red-500 text-center">{error}</div>
     }
