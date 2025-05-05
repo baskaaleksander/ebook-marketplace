@@ -13,20 +13,6 @@ import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { use, useEffect, useState, useRef } from "react";
 
-// export async function generateMetaData({ params }: { params: Promise<{ id: string }> }) {
-//   const resolvedParams = await params;
-//   const productId = resolvedParams.id;
-//   const productResponse = await api.get(`/listing/${productId}`);
-//   const product = productResponse.data.data;
-
-//   return {
-//     title: product.title,
-//   }
-// }
-
-// export const metaData: Metadata = {
-//   title: "dupa"
-// }
 
 
 

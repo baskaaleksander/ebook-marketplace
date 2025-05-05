@@ -104,7 +104,7 @@ describe('BoughtProductsTable', () => {
   });
 
   test('opens refund dialog when refund button is clicked', () => {
-    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === 'COMPLETED')} />);
+    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === OrderStatus.COMPLETED)} />);
     
     // Find and click refund button for completed order
     const refundButton = screen.getAllByText('Refund')[0];
@@ -117,7 +117,7 @@ describe('BoughtProductsTable', () => {
 
   test('opens review dialog when review button is clicked', () => {
     // Use only non-reviewed completed orders
-    const nonReviewedOrders = mockOrders.filter(o => o.status === 'COMPLETED' && !o.isReviewed);
+    const nonReviewedOrders = mockOrders.filter(o => o.status === OrderStatus.COMPLETED && !o.isReviewed);
     render(<BoughtProductsTable orders={nonReviewedOrders} />);
     
     // Find and click review button
@@ -130,7 +130,7 @@ describe('BoughtProductsTable', () => {
   });
 
   test('submits review when form is completed', async () => {
-    const nonReviewedOrders = mockOrders.filter(o => o.status === 'COMPLETED' && !o.isReviewed);
+    const nonReviewedOrders = mockOrders.filter(o => o.status === OrderStatus.COMPLETED && !o.isReviewed);
     render(<BoughtProductsTable orders={nonReviewedOrders} />);
     
     // Open review dialog
@@ -160,7 +160,7 @@ describe('BoughtProductsTable', () => {
   });
 
   test('submits refund request when confirmed', async () => {
-    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === 'COMPLETED')} />);
+    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === OrderStatus.COMPLETED)} />);
     
     // Open refund dialog
     fireEvent.click(screen.getAllByText('Refund')[0]);
@@ -182,24 +182,23 @@ describe('BoughtProductsTable', () => {
   test('displays download links only for completed orders', () => {
     render(<BoughtProductsTable orders={mockOrders} />);
     
-    // Count download links - should match the number of COMPLETED orders in the first page
     const completedOrdersFirstPage = mockOrders
-      .filter(o => o.status === 'COMPLETED')
-      .slice(0, 10);
-      
+      .slice(0, 10) // first page shows 10 items
+      .filter(o => o.status === OrderStatus.COMPLETED);
+        
     const downloadLinks = screen.getAllByText('Download');
     expect(downloadLinks.length).toBe(completedOrdersFirstPage.length);
   });
 
   test('shows "Already reviewed" for reviewed orders', () => {
-    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === 'COMPLETED' && o.isReviewed)} />);
+    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === OrderStatus.COMPLETED && o.isReviewed)} />);
     
     const alreadyReviewedTexts = screen.getAllByText('Already reviewed');
     expect(alreadyReviewedTexts.length).toBeGreaterThan(0);
   });
 
   test('shows "Already refunded" for refunded orders', () => {
-    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === 'REFUNDED')} />);
+    render(<BoughtProductsTable orders={mockOrders.filter(o => o.status === OrderStatus.REFUNDED)} />);
     
     const alreadyRefundedTexts = screen.getAllByText('Already refunded');
     expect(alreadyRefundedTexts.length).toBeGreaterThan(0);
@@ -214,14 +213,14 @@ describe('BoughtProductsTable', () => {
   test('disables previous button on first page', () => {
     render(<BoughtProductsTable orders={mockOrders} />);
     
-    const prevButton = screen.getByRole('button', { name: 'Previous' });
-    expect(prevButton).toHaveClass('pointer-events-none');
+    const prevLink = screen.getByLabelText('Go to previous page');
+    expect(prevLink).toHaveClass('pointer-events-none opacity-50');
   });
 
   test('enables next button when not on last page', () => {
     render(<BoughtProductsTable orders={mockOrders} />);
     
-    const nextButton = screen.getByRole('button', { name: 'Next' });
+    const nextButton = screen.getByLabelText('Go to next page');
     expect(nextButton).not.toHaveClass('pointer-events-none');
   });
 });
