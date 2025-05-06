@@ -5,15 +5,28 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { AlertCircle, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
 
+/**
+ * ConnectStripeAccount component facilitates seller onboarding with Stripe Connect
+ * Allows users to connect their Stripe account to receive payments from product sales
+ * Redirects to Stripe's onboarding flow when initiated
+ */
 function ConnectStripeAccount() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    // State for tracking API request and error handling
+    const [loading, setLoading] = useState(false); // Controls button loading state
+    const [error, setError] = useState<string | null>(null); // Stores error message if connection fails
   
+    /**
+     * Initiates the Stripe Connect onboarding process
+     * Makes API call to generate a Stripe Connect URL and redirects user
+     * Handles loading state and potential errors
+     */
     const handleConnectStripe = async () => {
       try {
         setLoading(true);
+        // Request Stripe Connect onboarding URL from backend
         const response = await api.post('/stripe/connect');
         
+        // Redirect user to Stripe's onboarding page
         window.location.href = response.data.url;
       } catch (err) {
         console.error("Error creating Stripe account link:", err);
@@ -26,6 +39,7 @@ function ConnectStripeAccount() {
     return (
       <div className="container mx-auto px-4 py-12">
         <Card className="max-w-2xl mx-auto">
+          {/* Card header explaining the purpose of Stripe connection */}
           <CardHeader>
             <CardTitle className="text-2xl">Connect your Stripe account</CardTitle>
             <CardDescription>
@@ -33,6 +47,7 @@ function ConnectStripeAccount() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Important notice about account verification requirement */}
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Important</AlertTitle>
@@ -41,6 +56,7 @@ function ConnectStripeAccount() {
               </AlertDescription>
             </Alert>
             
+            {/* Benefits section highlighting advantages of connecting Stripe */}
             <div className="bg-gray-50 p-6 rounded-lg">
               <h3 className="font-medium mb-2">Benefits of connecting:</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-600">
@@ -51,6 +67,7 @@ function ConnectStripeAccount() {
               </ul>
             </div>
             
+            {/* Conditional error message display if connection attempt fails */}
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -59,6 +76,7 @@ function ConnectStripeAccount() {
               </Alert>
             )}
             
+            {/* Connect button with loading state */}
             <div className="flex justify-center">
               <Button 
                 onClick={handleConnectStripe} 

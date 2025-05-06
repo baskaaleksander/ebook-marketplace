@@ -32,6 +32,10 @@ import ImageResizer from "./image-resizer"
 import FileUploader from "./file-uploader"
 import { Badge } from "./ui/badge"
 
+/**
+ * Zod validation schema for product creation form
+ * Defines validation rules and error messages for all required fields
+ */
 const createProductSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters" }),
     description: z.string().min(2, { message: "Description must be at least 2 characters" }),
@@ -39,8 +43,13 @@ const createProductSchema = z.object({
     category: z.string().min(1, { message: "Please select a category" }),
 });
 
+// Type inference for form values based on the Zod schema
 type CreateProductFormValues = z.infer<typeof createProductSchema>;
 
+/**
+ * Predefined list of available product categories
+ * Used to populate the category selection dropdown
+ */
 const categories = [
   { id: "Fiction", name: "Fiction" },
   { id: "nonfiction", name: "Non-Fiction" },
@@ -48,21 +57,38 @@ const categories = [
   { id: "creativeandlifestyle", name: "Creative & Lifestyle" },
 ];
 
+/**
+ * CreateProductForm component handles the creation of new e-book products
+ * Includes form validation, file uploads, image processing, and API integration
+ * Requires authenticated user with verified Stripe account
+ */
 function CreateProductForm() {
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState<boolean>(false)
-    const [pdfFile, setPdfFile] = useState<File | null>(null)
-    const router = useRouter()
-    const { user, loading: authLoading } = useAuth()
-    const { image } = useImage()
+    // Form submission and UI state
+    const [isLoading, setIsLoading] = useState(false); // Controls button loading state
+    const [error, setError] = useState<string | null>(null); // Tracks form/API errors
+    const [success, setSuccess] = useState<boolean>(false); // Tracks successful submission
+    const [pdfFile, setPdfFile] = useState<File | null>(null); // Stores the uploaded PDF file
+    
+    // Navigation and context hooks
+    const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
+    const { image } = useImage(); // Product cover image from ImageProvider context
 
+    /**
+     * Effect to check authentication and redirect to login if not authenticated
+     * Prevents unauthorized access to product creation
+     */
     useEffect(() => {
         if (!authLoading && !user) { 
             router.push('/login');
         }
-    }, [user, authLoading, router])
+    }, [user, authLoading, router]);
 
+    /**
+     * Effect to verify user has a connected Stripe account
+     * Redirects to wallet/Stripe onboarding if account isn't verified
+     * This ensures users complete Stripe verification before creating products
+     */
     useEffect(() => {
         if (authLoading) return;
         
@@ -83,8 +109,12 @@ function CreateProductForm() {
 
         fetchUserData();
 
-    }, [user, authLoading])
+    }, [user, authLoading]);
 
+    /**
+     * Initialize form with Zod validation schema and default empty values
+     * Form fields include title, description, price, and category
+     */
     const form = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
         defaultValues: {
@@ -95,15 +125,33 @@ function CreateProductForm() {
         },
     });
 
+    /**
+     * Handler for PDF file selection from FileUploader
+     * Updates state with the selected PDF file
+     * 
+     * @param {File} file - The selected PDF file
+     */
     const handlePdfSelect = (file: File) => {
         setPdfFile(file);
     };
 
+    /**
+     * Removes the currently selected PDF file
+     * Used when user wants to select a different file
+     */
     const clearPdfFile = () => {
         setPdfFile(null);
     };
 
+    /**
+     * Form submission handler that processes all data and files
+     * Uploads image and PDF, then creates product listing via API
+     * Shows success/error messages and redirects on completion
+     * 
+     * @param {CreateProductFormValues} data - Validated form data
+     */
     const onSubmit = async (data: CreateProductFormValues) => {
+        // Validate required files are present
         if (!image) {
             setError("Please upload a product image");
             return;
@@ -118,9 +166,11 @@ function CreateProductForm() {
             setIsLoading(true);
             setError(null);
             
+            // Process and upload product image
             let imageUrl = "";
             if (image) {
                 if (image.startsWith('data:') || image.startsWith('blob:')) {
+                    // Convert data URL/blob to file for upload
                     const response = await fetch(image);
                     const blob = await response.blob();
                     const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
@@ -128,18 +178,22 @@ function CreateProductForm() {
                     const imageFormData = new FormData();
                     imageFormData.append('file', imageFile);
                     
+                    // Upload image file to server
                     const imageUploadResponse = await api.post('/upload', imageFormData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         }
                     });
                     
+                    // Extract image URL from response
                     imageUrl = imageUploadResponse.data.url || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
                 } else {
+                    // Image is already a URL, use as is
                     imageUrl = image;
                 }
             }
 
+            // Prepare and upload PDF file
             const pdfFormData = new FormData();
             pdfFormData.append('file', pdfFile);
             
@@ -149,8 +203,10 @@ function CreateProductForm() {
                 }
             });
             
+            // Extract PDF URL from response
             const pdfUrl = pdfUploadResponse.data.fileUrl || `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
 
+            // Combine all data for product creation
             const productData = {
                 title: data.title,
                 description: data.description,
@@ -164,12 +220,15 @@ function CreateProductForm() {
             ]
             };
             
+            // Create product listing via API
             await api.post('/listing', productData);
             
+            // Handle successful submission
             setSuccess(true);
             form.reset();
             setPdfFile(null);
             
+            // Redirect to dashboard after short delay to show success message
             setTimeout(() => {
                 router.push('/dashboard');
             }, 2000);
@@ -184,23 +243,29 @@ function CreateProductForm() {
 
     return (
         <div className="max-w-4xl mx-auto">
+            {/* Two-column layout on larger screens, single column on mobile */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left column: Image and PDF upload sections */}
                 <div className="flex flex-col gap-6">
+                    {/* Image upload section */}
                     <div>
                         <h2 className="text-xl font-semibold mb-4">Product Image</h2>
                         <ImageResizer />
                     </div>
                     
+                    {/* PDF upload section */}
                     <div>
                         <h2 className="text-xl font-semibold mb-4">Upload PDF</h2>
+                        {/* Conditional rendering based on whether a file is selected */}
                         {!pdfFile ? (
                             <FileUploader
                                 onFileSelect={handlePdfSelect}
                                 accept="application/pdf"
-                                maxSize={20}
+                                maxSize={20} // 20MB max size
                                 label="Drag & drop your PDF file here"
                             />
                         ) : (
+                            // Display selected file details with option to remove
                             <Card>
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
@@ -231,23 +296,28 @@ function CreateProductForm() {
                     </div>
                 </div>
                 
+                {/* Right column: Product details form */}
                 <div>
                     <Card>
                         <CardContent className="pt-6">
+                            {/* Error message alert */}
                             {error && (
                                 <Alert variant="destructive" className="mb-6">
                                     <AlertDescription>{error}</AlertDescription>
                                 </Alert>
                             )}
                             
+                            {/* Success message alert */}
                             {success && (
                                 <Alert className="mb-6 bg-green-50 text-green-800 border-green-200">
                                     <AlertDescription>Product created successfully! Redirecting...</AlertDescription>
                                 </Alert>
                             )}
                             
+                            {/* Product details form */}
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                    {/* Title field */}
                                     <FormField
                                         control={form.control}
                                         name="title"
@@ -262,6 +332,7 @@ function CreateProductForm() {
                                         )}
                                     />
                                     
+                                    {/* Description field - text area for longer content */}
                                     <FormField
                                         control={form.control}
                                         name="description"
@@ -280,7 +351,9 @@ function CreateProductForm() {
                                         )}
                                     />
                                     
+                                    {/* Price and category fields in a grid layout */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Price field with dollar sign prefix */}
                                         <FormField
                                             control={form.control}
                                             name="price"
@@ -305,6 +378,7 @@ function CreateProductForm() {
                                             )}
                                         />
                                         
+                                        {/* Category dropdown selection */}
                                         <FormField
                                             control={form.control}
                                             name="category"
@@ -335,7 +409,9 @@ function CreateProductForm() {
                                                 </FormItem>
                                             )}
                                         />
-                                    </div>                                    
+                                    </div>
+                                    
+                                    {/* Submit button - disabled when loading or required files missing */}
                                     <Button 
                                         type="submit" 
                                         className="w-full" 

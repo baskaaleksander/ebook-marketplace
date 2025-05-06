@@ -10,13 +10,29 @@ import { Input } from "./ui/input";
 import { useSearchParams } from "next/navigation";
 import { Checkbox } from "./ui/checkbox";
 
+/**
+ * FilteringBar component provides UI for filtering and sorting products
+ * Includes a filter dialog with multiple criteria and a sorting dropdown
+ * Syncs with URL search parameters for shareable filtered views
+ */
 function FilteringBar() {
+    // Get filtering state and setter from context provider
     const { filtering, setFiltering } = useFiltering();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [localFilters, setLocalFilters] = useState({ ...filtering });
+    
+    // Local component state
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // Controls filter dialog visibility
+    const [localFilters, setLocalFilters] = useState({ ...filtering }); // Temporary filter state for dialog
+    
+    // Access URL search parameters for initial filter values
     const searchParams = useSearchParams();
     
+    /**
+     * Effect to sync component state with URL search parameters
+     * Updates local filter state when URL parameters change
+     * Enables bookmarking and sharing filtered views
+     */
     useEffect(() => {
+        // Extract all filter parameters from URL
         const query = searchParams.get('query') || undefined;
         const category = searchParams.get('category') || undefined;
         const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
@@ -25,6 +41,7 @@ function FilteringBar() {
         const sortBy = searchParams.get('sortBy') || 'createdAt';
         const sortOrder = searchParams.get('sortOrder') || 'desc';
         
+        // Update local filter state with URL parameters
         setLocalFilters({
             query,
             category,
@@ -34,8 +51,15 @@ function FilteringBar() {
             sortBy: sortBy as 'title' | 'price' | 'createdAt' | 'rating' | 'views',
             sortOrder
         });
-    }, [searchParams]);
+    }, [searchParams]); // Re-run when URL parameters change
 
+    /**
+     * Handles sort selection change
+     * Parses the combined sort value into separate sortBy and sortOrder properties
+     * Updates global filtering state immediately (no Apply button needed for sorting)
+     * 
+     * @param {string} value - Combined sort field and direction (e.g., "price-asc")
+     */
     const handleSortChange = (value: string) => {
         const [sortBy, sortOrder] = value.split('-');
         setFiltering(prev => ({ 
@@ -45,11 +69,20 @@ function FilteringBar() {
         }));
     };
 
+    /**
+     * Applies the temporary filter state to the global filtering state
+     * Closes the filter dialog after applying changes
+     */
     const applyFilters = () => {
         setFiltering(localFilters);
         setIsDialogOpen(false);
     };
 
+    /**
+     * Resets all filters to default values
+     * Updates both local and global filter state
+     * Closes the dialog after reset
+     */
     const resetFilters = () => {
         const resetState = {
             query: undefined,
@@ -65,16 +98,20 @@ function FilteringBar() {
         setIsDialogOpen(false);
     };
 
+    // Combine sort field and direction for the select component value
     const currentSortValue = `${filtering.sortBy || 'createdAt'}-${filtering.sortOrder || 'desc'}`;
 
     return (
         <div className="flex justify-between items-center mb-4">
+            {/* Filter button and dialog */}
             <div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    {/* Filter button with indicator for active filters */}
                     <DialogTrigger asChild>
                         <Button variant="outline" className="flex items-center gap-2">
                             <Filter className="h-4 w-4" />
                             Filters
+                            {/* Show indicator dot when any filter is active */}
                             {(filtering.query || filtering.category || filtering.minPrice || 
                              filtering.maxPrice || filtering.featured) && 
                                 <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs bg-primary text-primary-foreground rounded-full">
@@ -83,11 +120,14 @@ function FilteringBar() {
                             }
                         </Button>
                     </DialogTrigger>
+                    
+                    {/* Filter dialog content */}
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Filter Products</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
+                            {/* Search term filter */}
                             <div className="space-y-2">
                                 <Label htmlFor="search">Search</Label>
                                 <Input 
@@ -98,6 +138,7 @@ function FilteringBar() {
                                 />
                             </div>
                             
+                            {/* Category filter dropdown */}
                             <div className="space-y-2">
                                 <Label htmlFor="category">Category</Label>
                                 <Select 
@@ -117,6 +158,7 @@ function FilteringBar() {
                                 </Select>
                             </div>
                             
+                            {/* Price range filter with min and max inputs */}
                             <div className="space-y-2">
                                 <Label>Price Range</Label>
                                 <div className="flex gap-4 items-center">
@@ -142,6 +184,7 @@ function FilteringBar() {
                                 </div>
                             </div>
                             
+                            {/* Featured products checkbox filter */}
                             <div className="flex items-center space-x-2">
                                 <Checkbox 
                                     id="featured"
@@ -153,6 +196,7 @@ function FilteringBar() {
                                 <Label htmlFor="featured">Featured Only</Label>
                             </div>
                             
+                            {/* Filter action buttons */}
                             <div className="flex justify-between pt-4">
                                 <Button variant="outline" onClick={resetFilters}>
                                     Reset
@@ -166,6 +210,7 @@ function FilteringBar() {
                 </Dialog>
             </div>
             
+            {/* Sort order dropdown */}
             <div>
                 <Select 
                     value={currentSortValue}
