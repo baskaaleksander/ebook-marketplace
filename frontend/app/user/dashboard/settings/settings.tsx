@@ -32,6 +32,10 @@ import ChangeAvatarDialog from "@/components/change-avatar-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ChangePasswordDialog from "@/components/change-password-dialog";
 
+/**
+ * Zod schema for validating user settings form data
+ * Defines validation rules for name, surname, email, and optional fields
+ */
 const userSettingsSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   surname: z.string().min(2, { message: "Surname must be at least 2 characters" }),
@@ -40,23 +44,39 @@ const userSettingsSchema = z.object({
   avatarUrl: z.string().optional(),
 });
 
-
+// Type inference for form values based on the Zod schema
 type UserSettingsFormValues = z.infer<typeof userSettingsSchema>;
 
+/**
+ * Settings component handles user account settings and profile management
+ * Allows users to update profile info, change avatar, change password, and delete account
+ */
 function Settings() {
+  // Authentication context for current user data and logout function
   const { user, loading: authLoading, logout } = useAuth();
-  const [userData, setUserData] = useState<UserData>();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
-  const [deleteMyAccount, setDeleteMyAccount] = useState<string>("");
-  const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(true);
+  
+  // State management for user data and UI states
+  const [userData, setUserData] = useState<UserData>(); // Current user profile information
+  const [error, setError] = useState<string | null>(null); // Error message for operations
+  const [success, setSuccess] = useState<string | null>(null); // Success message for operations
+  const [loading, setLoading] = useState(true); // Loading state for initial data fetch
+  const [submitting, setSubmitting] = useState(false); // Loading state for form submissions
+  
+  // Dialog visibility states
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false); // Controls password change dialog
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false); // Controls avatar change dialog
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false); // Controls account deletion dialog
+  
+  // Account deletion confirmation state
+  const [deleteMyAccount, setDeleteMyAccount] = useState<string>(""); // Confirmation text input
+  const [deleteButtonDisabled, setDeleteButtonDisabled] = useState(true); // Disables delete button until confirmed
+  
   const router = useRouter();
   
+  /**
+   * Initialize form with Zod validation schema and default empty values
+   * Will be populated with user data once fetched
+   */
   const form = useForm<UserSettingsFormValues>({
     resolver: zodResolver(userSettingsSchema),
     defaultValues: {
@@ -68,27 +88,36 @@ function Settings() {
     },
   });
   
-
-  
+  /**
+   * Effect to check authentication and redirect to login if not authenticated
+   * Ensures settings page is only accessible to logged-in users
+   */
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
   }, [user, authLoading, router]);
 
+  /**
+   * Effect to fetch user profile data when component mounts
+   * Populates the form with current user information
+   */
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.id) return;
       
       try {
+        // Fetch user profile data from API
         const response = await api.get(`/user/${user.id}`);
         const fetchedUser = response.data;
         
+        // Update state with fetched user data, adding a fallback for missing avatar
         setUserData({
           ...fetchedUser,
           avatarUrl: fetchedUser.avatarUrl || `https://ui-avatars.com/api/?name=${fetchedUser.name}+${fetchedUser.surname}&bold=true`,
         });
         
+        // Pre-populate form fields with user data
         form.reset({
           name: fetchedUser.name,
           surname: fetchedUser.surname,
@@ -109,6 +138,10 @@ function Settings() {
     fetchData();
   }, [user, authLoading, form]);
 
+  /**
+   * Effect to enable/disable delete account button based on confirmation text
+   * Requires exact match of "delete my account" to enable the button
+   */
   useEffect(() => {
     if (deleteMyAccount === "delete my account") {
       setDeleteButtonDisabled(false);
@@ -117,15 +150,23 @@ function Settings() {
     }
   }, [deleteMyAccount]);
 
+  /**
+   * Handler for avatar change from the dialog
+   * Updates local state and form value with new avatar URL
+   * 
+   * @param {string} newAvatarUrl - URL of the new avatar image
+   */
   const onAvatarChange = (newAvatarUrl: string) => {
     try {
       if (!user?.id) return;
       
+      // Update local user data with new avatar URL
       setUserData(prev => prev ? {
         ...prev,
         avatarUrl: newAvatarUrl,
       } : undefined);
 
+      // Update form value to include new avatar
       form.setValue('avatarUrl', newAvatarUrl);
       
       setSuccess("Profile picture updated successfully");
@@ -139,10 +180,15 @@ function Settings() {
     }
   }
 
+  /**
+   * Handler for account deletion
+   * Makes API call to delete the user account and handles logout/redirect
+   */
   const onDeleteAccount = async () => {
     try {
       if (!user?.id) return;
       
+      // Delete user account via API
       await api.delete(`/user/${user.id}`);
       setSuccess("Account deleted successfully");
     }
@@ -151,12 +197,19 @@ function Settings() {
       setError("Failed to delete account");
     }
     finally {
+      // Close dialog, log out user, and redirect to login page
       setDeleteAccountDialogOpen(false);
       logout();
       router.push('/login');
     }
   }
 
+  /**
+   * Handler for form submission to update user profile
+   * Makes API call to update user data with form values
+   * 
+   * @param {UserSettingsFormValues} data - Validated form data
+   */
   const onSubmit = async (data: UserSettingsFormValues) => {
     if (!user?.id) return;
     
@@ -165,9 +218,11 @@ function Settings() {
     setSuccess(null);
     
     try {
+      // Update user profile via API
       await api.put(`/user/${user.id}`, data);
       setSuccess("Profile updated successfully");
       
+      // Update local user data state with new values
       setUserData(prev => prev ? {
         ...prev,
         ...data,
@@ -182,7 +237,7 @@ function Settings() {
     }
   };
   
-
+  // Show loading spinner while fetching initial data
   if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -203,6 +258,7 @@ function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Alert messages for errors and success notifications */}
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>{error}</AlertDescription>
@@ -214,7 +270,8 @@ function Settings() {
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
-          {/* User avatar and name */}
+          
+          {/* User avatar display with edit button */}
           <div className="flex items-center space-x-4 mb-8">
             <div className="relative">
               <Avatar className="h-20 w-20">
@@ -242,6 +299,7 @@ function Settings() {
             </div>
           </div>
 
+          {/* Avatar change dialog component */}
           {userData && (
             <ChangeAvatarDialog 
               open={avatarDialogOpen}
@@ -253,9 +311,10 @@ function Settings() {
             />
           )}
           
-          {/* Form for updating user settings */}
+          {/* User settings form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Name and surname fields in a two-column layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -286,6 +345,7 @@ function Settings() {
                 />
               </div>
               
+              {/* Email field */}
               <FormField
                 control={form.control}
                 name="email"
@@ -300,6 +360,7 @@ function Settings() {
                 )}
               />
               
+              {/* Bio/description field */}
               <FormField
                 control={form.control}
                 name="description"
@@ -318,8 +379,12 @@ function Settings() {
                 )}
               />
               
+              {/* Form action buttons */}
               <div className="flex justify-between items-center">
+                {/* Password change dialog component */}
                 <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
+                
+                {/* Save changes button with loading state */}
                 <Button 
                   type="submit" 
                   disabled={submitting}
@@ -333,6 +398,7 @@ function Settings() {
                 </Button>
               </div>
 
+              {/* Delete account section */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <div className="flex flex-col">
                   <h3 className="text-lg font-medium text-red-600 mb-2">Delete your account</h3>
@@ -351,7 +417,7 @@ function Settings() {
                 </div>
               </div>
 
-              {/* Dialog for deleting account */}
+              {/* Account deletion confirmation dialog */}
               <Dialog open={deleteAccountDialogOpen} onOpenChange={setDeleteAccountDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>

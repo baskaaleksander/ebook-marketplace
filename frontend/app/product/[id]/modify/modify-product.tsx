@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation";
 import ModifyProductSkeleton from "@/components/modify-product-skeleton";
 
+// Zod schema for form validation
 const createProductSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters" }),
     description: z.string().min(2, { message: "Description must be at least 2 characters" }),
@@ -28,8 +29,10 @@ const createProductSchema = z.object({
     category: z.string().min(1, { message: "Please select a category" }),
 });
 
+// Type inference from Zod schema for form values
 type CreateProductFormValues = z.infer<typeof createProductSchema>;
 
+// Available product categories
 const categories = [
   { id: "Fiction", name: "Fiction" },
   { id: "nonfiction", name: "Non-Fiction" },
@@ -38,21 +41,26 @@ const categories = [
   { id: "graphics", name: "Graphics & Design" },
 ];
 
+/**
+ * Main component for modifying an existing product
+ * Handles form state, file uploads, and API interactions
+ */
 function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
-    const { image, setImage } = useImage();
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [product, setProduct] = useState<Product | null>(null);
-    const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [pdfLoading, setPdfLoading] = useState(true);
-    const [pdfError, setPdfError] = useState(false);
-    const [pdfChanged, setPdfChanged] = useState(false);
-    const [pageLoading, setPageLoading] = useState(true);
-    const resolvedParams = use(params);
+    const { image, setImage } = useImage(); // Context for image handling
+    const [error, setError] = useState<string | null>(null) // General error state
+    const [success, setSuccess] = useState(false); // Success status for form submission
+    const [isLoading, setIsLoading] = useState(false); // Loading state for form submission
+    const [product, setProduct] = useState<Product | null>(null); // Product data
+    const [pdfFile, setPdfFile] = useState<File | null>(null); // PDF file to upload
+    const [pdfLoading, setPdfLoading] = useState(true); // Loading state for PDF
+    const [pdfError, setPdfError] = useState(false); // Error state for PDF
+    const [pdfChanged, setPdfChanged] = useState(false); // Track if PDF was changed by user
+    const [pageLoading, setPageLoading] = useState(true); // Loading state for the entire page
+    const resolvedParams = use(params); // Resolve the Promise to get the product ID
     const id = resolvedParams.id;
     
+    // Initialize form with Zod schema
     const form = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
         defaultValues: {
@@ -63,18 +71,21 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
         },
     });
     
+    // Fetch product data when component mounts
     useEffect(() => {
       const fetchData = async () => {
         try {
           setPageLoading(true);
           setPdfLoading(true);
           
+          // Get product data from API
           const response = await api.get(`/listing/${id}`);
           const productData = response.data.data;
           
           setProduct(productData);
-          setImage(productData.imageUrl);
+          setImage(productData.imageUrl); // Set image in the context
           
+          // Populate form with existing product data
           form.reset({
             title: productData.title || "",
             description: productData.description || "",
@@ -82,8 +93,11 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
             category: productData.category || productData.categories?.[0]?.name || "",
           });
 
+          // Handle PDF file if exists
           if (productData.fileUrl) {
             try {
+              // Create a placeholder file object for UI
+              // We don't actually download the PDF, just create a reference to it
               const emptyBlob = new Blob([], { type: 'application/pdf' });
               const fileName = productData.fileName || productData.fileUrl.split('/').pop() || 'file.pdf';
               
@@ -109,25 +123,38 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
       fetchData();
     }, [id, setImage, form]);
 
+    /**
+     * Handle PDF file selection
+     * @param file - The selected PDF file
+     */
     const handlePdfSelect = (file: File) => {
       setPdfFile(file);
-      setPdfChanged(true);
+      setPdfChanged(true); // Mark that PDF needs to be uploaded
       setPdfError(false);
     };
 
+    /**
+     * Remove the selected PDF file
+     */
     const clearPdfFile = () => {
       setPdfFile(null);
-      setPdfChanged(true);
+      setPdfChanged(true); // Mark that PDF was changed (removed)
     };
 
+    /**
+     * Handle form submission to update the product
+     * @param data - Validated form data
+     */
     const onSubmit = async (data: CreateProductFormValues) => {
       try {
         setError(null);
         setIsLoading(true);
         
+        // Handle image upload if image was changed
         let imageUrl = "";
         if (image) {
           if (image.startsWith('data:') || image.startsWith('blob:')) {
+            // Convert data URL or blob URL to file and upload
             const response = await fetch(image);
             const blob = await response.blob();
             const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
@@ -144,15 +171,17 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
             imageUrl = imageUploadResponse.data.imageUrl || 
                       `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
           } else {
+            // Use existing image URL
             imageUrl = image;
           }
         }
 
+        // Handle PDF file upload if changed
         let fileUrl = product?.fileUrl || "";
         
         if (pdfChanged) {
           if (pdfFile) {
-
+            // Upload new PDF file
             const pdfFormData = new FormData();
             pdfFormData.append('file', pdfFile);
             
@@ -165,10 +194,12 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
             fileUrl = pdfUploadResponse.data.fileUrl || 
                     `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
           } else {
+            // PDF was removed
             fileUrl = "";
           }
         }
 
+        // Update product in database
         await api.put(`/listing/${id}`, {
           title: data.title,
           description: data.description,
@@ -181,6 +212,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
      
         setSuccess(true);
         
+        // Redirect to product page after update
         setTimeout(() => {
           router.push(`/product/${id}`);
         }, 2000);
@@ -193,10 +225,12 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
       }
     };
 
+    // Show skeleton loader while data is being fetched
     if (pageLoading) {
       return <ModifyProductSkeleton />;
     }
 
+    // Extract filename from URL for display purposes
     const fileName = product?.fileUrl ? product.fileUrl.split('/').pop() : "No file selected";
     
     return (
@@ -206,20 +240,25 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
         <h1 className="text-3xl font-bold">Edit Product</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left column: Image and PDF uploads */}
           <div className="space-y-6">
+            {/* Image upload section */}
             <div>
               <h2 className="text-lg font-semibold mb-4">Product Image</h2>
               <ImageResizer />
             </div>
             
+            {/* PDF upload section with different states */}
             <div>
               <h2 className="text-lg font-semibold mb-4">PDF File</h2>
               {pdfLoading ? (
+                // PDF loading state
                 <Card className="p-6 flex items-center justify-center">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
                   <p>Loading PDF file...</p>
                 </Card>
               ) : pdfError ? (
+                // PDF error state
                 <div className="space-y-4">
                   <div className="bg-red-50 p-4 rounded-md text-red-700 mb-4">
                     <p>There was an error loading the PDF file. Please upload it again.</p>
@@ -232,6 +271,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                   />
                 </div>
               ) : !pdfFile ? (
+                // No PDF selected state
                 <FileUploader
                   onFileSelect={handlePdfSelect}
                   accept="application/pdf"
@@ -239,6 +279,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                   label="Drag & drop your PDF file here"
                 />
               ) : (
+                // PDF selected state - shows file info
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -262,6 +303,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
+                    {/* Show badge indicating if file is current or new */}
                     {product && fileName === pdfFile.name && !pdfChanged ? (
                       <Badge variant="outline" className="mt-2 bg-blue-50 text-blue-700 border-blue-200">
                         Current PDF File
@@ -277,23 +319,28 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
             </div>
           </div>
           
+          {/* Right column: Product details form */}
           <div>
             <Card>
               <CardContent className="pt-6">
+                {/* Error message display */}
                 {error && (
                   <Alert variant="destructive" className="mb-6">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
                 
+                {/* Success message display */}
                 {success && (
                   <Alert className="mb-6 bg-green-50 text-green-800 border-green-200">
                     <AlertDescription>Product updated successfully! Redirecting...</AlertDescription>
                   </Alert>
                 )}
                 
+                {/* Product edit form */}
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    {/* Title field */}
                     <FormField
                       control={form.control}
                       name="title"
@@ -308,6 +355,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                       )}
                     />
                     
+                    {/* Description field */}
                     <FormField
                       control={form.control}
                       name="description"
@@ -327,6 +375,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                     />
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Price field */}
                       <FormField
                         control={form.control}
                         name="price"
@@ -351,6 +400,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                         )}
                       />
                       
+                      {/* Category selection field */}
                       <FormField
                         control={form.control}
                         name="category"
@@ -382,8 +432,9 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                           </FormItem>
                         )}
                       />
-                    </div>
+                      </div>
                     
+                    {/* Submit button with loading state */}
                     <Button 
                       type="submit" 
                       className="w-full" 
@@ -407,6 +458,10 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
     );
 }
   
+/**
+ * Wrapper component that provides the ImageProvider context
+ * This ensures the image state is available throughout the component tree
+ */
 export default function ModifyProduct({ params }: { params: Promise<{ id: string }> }) {
     return (
       <ImageProvider>
