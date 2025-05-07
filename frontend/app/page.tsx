@@ -13,7 +13,7 @@ const LastViewed = dynamic(() => import('@/components/last-viewed'), {
 export default function Home() {
 
   return (
-    <div className="p-8">
+    <div className="p-8 min-h-screen">
       <LastViewed />
       <FeaturedProducts />
       <HomeProducts />
