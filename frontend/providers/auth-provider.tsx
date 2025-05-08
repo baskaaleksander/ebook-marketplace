@@ -112,13 +112,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     try {
       // Send registration request with user data
-      const response = await api.post('/auth/register', userData);
-      // Fetch complete user data using returned user ID
-      const user = await api.get(`/user/${response.data.user}`);
-      // Update authentication state with new user data
-      setUser(user.data);
+      await api.post('/auth/register', userData);
+
     } finally {
       setLoading(false);
+      // After registration, automatically log in the new user
+      await login(userData.email, userData.password);
+      
     }
   };
 

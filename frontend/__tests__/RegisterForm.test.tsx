@@ -45,8 +45,8 @@ describe('RegisterForm', () => {
     fireEvent.input(screen.getByLabelText(/^Password$/i), { target: { value: '123' } }); // password
     fireEvent.input(screen.getByLabelText(/Confirm Password/i), { target: { value: '123' } }); // confirmPassword
   
-    // const registerButton = screen.getByRole('button', { name: /register/i });
-    // fireEvent.click(registerButton);
+    const registerButton = screen.getByRole('button', { name: /register/i });
+    fireEvent.click(registerButton);
     
     await waitFor(() => {
       const formText = container.textContent;
