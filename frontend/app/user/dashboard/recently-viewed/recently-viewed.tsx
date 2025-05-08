@@ -14,7 +14,7 @@ function RecentlyViewed() {
       try {
         setLoading(true)
         const response = await api.get('/listing/viewed')
-        setViewed(response.data)
+        setViewed(response.data.data)
       } catch (error) {
         console.error("Error fetching data:", error)
         setError("Failed to load data")

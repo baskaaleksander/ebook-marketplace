@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import ModifyProductSkeleton from "@/components/modify-product-skeleton";
+import { LiaTimesSolid } from "react-icons/lia";
 
 // Zod schema for form validation
 const createProductSchema = z.object({
@@ -53,6 +54,8 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
     const [isLoading, setIsLoading] = useState(false); // Loading state for form submission
     const [product, setProduct] = useState<Product | null>(null); // Product data
     const [pdfFile, setPdfFile] = useState<File | null>(null); // PDF file to upload
+    const [oldImageUrl, setOldImageUrl] = useState<string | null>(null); // Image URL for the product
+    const [imgChanged, setImgChanged] = useState(false); // Track if image was changed by user
     const [pdfLoading, setPdfLoading] = useState(true); // Loading state for PDF
     const [pdfError, setPdfError] = useState(false); // Error state for PDF
     const [pdfChanged, setPdfChanged] = useState(false); // Track if PDF was changed by user
@@ -83,7 +86,17 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
           const productData = response.data.data;
           
           setProduct(productData);
-          setImage(productData.imageUrl); // Set image in the context
+          
+          // Fetch and convert the remote image to a data URL
+          if (productData.imageUrl) {
+            try {
+              setOldImageUrl(productData.imageUrl);
+              
+            } catch (imageError) {
+              console.error("Error loading image:", imageError);
+              setOldImageUrl(null);
+            }
+          }
           
           // Populate form with existing product data
           form.reset({
@@ -123,6 +136,21 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
       fetchData();
     }, [id, setImage, form]);
 
+    useEffect(() => {
+      // If image context has a value and it's different from oldImageUrl
+      if (image && image !== oldImageUrl) {
+        setImgChanged(true);
+      }
+    }, [image, oldImageUrl]);
+
+    /**
+     * Handle image deletion
+     */
+    const handleImageDelete = () => {
+      setImage(null); // Clear the image state
+      setOldImageUrl(null); // Clear the image URL
+      setImgChanged(true); // Mark that image needs to be uploaded
+    };
     /**
      * Handle PDF file selection
      * @param file - The selected PDF file
@@ -151,29 +179,56 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
         setIsLoading(true);
         
         // Handle image upload if image was changed
-        let imageUrl = "";
-        if (image) {
-          if (image.startsWith('data:') || image.startsWith('blob:')) {
-            // Convert data URL or blob URL to file and upload
-            const response = await fetch(image);
-            const blob = await response.blob();
-            const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
-            
-            const imageFormData = new FormData();
-            imageFormData.append('file', imageFile);
-            
-            const imageUploadResponse = await api.post('/upload', imageFormData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
+        let imageUrl = product?.imageUrl || ""; // Start with existing URL
+        
+        // Debug current state
+        console.log("Current state:", { 
+          imgChanged, 
+          image: image?.substring(0, 50), // Just log the start of the image string
+          oldImageUrl: oldImageUrl?.substring(0, 50) 
+        });
+
+        // Image handling logic
+        if (imgChanged) {
+          if (image) {
+            // Always try to upload the image if it's changed and exists
+            try {
+              // Convert data URL or blob URL to file and upload
+              const response = await fetch(image);
+              const blob = await response.blob();
+              const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
+              
+              const imageFormData = new FormData();
+              imageFormData.append('file', imageFile);
+              
+              const imageUploadResponse = await api.post('/upload', imageFormData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                }
+              });
+              
+              // Update imageUrl with the one from the server
+              imageUrl = imageUploadResponse.data.imageUrl || 
+                        imageUploadResponse.data.url || // Try alternate property
+                        `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+              
+              console.log("Image uploaded successfully:", imageUrl);
+            } catch (uploadError) {
+              console.error("Error uploading image:", uploadError);
+              // If upload fails, keep the old URL
+              if (oldImageUrl) {
+                imageUrl = oldImageUrl;
+                console.log("Keeping old image URL:", imageUrl);
               }
-            });
-            
-            imageUrl = imageUploadResponse.data.imageUrl || 
-                      `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+            }
           } else {
-            // Use existing image URL
-            imageUrl = image;
+            // Image was deliberately deleted
+            imageUrl = "";
+            console.log("Image was deleted");
           }
+        } else {
+          // Image wasn't changed, keep the old URL
+          console.log("Image wasn't changed, keeping old URL:", imageUrl);
         }
 
         // Handle PDF file upload if changed
@@ -191,13 +246,22 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
               }
             });
             
-            fileUrl = pdfUploadResponse.data.fileUrl || 
+            fileUrl = pdfUploadResponse.data.url || 
                     `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
           } else {
             // PDF was removed
             fileUrl = "";
           }
         }
+
+        // Log the data before making the API call
+        console.log("Updating product with:", {
+          title: data.title,
+          imageUrl,
+          fileUrl,
+          imgChanged,
+          image
+        });
 
         // Update product in database
         await api.put(`/listing/${id}`, {
@@ -245,7 +309,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
             {/* Image upload section */}
             <div>
               <h2 className="text-lg font-semibold mb-4">Product Image</h2>
-              <ImageResizer />
+              {oldImageUrl ? <ImagePreview handleImageDelete={handleImageDelete} imageUrl={oldImageUrl} /> : <ImageResizer /> }
             </div>
             
             {/* PDF upload section with different states */}
@@ -468,4 +532,31 @@ export default function ModifyProduct({ params }: { params: Promise<{ id: string
         <ModifyProductChildren params={params} />
       </ImageProvider>
     );
+}
+
+function ImagePreview( { imageUrl, handleImageDelete }: { imageUrl: string, handleImageDelete: () => void }) {
+  return (
+            <Card className="w-full max-w-md p-4">
+              <CardContent className="flex flex-col items-center">
+                <div className="mt-4 relative">
+                  <img
+                    src={imageUrl}
+                    alt="Product image"
+                    className="w-64 h-64 object-cover rounded-xl shadow"
+                  />
+                  {/* Remove button positioned at top-right of image */}
+                  <div className="absolute -top-3 -right-3 flex gap-2">
+                    <Button
+                      variant="secondary"
+                      onClick={() => handleImageDelete()}
+                      className="h-8 w-8 rounded-full p-0"
+                      aria-label="Clear image"
+                    >
+                      <LiaTimesSolid />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+  )
 }

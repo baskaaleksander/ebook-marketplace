@@ -194,6 +194,7 @@ export default function ImageResizer() {
               <img
                 src={croppedImgUrl}
                 alt="Product image"
+                crossOrigin="anonymous"
                 className="w-64 h-64 object-cover rounded-xl shadow"
               />
               {/* Remove button positioned at top-right of image */}

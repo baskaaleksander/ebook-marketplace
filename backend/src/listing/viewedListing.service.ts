@@ -57,6 +57,10 @@ export class ViewedListingsService {
                     select: {
                         id: true,
                         title: true,
+                        description: true,
+                        price: true,
+                        imageUrl: true,
+                        sellerId: true,
                         seller: {
                             select: {
                                 id: true,
@@ -73,7 +77,26 @@ export class ViewedListingsService {
             }
         });
     
-        return viewed.filter(v => v.product !== null);
+        return {
+            data: viewed.map((viewed) => ({
+                id: viewed.product.id,
+                title: viewed.product.title,
+                description: viewed.product.description,
+                price: viewed.product.price,
+                imageUrl: viewed.product.imageUrl,
+                sellerId: viewed.product.sellerId,
+                seller: {
+                    id: viewed.product.seller.id,
+                    name: viewed.product.seller.name,
+                    surname: viewed.product.seller.surname,
+                    email: viewed.product.seller.email,
+                    avatarUrl: viewed.product.seller.avatarUrl,
+                    stripeStatus: viewed.product.seller.stripeStatus,
+                    createdAt: viewed.product.seller.createdAt
+                }
+            })),
+            message: 'Viewed products retrieved successfully',
+        }
     }
     
     async clearViewedProducts() {

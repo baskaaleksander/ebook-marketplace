@@ -204,7 +204,7 @@ function CreateProductForm() {
             });
             
             // Extract PDF URL from response
-            const pdfUrl = pdfUploadResponse.data.fileUrl || `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
+            const pdfUrl = pdfUploadResponse.data.url || `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
 
             // Combine all data for product creation
             const productData = {
@@ -230,7 +230,7 @@ function CreateProductForm() {
             
             // Redirect to dashboard after short delay to show success message
             setTimeout(() => {
-                router.push('/dashboard');
+                router.push('/user/dashboard');
             }, 2000);
             
         } catch (err) {
