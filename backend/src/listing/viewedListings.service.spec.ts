@@ -111,51 +111,57 @@ describe('ViewedListingsService', () => {
       
       const result = await service.getViewedProducts('user1');
 
-      expect(result).toEqual([
-        {
-          id: 'view1',
-          userId: 'user1',
-          productId: 'product1',
-          viewedAt: new Date('2025-05-01T12:34:31.812Z'),
-          product: {
-            id: 'product1',
-            title: 'Test Product',
-            seller: {
-              id: 'seller1',
-              name: 'John',
-              surname: 'Doe',
-              email: 'john@example.com',
-              avatarUrl: null,
-              stripeStatus: 'active',
-              createdAt: new Date('2025-01-01T10:00:00.000Z'),
-            }
-          }
+      expect(result).toEqual({
+        data: [
+          {
+        id: 'product1',
+        title: 'Test Product',
+        description: undefined,
+        price: undefined,
+        imageUrl: undefined,
+        sellerId: undefined,
+        seller: {
+          id: 'seller1',
+          name: 'John',
+          surname: 'Doe',
+          email: 'john@example.com',
+          avatarUrl: null,
+          stripeStatus: 'active',
+          createdAt: new Date('2025-01-01T10:00:00.000Z'),
         }
-      ]);
+          }
+        ],
+        message: 'Viewed products retrieved successfully',
+      });
       
       expect(mockPrismaService.viewedListing.findMany).toHaveBeenCalledWith({
-        where: { userId: 'user1' },
-        orderBy: { viewedAt: 'desc' },
-        take: 10,
-        include: {
-            product: {
-                select: {
-                    id: true,
-                    title: true,
-                    seller: {
-                        select: {
-                            id: true,
-                            name: true,
-                            surname: true,
-                            email: true,
-                            avatarUrl: true,
-                            stripeStatus: true,
-                            createdAt: true,
+            where: { userId: 'user1' },
+            orderBy: { viewedAt: 'desc' },
+            take: 10,
+            include: {
+                product: {
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        price: true,
+                        imageUrl: true,
+                        sellerId: true,
+                        seller: {
+                            select: {
+                                id: true,
+                                name: true,
+                                surname: true,
+                                email: true,
+                                avatarUrl: true,
+                                stripeStatus: true,
+                                createdAt: true,
+                            }
                         }
                     }
                 }
             }
-        }
+
   });
     });
   });
