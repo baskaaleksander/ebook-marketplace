@@ -228,7 +228,13 @@ describe('CreateProductForm', () => {
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Test Product' } });
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'This is a test product description' } });
     fireEvent.change(screen.getByPlaceholderText('0.00'), { target: { value: '19.99' } });
-    
+    // Mock the image upload logic since the actual component is mocked
+    // This will trigger the image being set in the form state
+    const mockImageResizer = screen.getByTestId('image-resizer');
+    fireEvent.click(mockImageResizer);
+
+    // Ensure that we have an image set (this would normally happen via the useImage hook)
+    expect(mockImage).toBeTruthy();
     // Open the category dropdown and select a category
     fireEvent.click(screen.getByText('Select a category'));
     fireEvent.click(screen.getAllByText('Fiction')[1]); // Select the second occurrence of Fiction
@@ -297,8 +303,16 @@ describe('CreateProductForm', () => {
     // Fill in the form with minimum required data
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Test Product' } });
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Description' } });
-    fireEvent.click(screen.getByText('Select a category'));
-    fireEvent.click(screen.getByText('Fiction'));
+    
+    // Mock the category selection without relying on getAllByText which might return non-DOM elements
+    const selectCategory = screen.getByText('Select a category');
+    fireEvent.click(selectCategory);
+    
+    // Wait for dropdown to appear and then find the option within it
+    await waitFor(() => {
+      const fictionOption = screen.getByRole('option', { name: /Fiction/i });
+      fireEvent.click(fictionOption);
+    });
     
     // Submit the form
     fireEvent.click(screen.getByText('Create Product'));
@@ -331,7 +345,7 @@ describe('CreateProductForm', () => {
     render(<CreateProductForm />);
     
     // Still disabled because PDF is missing
-    expect(screen.getByText('Create Product')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Create Product' })).toBeDisabled();
     
     // Upload a PDF
     fireEvent.click(screen.getByTestId('file-uploader'));

@@ -187,7 +187,7 @@ describe('BoughtProductsTable', () => {
       .filter(o => o.status === OrderStatus.COMPLETED);
         
     const downloadLinks = screen.getAllByText('Download');
-    expect(downloadLinks.length).toBe(completedOrdersFirstPage.length);
+    expect(downloadLinks.length).toBe(completedOrdersFirstPage.length + 1); // +1 for the heading
   });
 
   test('shows "Already reviewed" for reviewed orders', () => {

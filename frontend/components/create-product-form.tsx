@@ -179,7 +179,7 @@ function CreateProductForm() {
                     imageFormData.append('file', imageFile);
                     
                     // Upload image file to server
-                    const imageUploadResponse = await api.post('/upload', imageFormData, {
+                    const imageUploadResponse = await api.post('/upload/', imageFormData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         }
