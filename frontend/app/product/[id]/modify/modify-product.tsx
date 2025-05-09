@@ -1,7 +1,6 @@
 'use client';
 
 import FileUploader from "@/components/file-uploader";
-import ImageResizer from "@/components/image-resizer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

@@ -58,17 +58,6 @@ function LastViewed() {
         setLoading(false);
     }, [user, authLoading]); // Re-run when auth state changes
 
-    /**
-     * Conditional rendering for loading state
-     * Shows during both component data loading and auth loading
-     */
-    if (loading || authLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-2xl font-bold">Loading...</h1>
-            </div>
-        );
-    }
 
     /**
      * Conditional rendering for error state

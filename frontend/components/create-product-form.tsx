@@ -186,7 +186,7 @@ function CreateProductForm() {
                     });
                     
                     // Extract image URL from response
-                    imageUrl = imageUploadResponse.data.url || `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+                    imageUrl = imageUploadResponse.data.url;
                 } else {
                     // Image is already a URL, use as is
                     imageUrl = image;
@@ -204,7 +204,7 @@ function CreateProductForm() {
             });
             
             // Extract PDF URL from response
-            const pdfUrl = pdfUploadResponse.data.url || `http://localhost:3000/uploads/${pdfUploadResponse.data.filename}`;
+            const pdfUrl = pdfUploadResponse.data.url;
 
             // Combine all data for product creation
             const productData = {
@@ -362,7 +362,7 @@ function CreateProductForm() {
                                                     <FormLabel>Price</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
-                                                            <span className="absolute left-3 top-2 text-gray-500">$</span>
+                                                            <span className="absolute left-3 top-2 text-gray-500">PLN</span>
                                                             <Input 
                                                                 type="number" 
                                                                 min="0" 
@@ -415,7 +415,7 @@ function CreateProductForm() {
                                     <Button 
                                         type="submit" 
                                         className="w-full" 
-                                        disabled={isLoading || !image || !pdfFile}
+                                        disabled={isLoading || !pdfFile}
                                     >
                                         {isLoading ? (
                                             <>

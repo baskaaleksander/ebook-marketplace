@@ -54,8 +54,8 @@ export class StripeService {
 
             const accountLink = await this.stripe.accountLinks.create({
                 account: account.id,
-                refresh_url: `${this.configService.get('FRONTEND_URL')}/${userId}/wallet`,
-                return_url: `${this.configService.get('FRONTEND_URL')}/${userId}/wallet`,
+                refresh_url: `${this.configService.get('FRONTEND_URL')}/user/dashboard`,
+                return_url: `${this.configService.get('FRONTEND_URL')}/user/dashboard`,
                 type: 'account_onboarding',
             });
 
