@@ -42,7 +42,6 @@ function Purchased() {
                 setLoading(true);
                 // Fetch all orders purchased by the current user
                 const soldOrdersResponse = await api.get(`/stripe/orders/`);
-                console.log('Sold Orders Response:', soldOrdersResponse.data);
                 setBoughtOrders(soldOrdersResponse.data.data);
             } catch (err) {
                 console.error("Error fetching data:", err);

@@ -34,7 +34,6 @@ function LastViewed() {
                 try {
                     // Get user's recently viewed products from API
                     const response = await api.get('/listing/viewed');
-                    console.log("Last viewed products:", response.data);
                     setLastViewed(response.data.data);
                 } catch (err) {
                     setError("failed to load last viewed products");

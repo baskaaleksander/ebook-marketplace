@@ -54,7 +54,6 @@ function CategoryPage({ params }: { params: Promise<{ name: string }> }) {
     const fetchData = async () => {
       // Extract the first part of the category name if it contains spaces
       const category = categoryName.split('%20').shift();
-      console.log(category);
       
       // Make API request to get products in this category
       const response = await api.get(`/listing?category=${category}`);

@@ -44,7 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         // Request current authentication status
         const response = await api.get('/auth/me');
-        console.log(response)
         // If authenticated, fetch complete user data using returned ID
         const user = await api.get(`/user/${response.data}`);
         setUser(user.data);
