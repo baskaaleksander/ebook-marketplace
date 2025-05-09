@@ -10,8 +10,4 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('ping')
-publicPing() {
-  return { ok: true };
-}
 }

@@ -255,7 +255,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
 
 
         // Update product in database
-        await api.put(`/listing/${id}`, {
+        await api.patch(`/listing/${id}`, {
           title: data.title,
           description: data.description,
           price: data.price,

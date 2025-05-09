@@ -48,7 +48,7 @@ function ReviewCard({ review, withProductLink }: { review: Review, withProductLi
     setIsSubmitting(true);
     try {
       // Send updated review data to API
-      await api.put(`/listing/reviews/${review.id}`, {
+      await api.patch(`/listing/reviews/${review.id}`, {
         comment: editedComment,
         rating: editedRating
       });

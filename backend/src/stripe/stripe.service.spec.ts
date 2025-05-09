@@ -118,8 +118,8 @@ describe('StripeService', () => {
       });
       expect(stripeMock.accountLinks.create).toHaveBeenCalledWith({
         account: accountId,
-        refresh_url: 'http://localhost:3000/user123/wallet',
-        return_url: 'http://localhost:3000/user123/wallet',
+        refresh_url: 'http://localhost:3000/user/dashboard',
+        return_url: 'http://localhost:3000/user/dashboard',
         type: 'account_onboarding',
       });
       expect(result).toEqual({ url: accountLinkUrl });

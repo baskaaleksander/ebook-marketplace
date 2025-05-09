@@ -55,8 +55,7 @@ async function bootstrap() {
   )
 
   const config = new DocumentBuilder()
-  .setTitle('Your API')
-  .setDescription('API description')
+  .setTitle('Ebook Marketplace API')
   .setVersion('1.0')
   .build();
   

@@ -219,7 +219,7 @@ function Settings() {
     
     try {
       // Update user profile via API
-      await api.put(`/user/${user.id}`, data);
+      await api.patch(`/user/${user.id}`, data);
       setSuccess("Profile updated successfully");
       
       // Update local user data state with new values
