@@ -148,7 +148,6 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
      */
     const handleImageDelete = () => {
       setImage(null); // Clear the image state
-      setOldImageUrl(null); // Clear the image URL
       setImgChanged(true); // Mark that image needs to be uploaded
     };
     /**
@@ -178,58 +177,60 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
         setError(null);
         setIsLoading(true);
         
-        // Handle image upload if image was changed
-        let imageUrl = product?.imageUrl || ""; // Start with existing URL
+        // to fix
+        // // Handle image upload if image was changed
+        // let imageUrl = product?.imageUrl || ""; // Start with existing URL
         
-        // Debug current state
-        console.log("Current state:", { 
-          imgChanged, 
-          image: image?.substring(0, 50), // Just log the start of the image string
-          oldImageUrl: oldImageUrl?.substring(0, 50) 
-        });
+        // // Debug current state
+        // console.log("Current state:", { 
+        //   imgChanged, 
+        //   image: image?.substring(0, 50), // Just log the start of the image string
+        //   oldImageUrl: oldImageUrl?.substring(0, 50) 
+        // });
 
-        // Image handling logic
-        if (imgChanged) {
-          if (image) {
-            // Always try to upload the image if it's changed and exists
-            try {
-              // Convert data URL or blob URL to file and upload
-              const response = await fetch(image);
-              const blob = await response.blob();
-              const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
+        // // Image handling logic
+        // if (imgChanged || !oldImageUrl) {
+        //   if (image) {
+        //     // Always try to upload the image if it's changed and exists
+        //     console.log('Uploading new image:', image);
+        //     try {
+        //       // Convert data URL or blob URL to file and upload
+        //       const response = await fetch(image);
+        //       const blob = await response.blob();
+        //       const imageFile = new File([blob], "product-image.jpg", { type: "image/jpeg" });
               
-              const imageFormData = new FormData();
-              imageFormData.append('file', imageFile);
+        //       const imageFormData = new FormData();
+        //       imageFormData.append('file', imageFile);
               
-              const imageUploadResponse = await api.post('/upload', imageFormData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                }
-              });
+        //       const imageUploadResponse = await api.post('/upload', imageFormData, {
+        //         headers: {
+        //           'Content-Type': 'multipart/form-data',
+        //         }
+        //       });
               
-              // Update imageUrl with the one from the server
-              imageUrl = imageUploadResponse.data.imageUrl || 
-                        imageUploadResponse.data.url || // Try alternate property
-                        `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
+        //       // Update imageUrl with the one from the server
+        //       imageUrl = imageUploadResponse.data.imageUrl || 
+        //                 imageUploadResponse.data.url || // Try alternate property
+        //                 `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
               
-              console.log("Image uploaded successfully:", imageUrl);
-            } catch (uploadError) {
-              console.error("Error uploading image:", uploadError);
-              // If upload fails, keep the old URL
-              if (oldImageUrl) {
-                imageUrl = oldImageUrl;
-                console.log("Keeping old image URL:", imageUrl);
-              }
-            }
-          } else {
-            // Image was deliberately deleted
-            imageUrl = "";
-            console.log("Image was deleted");
-          }
-        } else {
-          // Image wasn't changed, keep the old URL
-          console.log("Image wasn't changed, keeping old URL:", imageUrl);
-        }
+        //       console.log("Image uploaded successfully:", imageUrl);
+        //     } catch (uploadError) {
+        //       console.error("Error uploading image:", uploadError);
+        //       // If upload fails, keep the old URL
+        //       if (oldImageUrl) {
+        //         imageUrl = oldImageUrl;
+        //         console.log("Keeping old image URL:", imageUrl);
+        //       }
+        //     }
+        //   } else {
+        //     // Image was deliberately deleted
+        //     imageUrl = "";
+        //     console.log("Image was deleted");
+        //   }
+        // } else {
+        //   // Image wasn't changed, keep the old URL
+        //   console.log("Image wasn't changed, keeping old URL:", imageUrl);
+        // }
 
         // Handle PDF file upload if changed
         let fileUrl = product?.fileUrl || "";
@@ -254,14 +255,6 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
           }
         }
 
-        // Log the data before making the API call
-        console.log("Updating product with:", {
-          title: data.title,
-          imageUrl,
-          fileUrl,
-          imgChanged,
-          image
-        });
 
         // Update product in database
         await api.put(`/listing/${id}`, {
@@ -269,9 +262,7 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
           description: data.description,
           price: data.price,
           category: data.category,
-          imageUrl,
           fileUrl,
-          fileName
         });
      
         setSuccess(true);
@@ -307,10 +298,12 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
           {/* Left column: Image and PDF uploads */}
           <div className="space-y-6">
             {/* Image upload section */}
-            <div>
+            {product?.imageUrl && <div>
               <h2 className="text-lg font-semibold mb-4">Product Image</h2>
-              {oldImageUrl ? <ImagePreview handleImageDelete={handleImageDelete} imageUrl={oldImageUrl} /> : <ImageResizer /> }
+              <img src={product?.imageUrl} alt="Product" className="hidden" />
+              {/* {oldImageUrl ? <ImagePreview handleImageDelete={handleImageDelete} imageUrl={oldImageUrl} /> : <ImageResizer /> } */}
             </div>
+            }
             
             {/* PDF upload section with different states */}
             <div>
