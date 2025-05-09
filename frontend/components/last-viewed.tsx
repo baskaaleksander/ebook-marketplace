@@ -17,7 +17,6 @@ function LastViewed() {
     const { user, loading: authLoading } = useAuth();
     
     // State for component data and UI states
-    const [loading, setLoading] = useState(true);          // Controls component loading state
     const [lastViewed, setLastViewed] = useState<Product[]>([]); // Stores recently viewed products
     const [error, setError] = useState<string | null>(null); // Tracks API errors
 
@@ -29,7 +28,6 @@ function LastViewed() {
     useEffect(() => {
         // Fetch data when user is authenticated and auth loading is complete
         if (user && !authLoading) {
-            setLoading(true);
             setError(null);
             
             const fetchLastViewed = async () => {
@@ -41,8 +39,6 @@ function LastViewed() {
                 } catch (err) {
                     setError("failed to load last viewed products");
                     console.error("Error fetching last viewed products:", err);
-                } finally {
-                    setLoading(false);
                 }
             };
             
@@ -55,7 +51,6 @@ function LastViewed() {
         }
         
         // Always set loading to false when auth state is determined
-        setLoading(false);
     }, [user, authLoading]); // Re-run when auth state changes
 
 

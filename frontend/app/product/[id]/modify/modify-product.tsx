@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@/lib/definitions";
-import { ImageProvider, useImage } from "@/providers/image-provider";
+import { ImageProvider } from "@/providers/image-provider";
 import api from "@/utils/axios";
 import { FileIcon, Loader2, X } from "lucide-react";
 import { use, useEffect, useState } from "react";
@@ -19,7 +19,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import ModifyProductSkeleton from "@/components/modify-product-skeleton";
-import { LiaTimesSolid } from "react-icons/lia";
 
 // Zod schema for form validation
 const createProductSchema = z.object({
@@ -47,14 +46,14 @@ const categories = [
  */
 function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
-    const { image, setImage } = useImage(); // Context for image handling
+    // const { image, setImage } = useImage(); // Context for image handling
     const [error, setError] = useState<string | null>(null) // General error state
     const [success, setSuccess] = useState(false); // Success status for form submission
     const [isLoading, setIsLoading] = useState(false); // Loading state for form submission
     const [product, setProduct] = useState<Product | null>(null); // Product data
     const [pdfFile, setPdfFile] = useState<File | null>(null); // PDF file to upload
-    const [oldImageUrl, setOldImageUrl] = useState<string | null>(null); // Image URL for the product
-    const [imgChanged, setImgChanged] = useState(false); // Track if image was changed by user
+    // const [oldImageUrl, setOldImageUrl] = useState<string | null>(null); // Image URL for the product
+    // const [imgChanged, setImgChanged] = useState(false); // Track if image was changed by user
     const [pdfLoading, setPdfLoading] = useState(true); // Loading state for PDF
     const [pdfError, setPdfError] = useState(false); // Error state for PDF
     const [pdfChanged, setPdfChanged] = useState(false); // Track if PDF was changed by user
@@ -86,16 +85,16 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
           
           setProduct(productData);
           
-          // Fetch and convert the remote image to a data URL
-          if (productData.imageUrl) {
-            try {
-              setOldImageUrl(productData.imageUrl);
+          // // Fetch and convert the remote image to a data URL
+          // if (productData.imageUrl) {
+          //   try {
+          //     setOldImageUrl(productData.imageUrl);
               
-            } catch (imageError) {
-              console.error("Error loading image:", imageError);
-              setOldImageUrl(null);
-            }
-          }
+          //   } catch (imageError) {
+          //     console.error("Error loading image:", imageError);
+          //     setOldImageUrl(null);
+          //   }
+          // }
           
           // Populate form with existing product data
           form.reset({
@@ -133,22 +132,22 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
       };
       
       fetchData();
-    }, [id, setImage, form]);
+    }, [id, form]);
 
-    useEffect(() => {
-      // If image context has a value and it's different from oldImageUrl
-      if (image && image !== oldImageUrl) {
-        setImgChanged(true);
-      }
-    }, [image, oldImageUrl]);
+    // useEffect(() => {
+    //   // If image context has a value and it's different from oldImageUrl
+    //   if (image && image !== oldImageUrl) {
+    //     setImgChanged(true);
+    //   }
+    // }, [image, oldImageUrl]);
 
     /**
      * Handle image deletion
      */
-    const handleImageDelete = () => {
-      setImage(null); // Clear the image state
-      setImgChanged(true); // Mark that image needs to be uploaded
-    };
+    // const handleImageDelete = () => {
+    //   setImage(null); // Clear the image state
+    //   setImgChanged(true); // Mark that image needs to be uploaded
+    // };
     /**
      * Handle PDF file selection
      * @param file - The selected PDF file
@@ -526,29 +525,29 @@ export default function ModifyProduct({ params }: { params: Promise<{ id: string
     );
 }
 
-function ImagePreview( { imageUrl, handleImageDelete }: { imageUrl: string, handleImageDelete: () => void }) {
-  return (
-            <Card className="w-full max-w-md p-4">
-              <CardContent className="flex flex-col items-center">
-                <div className="mt-4 relative">
-                  <img
-                    src={imageUrl}
-                    alt="Product image"
-                    className="w-64 h-64 object-cover rounded-xl shadow"
-                  />
-                  {/* Remove button positioned at top-right of image */}
-                  <div className="absolute -top-3 -right-3 flex gap-2">
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleImageDelete()}
-                      className="h-8 w-8 rounded-full p-0"
-                      aria-label="Clear image"
-                    >
-                      <LiaTimesSolid />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-  )
-}
+// function ImagePreview( { imageUrl, handleImageDelete }: { imageUrl: string, handleImageDelete: () => void }) {
+//   return (
+//             <Card className="w-full max-w-md p-4">
+//               <CardContent className="flex flex-col items-center">
+//                 <div className="mt-4 relative">
+//                   <img
+//                     src={imageUrl}
+//                     alt="Product image"
+//                     className="w-64 h-64 object-cover rounded-xl shadow"
+//                   />
+//                   {/* Remove button positioned at top-right of image */}
+//                   <div className="absolute -top-3 -right-3 flex gap-2">
+//                     <Button
+//                       variant="secondary"
+//                       onClick={() => handleImageDelete()}
+//                       className="h-8 w-8 rounded-full p-0"
+//                       aria-label="Clear image"
+//                     >
+//                       <LiaTimesSolid />
+//                     </Button>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//   )
+// }
