@@ -11,13 +11,13 @@ jest.mock('@/providers/auth-provider', () => ({
 }));
 
 jest.mock('@/utils/axios', () => ({
-  put: jest.fn().mockResolvedValue({}),
+  patch: jest.fn().mockResolvedValue({}),
   delete: jest.fn().mockResolvedValue({}),
 }));
 
 jest.mock('../components/star-rating', () => ({
   __esModule: true,
-  default: ({ rating, editable, onChange }) => (
+  default: ({ rating, editable, onChange } : {rating: number, editable: boolean, onChange: (value: number) => void}) => (
     <div data-testid="star-rating" data-rating={rating} data-editable={editable || false}>
       {editable && <button onClick={() => onChange && onChange(4)} data-testid="change-rating">Change Rating</button>}
       Star Rating: {rating}
@@ -43,6 +43,16 @@ describe('ReviewCard', () => {
     comment: 'This is a great product!',
     productId: 'product-1',
     createdAt: '2025-05-01T10:30:00Z',
+    user: {
+      id: 'user-1',
+      name: 'John',
+      surname: 'Doe',
+      email: 'test@example.com',
+      avatarUrl: 'https://example.com/avatar.jpg',
+      stripeStatus: 'verified',
+      createdAt: '2025-01-01T10:30:00Z',
+      rating: 4.5,
+    },
     buyer: {
       id: 'user-1',
       name: 'John',
@@ -148,7 +158,7 @@ describe('ReviewCard', () => {
     
     // Check if API call was made correctly
     await waitFor(() => {
-      expect(api.put).toHaveBeenCalledWith(
+      expect(api.patch).toHaveBeenCalledWith(
         `/listing/reviews/${mockReview.id}`,
         {
           comment: 'Updated comment',
@@ -176,7 +186,7 @@ describe('ReviewCard', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     
     // Mock API to throw error
-    (api.put as jest.Mock).mockRejectedValueOnce(new Error('Update failed'));
+    (api.patch as jest.Mock).mockRejectedValueOnce(new Error('Update failed'));
     
     // Set current user as the review author
     (useAuth as jest.Mock).mockReturnValue({

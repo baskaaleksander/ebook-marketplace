@@ -31,7 +31,7 @@ jest.mock('../components/image-resizer', () => ({
 
 jest.mock('../components/file-uploader', () => ({
   __esModule: true,
-  default: ({ onFileSelect, maxSize, accept, label }) => (
+  default: ({ onFileSelect, maxSize, accept, label } : { onFileSelect: (value: File) => void, maxSize: number, accept: boolean, label: string}) => (
     <div data-testid="file-uploader" onClick={() => {
       const mockFile = new File(['dummy content'], 'test.pdf', { type: 'application/pdf' });
       onFileSelect(mockFile);
@@ -345,14 +345,20 @@ describe('CreateProductForm', () => {
     render(<CreateProductForm />);
     
     // Still disabled because PDF is missing
-    expect(screen.getByRole('button', { name: 'Create Product' })).toBeDisabled();
+    const submitButtons = screen.getAllByText('Create Product');
+    submitButtons.forEach(button => {
+      expect(button).toBeDisabled();
+    });
     
-    // Upload a PDF
-    fireEvent.click(screen.getByTestId('file-uploader'));
+    // Upload a PDF - use getAllByTestId to get all matching elements
+    const fileUploaders = screen.getAllByTestId('file-uploader');
+    fireEvent.click(fileUploaders[0]);
     
     // Now the button should be enabled
     await waitFor(() => {
-      expect(screen.getByText('Create Product')).not.toBeDisabled();
+      screen.getAllByText('Create Product').forEach(button => {
+        expect(button).not.toBeDisabled();
+      });
     });
   });
 });
