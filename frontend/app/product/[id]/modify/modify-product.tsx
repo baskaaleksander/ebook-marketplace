@@ -439,13 +439,13 @@ function ModifyProductChildren({ params }: { params: Promise<{ id: string }> }) 
                             <FormLabel>Price</FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <span className="absolute left-3 top-2 text-gray-500">$</span>
+                                <span className="absolute left-3 top-2 text-gray-500">PLN</span>
                                 <Input 
                                   type="number" 
                                   min="0" 
                                   step="0.01"
                                   placeholder="0.00" 
-                                  className="pl-7" 
+                                  className="pl-12" 
                                   {...field} 
                                 />
                               </div>

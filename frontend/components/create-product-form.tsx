@@ -368,7 +368,7 @@ function CreateProductForm() {
                                                                 min="0" 
                                                                 step="0.01"
                                                                 placeholder="0.00" 
-                                                                className="pl-7" 
+                                                                className="pl-12" 
                                                                 {...field} 
                                                             />
                                                         </div>
