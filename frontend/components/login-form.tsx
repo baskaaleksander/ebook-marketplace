@@ -115,7 +115,10 @@ export function LoginForm({
             <div className="flex flex-col gap-6">
               {/* Error message display */}
               {error && (
-                <div className="bg-red-50 p-3 rounded-md border border-red-200 text-red-600 text-sm">
+                <div 
+                className="bg-red-50 p-3 rounded-md border border-red-200 text-red-600 text-sm"
+                data-testid="login-error"
+                >
                   {error}
                 </div>
               )}

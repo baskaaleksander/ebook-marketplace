@@ -39,7 +39,7 @@ export type Seller = {
     surname: string;
 }
 
-enum PayoutStatus {
+export enum PayoutStatus {
     PENDING = "PENDING",
     COMPLETED = "COMPLETED",
     FAILED = "FAILED"
