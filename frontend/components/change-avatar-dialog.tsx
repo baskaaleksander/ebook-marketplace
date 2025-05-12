@@ -97,7 +97,7 @@ function ChangeAvatarDialogContent({
                          `http://localhost:3000/uploads/${imageUploadResponse.data.filename}`;
         
         // Update user profile with new avatar URL
-        await api.put(`/user/${user.id}`, { avatarUrl });
+        await api.patch(`/user/${user.id}`, { avatarUrl });
         
         // Notify parent component about successful change
         onAvatarChange(avatarUrl);
@@ -106,7 +106,7 @@ function ChangeAvatarDialogContent({
         onOpenChange(false);
       } else {
         // If image is already a URL, just update user profile
-        await api.put(`/user/${user.id}`, { avatarUrl: image });
+        await api.patch(`/user/${user.id}`, { avatarUrl: image });
         onAvatarChange(image);
         onOpenChange(false);
       }
