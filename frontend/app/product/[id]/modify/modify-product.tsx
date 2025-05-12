@@ -19,7 +19,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import ModifyProductSkeleton from "@/components/modify-product-skeleton";
-import { LiaTimesSolid } from "react-icons/lia";
 import ImageResizer from "@/components/image-resizer";
 
 // Zod schema for form validation
