@@ -134,7 +134,7 @@ function Wallet() {
     }    
 
     return (
-        <div className="container mx-auto px-4 py-8 h-screen">
+        <div className="container mx-auto px-4 py-8 min-h-screen">
             {/* Display error message if API request failed */}
             {error && (
                 <Alert variant="destructive" className="mb-6">
